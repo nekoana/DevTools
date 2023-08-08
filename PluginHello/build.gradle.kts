@@ -1,6 +1,6 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 plugins {
     kotlin("jvm")
+    kotlin("kapt")
     id("org.jetbrains.compose")
 }
 
@@ -16,4 +16,7 @@ dependencies {
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.common)
+    implementation(project(":PluginView"))
+    implementation("com.google.auto.service:auto-service-annotations:1.1.1")
+    kapt("com.google.auto.service:auto-service:1.0-rc4")
 }
