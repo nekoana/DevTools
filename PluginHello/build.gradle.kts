@@ -17,6 +17,7 @@ dependencies {
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.common)
     implementation(project(":PluginView"))
-    implementation("com.google.auto.service:auto-service-annotations:1.1.1")
-    kapt("com.google.auto.service:auto-service:1.0-rc4")
+    implementation(libs.material3.desktop)
+    implementation(libs.auto.service.annotations)
+    kapt(libs.auto.service.processor)
 }

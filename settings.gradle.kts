@@ -1,3 +1,5 @@
+
+
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -13,3 +15,6 @@ pluginManagement {
 rootProject.name = "DevTools"
 include("PluginView")
 include("PluginHello")
+include("PluginHex")
+include("core-util")
+include("resource")

@@ -1,5 +1,14 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
+buildscript {
+    repositories {
+        maven("https://maven.aliyun.com/repository/public")
+        maven("https://maven.aliyun.com/repository/central")
+        gradlePluginPortal()
+    }
+}
+
+
 plugins {
     kotlin("jvm")
     id("org.jetbrains.compose")
@@ -21,6 +30,10 @@ dependencies {
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
     implementation(project(":PluginView"))
+    implementation(project(":resource"))
+    // https://mvnrepository.com/artifact/org.jetbrains.compose.material3/material3-desktop
+    implementation(libs.material3.desktop)
+
 }
 
 compose.desktop {
@@ -31,6 +44,10 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "DevTools"
             packageVersion = "1.0.0"
+
+            macOS {
+                iconFile.set(project.file("icon.svg"))
+            }
         }
     }
 }
