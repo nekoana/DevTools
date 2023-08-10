@@ -1,9 +1,13 @@
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.material.icons.Icons
@@ -12,11 +16,11 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
@@ -24,39 +28,46 @@ import androidx.compose.ui.window.rememberWindowState
 import com.kouqurong.plugin.view.IPluginView
 import java.util.*
 
+
+val classLoader =
+    PathClassLoader(
+        "/Users/codin/MyCode/DevTools/PluginHello/build/libs/PluginHello.jar",
+    )
+
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Home(onDisplay: (IPluginView) -> Unit) {
-    val classLoader =
-        PathClassLoader(
-            "/Users/codin/MyCode/DevTools/PluginHello/build/libs/PluginHello.jar",
-            "/Users/codin/MyCode/DevTools/PluginHex/build/libs/PluginHex.jar"
-        )
-    val serviceLoader =
-        ServiceLoader.load(IPluginView::class.java, classLoader)
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+    val views = remember {
+        ServiceLoader.load(IPluginView::class.java, classLoader).map { it }
+    }
+    LazyVerticalGrid(
+        columns = GridCells.FixedSize(120.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(16.dp)
     ) {
-        serviceLoader.forEach {
-            Surface(
-                modifier = Modifier.size(60.dp, 80.dp)
+        items(views) {
+            ElevatedCard(
+                modifier = Modifier
+                    .size(120.dp, 80.dp)
+                    .clip(RoundedCornerShape(8.dp))
                     .clickable {
                         onDisplay(it)
-                    }
+                    },
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
                 Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    modifier = Modifier.padding(8.dp)
                 ) {
                     Image(
-                        modifier = Modifier.size(60.dp, 60.dp),
+                        modifier = Modifier.size(40.dp, 40.dp),
                         painter = it.icon(),
                         contentDescription = it.label
                     )
                     Text(
-                        it.label
+                        it.label,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
             }
@@ -147,6 +158,7 @@ fun main() = application {
         state = windowState,
         undecorated = true,
         transparent = true,
+        resizable = false,
         icon = painterResource("icon.svg")
     ) {
 
@@ -167,12 +179,16 @@ fun main() = application {
                     displayPluginView = it
                 }
             ) {
-                if (displayPluginView != null) {
-                    displayPluginView!!.view()
-                } else {
-                    Home(onDisplay = {
-                        displayPluginView = it
-                    })
+                AnimatedContent(
+                    targetState = displayPluginView,
+                ) {
+                    if (it != null) {
+                        it.view()
+                    } else {
+                        Home(onDisplay = {
+                            displayPluginView = it
+                        })
+                    }
                 }
             }
         }
