@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.MoveUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -20,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
@@ -85,6 +87,7 @@ fun App(
     onMinimize: () -> Unit,
     onBack: () -> Unit,
     onDisplay: (IPluginView) -> Unit,
+    onMoveUp: () -> Unit,
     content: @Composable () -> Unit
 ) {
     MaterialTheme {
@@ -134,6 +137,18 @@ fun App(
                             }
                         }
                     },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                onMoveUp()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MoveUp,
+                                contentDescription = "Float"
+                            )
+                        }
+                    }
                 )
             },
         ) {
@@ -149,8 +164,22 @@ fun App(
     }
 }
 
+
+@Composable
+fun ApplicationScope.PluginViewWindow(
+    state: PluginViewWindowState
+) = Window(onCloseRequest = state::close) {
+    println("PluginViewWindow")
+    state.pluginView.view()
+}
+
 fun main() = application {
+    val viewModel = remember {
+        HostViewModel()
+    }
+
     val windowState = rememberWindowState()
+
     Window(
         onCloseRequest = ::exitApplication,
         state = windowState,
@@ -159,7 +188,6 @@ fun main() = application {
         resizable = false,
         icon = painterResource("icon.svg")
     ) {
-
         var displayPluginView by remember {
             mutableStateOf<IPluginView?>(null)
         }
@@ -175,6 +203,12 @@ fun main() = application {
                 },
                 onDisplay = {
                     displayPluginView = it
+                },
+                onMoveUp = {
+                    if (displayPluginView != null) {
+                        viewModel.openNewPluginViewWindow(displayPluginView!!)
+                        displayPluginView = null
+                    }
                 }
             ) {
                 AnimatedContent(
@@ -191,4 +225,14 @@ fun main() = application {
             }
         }
     }
+
+
+    val pluginViewWindowState = remember { viewModel.pluginViewWindowState }
+
+    for (state in pluginViewWindowState) {
+        key(state) {
+            PluginViewWindow(state = state)
+        }
+    }
 }
+
