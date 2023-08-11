@@ -18,13 +18,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.ApplicationScope
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
-import androidx.compose.ui.window.rememberWindowState
+import androidx.compose.ui.window.*
 import com.kouqurong.plugin.view.IPluginView
 import java.util.*
 
@@ -173,65 +171,119 @@ fun ApplicationScope.PluginViewWindow(
     state.pluginView.view()
 }
 
-fun main() = application {
-    val viewModel = remember {
-        HostViewModel()
+@Composable
+fun ApplicationScope.HostWindow(
+    viewModel: HostViewModel,
+    windowState: WindowState = rememberWindowState(),
+    onCloseRequest: () -> Unit = ::exitApplication,
+    title: String = "DevTools",
+    icon: Painter = painterResource("icon.svg")
+) = Window(
+    onCloseRequest = onCloseRequest,
+    state = windowState,
+    title = title,
+    undecorated = true,
+    transparent = true,
+    resizable = false,
+    icon = icon
+) {
+    var displayPluginView by remember {
+        mutableStateOf<IPluginView?>(null)
     }
 
-    val windowState = rememberWindowState()
-
-    Window(
-        onCloseRequest = ::exitApplication,
-        state = windowState,
-        undecorated = true,
-        transparent = true,
-        resizable = false,
-        icon = painterResource("icon.svg")
-    ) {
-        var displayPluginView by remember {
-            mutableStateOf<IPluginView?>(null)
-        }
-
-        WindowDraggableArea {
-            App(
-                onClose = ::exitApplication,
-                onMinimize = {
-                    windowState.isMinimized = true
-                },
-                onBack = {
-                    displayPluginView = null
-                },
-                onDisplay = {
-                    displayPluginView = it
-                },
-                onMoveUp = {
-                    if (displayPluginView != null) {
-                        viewModel.openNewPluginViewWindow(displayPluginView!!)
-                        displayPluginView = null
-                    }
+    MenuBar {
+        Menu(
+            text = "DevTools",
+        ) {
+            Item(
+                text = "Quit",
+                onClick = {
+                    exitApplication()
                 }
+            )
+        }
+    }
+
+    WindowDraggableArea {
+        App(
+            onClose = {
+                onCloseRequest()
+            },
+            onMinimize = {
+                windowState.isMinimized = true
+            },
+            onBack = {
+                displayPluginView = null
+            },
+            onDisplay = {
+                displayPluginView = it
+            },
+            onMoveUp = {
+                if (displayPluginView != null) {
+                    viewModel.openNewPluginViewWindow(displayPluginView!!)
+                    displayPluginView = null
+                }
+            }
+        ) {
+            AnimatedContent(
+                targetState = displayPluginView,
             ) {
-                AnimatedContent(
-                    targetState = displayPluginView,
-                ) {
-                    if (it != null) {
-                        it.view()
-                    } else {
-                        Home(onDisplay = {
-                            displayPluginView = it
-                        })
-                    }
+                if (it != null) {
+                    it.view()
+                } else {
+                    Home(onDisplay = {
+                        displayPluginView = it
+                    })
                 }
             }
         }
     }
+}
 
+fun main() = application {
+    val viewModel = remember { HostViewModel() }
 
     val pluginViewWindowState = remember { viewModel.pluginViewWindowState }
+    val windowState = rememberWindowState()
 
-    for (state in pluginViewWindowState) {
-        key(state) {
-            PluginViewWindow(state = state)
+    var isOnTray by remember {
+        mutableStateOf(false)
+    }
+
+    if (isOnTray) {
+        Tray(
+            icon = painterResource("icon.svg"),
+            menu = {
+                Item(
+                    text = "Quit",
+                    onClick = {
+                        exitApplication()
+                    }
+                )
+
+                Separator()
+
+                Item(
+                    text = "Open",
+                    onClick = {
+                        isOnTray = false
+                    }
+                )
+            }
+        )
+    } else {
+        HostWindow(
+            viewModel = viewModel,
+            windowState = windowState,
+            onCloseRequest = {
+                isOnTray = true
+            })
+
+
+        for (state in pluginViewWindowState) {
+            key(state) {
+                PluginViewWindow(state = state)
+            }
         }
     }
 }
