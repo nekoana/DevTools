@@ -168,7 +168,7 @@ fun App(
 @Composable
 fun ApplicationScope.PluginViewWindow(
     state: PluginViewWindowState
-) = Window(onCloseRequest = state::close) {
+) = Window(onCloseRequest = state::close, title = state.pluginView.label) {
     println("PluginViewWindow")
     state.pluginView.view()
 }
