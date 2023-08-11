@@ -7,10 +7,11 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material3.Card
-import androidx.compose.runtime.*
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,12 +29,6 @@ import androidx.compose.ui.unit.sp
 fun App() {
     val viewModel = remember { TcpClientViewModel() }
 
-    var ip by remember { mutableStateOf(TextFieldValue("")) }
-    var port by remember { mutableStateOf(TextFieldValue("")) }
-
-    val scope = rememberCoroutineScope()
-
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -44,17 +39,17 @@ fun App() {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            OutlinedTextField(
+            TextField(
                 modifier = Modifier
                     .width(260.dp),
-                value = ip,
+                value = viewModel.address.value,
                 label = {
                     Text(
-                        text = "IP",
+                        text = "Address",
                     )
                 },
                 onValueChange = {
-                    ip = it
+                    viewModel.updateIp(it)
                 },
                 maxLines = 1,
                 keyboardOptions = KeyboardOptions(
@@ -65,24 +60,6 @@ fun App() {
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            OutlinedTextField(
-                modifier = Modifier
-                    .width(120.dp),
-                value = port,
-                label = {
-                    Text(
-                        text = "Port",
-                    )
-                },
-                onValueChange = {
-                    port = it
-                },
-                maxLines = 1,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Done
-                ),
-            )
 
             Button(
                 onClick = {

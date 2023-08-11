@@ -1,21 +1,14 @@
 package com.kouqurong.plugin.tcpclient
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 
 class TcpClientViewModel {
-    private val _ip = MutableStateFlow<String>("")
-    private val _port = MutableStateFlow<String>("")
+    private val _address = mutableStateOf("")
 
-    val ip: StateFlow<String> = _ip
-    val port: StateFlow<String> = _port
+    val address: State<String> = _address
 
-
-    suspend fun updateIp(ip: String) {
-        _ip.emit(ip)
-    }
-
-    fun updatePort(it: String) {
-        _port.value = it
+    fun updateIp(ip: String) {
+        _address.value = ip
     }
 }
