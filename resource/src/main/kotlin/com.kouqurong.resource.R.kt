@@ -6,7 +6,7 @@ object R {
         @IdRes
         const val APP_NAME = 1
 
-         val map = buildMap<Int,String>{
+         val map = buildMap {
              put(1,"DevTools")
         }
     }

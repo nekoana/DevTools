@@ -32,9 +32,10 @@ import java.util.*
 val classLoader =
     PathClassLoader(
         "/Users/codin/MyCode/DevTools/PluginHello/build/libs/PluginHello.jar",
+        "/Users/codin/MyCode/DevTools/PluginHex/build/libs/PluginHex.jar",
+        "/Users/codin/MyCode/DevTools/PluginTcpClient/build/libs/PluginTcpClient.jar"
     )
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Home(onDisplay: (IPluginView) -> Unit) {
     val views = remember {
@@ -76,8 +77,7 @@ fun Home(onDisplay: (IPluginView) -> Unit) {
 }
 
 @OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class,
-    ExperimentalFoundationApi::class
+    ExperimentalMaterial3Api::class
 )
 
 @Composable
