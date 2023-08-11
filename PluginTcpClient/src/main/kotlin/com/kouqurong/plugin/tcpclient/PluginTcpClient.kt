@@ -1,8 +1,6 @@
 package com.kouqurong.plugin.tcpclient
 
-import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
@@ -16,7 +14,7 @@ class PluginTcpClient : IPluginView {
         get() = {
             App()
         }
-    override val icon:@Composable () -> Painter
+    override val icon: @Composable () -> Painter
         get() = {
             rememberVectorPainter(Icons.Filled.Edit)
         }
