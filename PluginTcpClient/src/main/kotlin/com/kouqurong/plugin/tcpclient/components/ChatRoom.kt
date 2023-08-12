@@ -13,71 +13,57 @@ import androidx.compose.ui.unit.dp
 import com.kouqurong.plugin.tcpclient.model.Message
 import com.kouqurong.plugin.tcpclient.model.Whoami
 
-
 @Composable
 fun ChatRoom(
     messages: List<Message>,
     modifier: Modifier = Modifier,
 ) {
-    val scrollState = rememberLazyListState()
+  val scrollState = rememberLazyListState()
 
-    Box(
-        modifier = modifier
+  Box(modifier = modifier) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        state = scrollState,
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            state = scrollState,
-        ) {
-            items(messages, key = {
-                it
-            }) {
-                ChatMessage(
-                    message = it,
-                )
-            }
+      items(messages, key = { it }) {
+        ChatMessage(
+            message = it,
+        )
+      }
 
-            item {
-                UserInput(
-                    modifier = Modifier
-                        .padding(bottom = 16.dp, top = 16.dp)
-                )
-            }
-        }
+      item { UserInput(modifier = Modifier.padding(bottom = 16.dp, top = 16.dp)) }
     }
+  }
 }
-
 
 @Preview
 @Composable
 fun PreviewChatRoom() {
-    val messages = listOf(
-        Message(
-            whoami = Whoami.Me,
-            content = "Hello, world!",
-            timestamp = "2021-10-01 00:00:01",
-        ),
+  val messages =
+      listOf(
+          Message(
+              whoami = Whoami.Me,
+              content = "Hello, world!",
+              timestamp = "2021-10-01 00:00:01",
+          ),
+          Message(
+              whoami = Whoami.Me,
+              content = "Hello, world!",
+              timestamp = "2021-10-01 00:00:02",
+          ),
+          Message(
+              whoami = Whoami.Me,
+              content = "Hello, world!",
+              timestamp = "2021-10-01 00:00:03",
+          ),
+          Message(
+              whoami = Whoami.Me,
+              content = "Hello, world!",
+              timestamp = "2021-10-01 00:00:04",
+          ),
+      )
 
-        Message(
-            whoami = Whoami.Me,
-            content = "Hello, world!",
-            timestamp = "2021-10-01 00:00:02",
-        ),
-
-        Message(
-            whoami = Whoami.Me,
-            content = "Hello, world!",
-            timestamp = "2021-10-01 00:00:03",
-        ),
-
-        Message(
-            whoami = Whoami.Me,
-            content = "Hello, world!",
-            timestamp = "2021-10-01 00:00:04",
-        ),
-
-        )
-
-    ChatRoom(
-        messages = messages,
-    )
+  ChatRoom(
+      messages = messages,
+  )
 }

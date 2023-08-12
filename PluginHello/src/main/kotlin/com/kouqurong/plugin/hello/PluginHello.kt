@@ -11,17 +11,11 @@ import com.kouqurong.plugin.view.IPluginView
 
 @AutoService(IPluginView::class)
 class PluginHello : IPluginView {
-    override val view: @Composable () -> Unit
-        get() = {
-            Box {
-                sayHello()
-            }
-        }
+  override val view: @Composable () -> Unit
+    get() = { Box { sayHello() } }
 
-    override val icon: @Composable () -> Painter
-        get() = {
-            rememberVectorPainter(Icons.Filled.Add)
-        }
-    override val label: String
-        get() = "Hello"
+  override val icon: @Composable () -> Painter
+    get() = { rememberVectorPainter(Icons.Filled.Add) }
+  override val label: String
+    get() = "Hello"
 }

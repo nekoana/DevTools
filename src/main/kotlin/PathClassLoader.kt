@@ -3,7 +3,7 @@ import java.net.URLClassLoader
 
 class PathClassLoader(vararg path: String) :
     URLClassLoader(path.map { File(it).toURI().toURL() }.toTypedArray()) {
-    override fun findClass(name: String?): Class<*> {
-        return super.findClass(name)
-    }
+  override fun findClass(name: String?): Class<*> {
+    return super.findClass(name)
+  }
 }

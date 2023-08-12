@@ -6,8 +6,36 @@ buildscript {
         maven("https://maven.aliyun.com/repository/central")
         gradlePluginPortal()
     }
+
+    dependencies {
+        classpath("com.diffplug.spotless:spotless-plugin-gradle:6.13.0")
+    }
 }
 
+allprojects {
+    repositories {
+        mavenCentral()
+        maven("https://maven.aliyun.com/repository/public")
+        maven("https://maven.aliyun.com/repository/central")
+    }
+
+    apply(plugin = "com.diffplug.spotless")
+
+    configure<com.diffplug.gradle.spotless.SpotlessExtension> {
+        // configure<com.diffplug.gradle.spotless.SpotlessExtension> {
+        kotlin {
+            // by default the target is every '.kt' and '.kts` file in the java sourcesets
+            target("**/*.kt")
+            targetExclude("$buildDir/**/*.kt")
+            targetExclude("bin/**/*.kt")
+            ktfmt() // has its own section below
+        }
+        kotlinGradle {
+            target("*.gradle.kts") // default target for kotlinGradle
+            ktlint() // or ktfmt() or prettier()
+        }
+    }
+}
 
 plugins {
     kotlin("jvm")
@@ -34,9 +62,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.jetbrains.compose.material3/material3-desktop
     implementation(libs.material3.desktop)
     // https://mvnrepository.com/artifact/org.jetbrains.compose.material/material-icons-extended-desktop
-    implementation("org.jetbrains.compose.material:material-icons-extended-desktop:1.5.0-beta01")
-
-
+    implementation(libs.material.icons.extended.desktop)
 }
 
 compose.desktop {

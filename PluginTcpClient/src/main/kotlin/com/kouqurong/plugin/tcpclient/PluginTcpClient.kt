@@ -10,14 +10,10 @@ import com.kouqurong.plugin.view.IPluginView
 
 @AutoService(IPluginView::class)
 class PluginTcpClient : IPluginView {
-    override val view: @Composable () -> Unit
-        get() = {
-            App()
-        }
-    override val icon: @Composable () -> Painter
-        get() = {
-            rememberVectorPainter(Icons.Filled.Edit)
-        }
-    override val label: String
-        get() = "Tcp Client"
+  override val view: @Composable () -> Unit
+    get() = { App() }
+  override val icon: @Composable () -> Painter
+    get() = { rememberVectorPainter(Icons.Filled.Edit) }
+  override val label: String
+    get() = "Tcp Client"
 }

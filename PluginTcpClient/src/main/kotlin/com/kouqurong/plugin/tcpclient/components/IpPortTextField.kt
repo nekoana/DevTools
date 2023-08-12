@@ -22,55 +22,35 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-
 @Composable
 fun IpPortTextField(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
     focusRequester: FocusRequester,
 ) {
-    BasicTextField(
-        readOnly = false,
-        value = value,
-        onValueChange = onValueChange,
-        modifier = Modifier
-            .padding(horizontal = 10.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .wrapContentSize()
-            .background(Color.DarkGray)
-            .focusRequester(focusRequester),
-        maxLines = 1,
-        decorationBox = { innerTextField ->
-            Row(
-                modifier = Modifier
-                    .background(Color.White),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Card(
-                    modifier = Modifier.fillMaxHeight()
-                        .weight(4F)
-                ) {
-                    Text("HEllo")
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Card(
-                    modifier = Modifier.fillMaxHeight()
-                        .weight(4F)
-                ) {
-                    innerTextField()
-                }
+  BasicTextField(
+      readOnly = false,
+      value = value,
+      onValueChange = onValueChange,
+      modifier =
+          Modifier.padding(horizontal = 10.dp)
+              .clip(RoundedCornerShape(8.dp))
+              .wrapContentSize()
+              .background(Color.DarkGray)
+              .focusRequester(focusRequester),
+      maxLines = 1,
+      decorationBox = { innerTextField ->
+        Row(
+            modifier = Modifier.background(Color.White),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center) {
+              Card(modifier = Modifier.fillMaxHeight().weight(4F)) { Text("HEllo") }
+              Spacer(modifier = Modifier.width(16.dp))
+              Card(modifier = Modifier.fillMaxHeight().weight(4F)) { innerTextField() }
             }
-        },
-        textStyle = TextStyle(
-            color = Color.Black,
-            fontSize = 26.sp
-        ),
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Number,
-            imeAction = ImeAction.Done
-        ),
-        keyboardActions = KeyboardActions(onDone = null)
-    )
-
+      },
+      textStyle = TextStyle(color = Color.Black, fontSize = 26.sp),
+      keyboardOptions =
+          KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+      keyboardActions = KeyboardActions(onDone = null))
 }

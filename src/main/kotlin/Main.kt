@@ -26,58 +26,44 @@ import androidx.compose.ui.window.*
 import com.kouqurong.plugin.view.IPluginView
 import java.util.*
 
-
 val classLoader =
     PathClassLoader(
         "/Users/codin/MyCode/DevTools/PluginHello/build/libs/PluginHello.jar",
         "/Users/codin/MyCode/DevTools/PluginHex/build/libs/PluginHex.jar",
-        "/Users/codin/MyCode/DevTools/PluginTcpClient/build/libs/PluginTcpClient.jar"
-    )
+        "/Users/codin/MyCode/DevTools/PluginTcpClient/build/libs/PluginTcpClient.jar")
 
 @Composable
 fun Home(onDisplay: (IPluginView) -> Unit) {
-    val views = remember {
-        ServiceLoader.load(IPluginView::class.java, classLoader).map { it }
-    }
-    LazyVerticalGrid(
-        columns = GridCells.FixedSize(120.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(16.dp)
-    ) {
+  val views = remember { ServiceLoader.load(IPluginView::class.java, classLoader).map { it } }
+  LazyVerticalGrid(
+      columns = GridCells.FixedSize(120.dp),
+      verticalArrangement = Arrangement.spacedBy(16.dp),
+      horizontalArrangement = Arrangement.spacedBy(16.dp),
+      contentPadding = PaddingValues(16.dp)) {
         items(views) {
-            ElevatedCard(
-                modifier = Modifier
-                    .size(120.dp, 80.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable {
-                        onDisplay(it)
-                    },
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(8.dp)
-                ) {
-                    Image(
-                        modifier = Modifier.size(40.dp, 40.dp),
-                        painter = it.icon(),
-                        contentDescription = it.label
-                    )
-                    Text(
-                        it.label,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+          ElevatedCard(
+              modifier =
+                  Modifier.size(120.dp, 80.dp).clip(RoundedCornerShape(8.dp)).clickable {
+                    onDisplay(it)
+                  },
+              elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+                Column(modifier = Modifier.padding(8.dp)) {
+                  Image(
+                      modifier = Modifier.size(40.dp, 40.dp),
+                      painter = it.icon(),
+                      contentDescription = it.label)
+                  Text(
+                      it.label,
+                      maxLines = 1,
+                      overflow = TextOverflow.Ellipsis,
+                  )
                 }
-            }
+              }
         }
-    }
+      }
 }
 
-@OptIn(
-    ExperimentalMaterial3Api::class
-)
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
 fun App(
@@ -88,88 +74,53 @@ fun App(
     onMoveUp: () -> Unit,
     content: @Composable () -> Unit
 ) {
-    MaterialTheme {
-        Scaffold(
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp)),
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = stringResource(R.id.APP_NAME)
-                        )
-                    },
-                    navigationIcon = {
-                        Row {
-                            IconButton(
-                                onClick = {
-                                    onClose()
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "Close"
-                                )
-                            }
+  MaterialTheme {
+    Scaffold(
+        modifier = Modifier.clip(RoundedCornerShape(16.dp)),
+        topBar = {
+          TopAppBar(
+              title = { Text(text = stringResource(R.id.APP_NAME)) },
+              navigationIcon = {
+                Row {
+                  IconButton(onClick = { onClose() }) {
+                    Icon(imageVector = Icons.Default.Close, contentDescription = "Close")
+                  }
 
-                            IconButton(
-                                onClick = {
-                                    onMinimize()
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.KeyboardArrowDown,
-                                    contentDescription = "Minimize"
-                                )
-                            }
+                  IconButton(onClick = { onMinimize() }) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Minimize")
+                  }
 
-                            IconButton(
-                                onClick = {
-                                    onBack()
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowBack,
-                                    contentDescription = "Back"
-                                )
-                            }
-                        }
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = {
-                                onMoveUp()
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.MoveUp,
-                                contentDescription = "Float"
-                            )
-                        }
-                    }
-                )
-            },
-        ) {
-            Surface(
-                modifier = Modifier
-                    .padding(top = it.calculateTopPadding())
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-            ) {
-                content()
-            }
-        }
+                  IconButton(onClick = { onBack() }) {
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                  }
+                }
+              },
+              actions = {
+                IconButton(onClick = { onMoveUp() }) {
+                  Icon(imageVector = Icons.Default.MoveUp, contentDescription = "Float")
+                }
+              })
+        },
+    ) {
+      Surface(
+          modifier =
+              Modifier.padding(top = it.calculateTopPadding())
+                  .fillMaxSize()
+                  .background(MaterialTheme.colorScheme.background)) {
+            content()
+          }
     }
+  }
 }
-
 
 @Composable
-fun ApplicationScope.PluginViewWindow(
-    state: PluginViewWindowState
-) = Window(onCloseRequest = state::close, title = state.pluginView.label) {
-    println("PluginViewWindow")
-    state.pluginView.view()
-}
+fun ApplicationScope.PluginViewWindow(state: PluginViewWindowState) =
+    Window(onCloseRequest = state::close, title = state.pluginView.label) {
+      println("PluginViewWindow")
+      state.pluginView.view()
+    }
 
 @Composable
 fun ApplicationScope.HostWindow(
@@ -178,113 +129,74 @@ fun ApplicationScope.HostWindow(
     onCloseRequest: () -> Unit = ::exitApplication,
     title: String = "DevTools",
     icon: Painter = painterResource("icon.svg")
-) = Window(
-    onCloseRequest = onCloseRequest,
-    state = windowState,
-    title = title,
-    undecorated = true,
-    transparent = true,
-    resizable = false,
-    icon = icon
-) {
-    var displayPluginView by remember {
-        mutableStateOf<IPluginView?>(null)
-    }
+) =
+    Window(
+        onCloseRequest = onCloseRequest,
+        state = windowState,
+        title = title,
+        undecorated = true,
+        transparent = true,
+        resizable = false,
+        icon = icon) {
+          var displayPluginView by remember { mutableStateOf<IPluginView?>(null) }
 
-    MenuBar {
-        Menu(
-            text = "DevTools",
-        ) {
-            Item(
-                text = "Quit",
-                onClick = {
-                    exitApplication()
-                }
-            )
-        }
-    }
+          MenuBar {
+            Menu(
+                text = "DevTools",
+            ) {
+              Item(text = "Quit", onClick = { exitApplication() })
+            }
+          }
 
-    WindowDraggableArea {
-        App(
-            onClose = {
-                onCloseRequest()
-            },
-            onMinimize = {
-                windowState.isMinimized = true
-            },
-            onBack = {
-                displayPluginView = null
-            },
-            onDisplay = {
-                displayPluginView = it
-            },
-            onMoveUp = {
-                if (displayPluginView != null) {
+          WindowDraggableArea {
+            App(
+                onClose = { onCloseRequest() },
+                onMinimize = { windowState.isMinimized = true },
+                onBack = { displayPluginView = null },
+                onDisplay = { displayPluginView = it },
+                onMoveUp = {
+                  if (displayPluginView != null) {
                     viewModel.openNewPluginViewWindow(displayPluginView!!)
                     displayPluginView = null
+                  }
+                }) {
+                  AnimatedContent(
+                      targetState = displayPluginView,
+                  ) {
+                    if (it != null) {
+                      it.view()
+                    } else {
+                      Home(onDisplay = { displayPluginView = it })
+                    }
+                  }
                 }
-            }
-        ) {
-            AnimatedContent(
-                targetState = displayPluginView,
-            ) {
-                if (it != null) {
-                    it.view()
-                } else {
-                    Home(onDisplay = {
-                        displayPluginView = it
-                    })
-                }
-            }
+          }
         }
-    }
-}
 
 fun main() = application {
-    val viewModel = remember { HostViewModel() }
+  val viewModel = remember { HostViewModel() }
 
-    val pluginViewWindowState = remember { viewModel.pluginViewWindowState }
-    val windowState = rememberWindowState()
+  val pluginViewWindowState = remember { viewModel.pluginViewWindowState }
+  val windowState = rememberWindowState()
 
-    var isOnTray by remember {
-        mutableStateOf(false)
+  var isOnTray by remember { mutableStateOf(false) }
+
+  if (isOnTray) {
+    Tray(
+        icon = painterResource("icon.svg"),
+        menu = {
+          Item(text = "Quit", onClick = { exitApplication() })
+
+          Separator()
+
+          Item(text = "Open", onClick = { isOnTray = false })
+        })
+  } else {
+    HostWindow(
+        viewModel = viewModel, windowState = windowState, onCloseRequest = { isOnTray = true })
+
+    for (state in pluginViewWindowState) {
+      key(state) { PluginViewWindow(state = state) }
     }
-
-    if (isOnTray) {
-        Tray(
-            icon = painterResource("icon.svg"),
-            menu = {
-                Item(
-                    text = "Quit",
-                    onClick = {
-                        exitApplication()
-                    }
-                )
-
-                Separator()
-
-                Item(
-                    text = "Open",
-                    onClick = {
-                        isOnTray = false
-                    }
-                )
-            }
-        )
-    } else {
-        HostWindow(
-            viewModel = viewModel,
-            windowState = windowState,
-            onCloseRequest = {
-                isOnTray = true
-            })
-
-
-        for (state in pluginViewWindowState) {
-            key(state) {
-                PluginViewWindow(state = state)
-            }
-        }
-    }
+  }
 }
-

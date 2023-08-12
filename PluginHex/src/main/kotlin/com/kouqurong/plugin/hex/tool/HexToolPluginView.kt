@@ -10,16 +10,10 @@ import com.kouqurong.plugin.view.IPluginView
 
 @AutoService(IPluginView::class)
 class HexToolPluginView : IPluginView {
-    override val view: @Composable () -> Unit
-        get() = {
-            App()
-        }
-    override val icon: @Composable () -> Painter
-        get() = {
-            rememberVectorPainter(Icons.Filled.Phone)
-        }
-    override val label: String
-        get() = "Hex Tools"
-
-
+  override val view: @Composable () -> Unit
+    get() = { App() }
+  override val icon: @Composable () -> Painter
+    get() = { rememberVectorPainter(Icons.Filled.Phone) }
+  override val label: String
+    get() = "Hex Tools"
 }

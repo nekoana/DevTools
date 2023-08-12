@@ -8,6 +8,7 @@ autoservice = "1.0-rc7"
 material3-desktop = { module = "org.jetbrains.compose.material3:material3-desktop", version.ref = "material3" }
 auto-service-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoservice" }
 auto-service-processor = { module = "com.google.auto.service:auto-service", version.ref = "autoservice" }
+material-icons-extended-desktop = { module = "org.jetbrains.compose.material:material-icons-extended-desktop", version.ref = "material3" }
 
 [plugins]
 jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose" }
