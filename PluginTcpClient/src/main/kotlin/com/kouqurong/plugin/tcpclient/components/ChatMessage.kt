@@ -3,11 +3,15 @@ package com.kouqurong.plugin.tcpclient.components
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LastBaseline
 import androidx.compose.ui.semantics.semantics
@@ -86,22 +90,45 @@ fun TextBubble(
     message: Message,
     modifier: Modifier = Modifier
 ) {
+
+    val selectionBubbleColor = if (message.whoami == Whoami.Me) {
+        MaterialTheme.colorScheme.surfaceVariant
+    } else {
+        MaterialTheme.colorScheme.primary
+    }
+
+
     val backgroundBubbleColor = if (message.whoami == Whoami.Me) {
         MaterialTheme.colorScheme.primary
     } else {
         MaterialTheme.colorScheme.surfaceVariant
     }
 
-    Column {
-        Surface(
-            color = backgroundBubbleColor,
-            shape = ChatBubbleShape,
-        ) {
-            Text(
-                text = message.content,
-                style = MaterialTheme.typography.bodyLarge.copy(color = LocalContentColor.current),
-                modifier = Modifier.padding(16.dp),
-            )
+
+    val textSelectionColors = TextSelectionColors(
+        handleColor = selectionBubbleColor,
+        backgroundColor = selectionBubbleColor.copy(alpha = 0.6F),
+    )
+
+    CompositionLocalProvider(
+        LocalTextSelectionColors provides textSelectionColors
+    ) {
+        Column {
+            Surface(
+                color = backgroundBubbleColor,
+                shape = ChatBubbleShape,
+            ) {
+
+                SelectionContainer(
+                    modifier
+                ) {
+                    Text(
+                        text = message.content,
+                        style = MaterialTheme.typography.bodyLarge.copy(color = LocalContentColor.current),
+                        modifier = Modifier.padding(16.dp),
+                    )
+                }
+            }
         }
     }
 }
