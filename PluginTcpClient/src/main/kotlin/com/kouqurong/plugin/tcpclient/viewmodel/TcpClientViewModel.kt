@@ -1,44 +1,46 @@
 package com.kouqurong.plugin.tcpclient.viewmodel
 
-import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import com.kouqurong.plugin.tcpclient.model.ISendType
+import com.kouqurong.plugin.tcpclient.model.Message
+import com.kouqurong.plugin.tcpclient.utils.toHexByteArray
 import java.net.Socket
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.*
+import org.jetbrains.skiko.MainUIDispatcher
 
 sealed interface IConnectionState {
   object Disconnected : IConnectionState
   object Connecting : IConnectionState
   object Connected : IConnectionState
+  class Received(val data: Byte) : IConnectionState
   class Error(val throwable: Throwable) : IConnectionState
 }
 
-sealed class DataType(val value: String) {
-  class Hex(value: String) : DataType(value)
-  class Str(value: String) : DataType(value)
-}
-
 class TcpClientViewModel {
-  private val scope = MainScope()
 
-  private var socket: Socket? = null
+  private val scope = CoroutineScope(MainUIDispatcher + SupervisorJob())
 
-  private val _address = mutableStateOf("")
-  private val _isAvailableAddress = mutableStateOf(false)
-  private val _connectionState = MutableStateFlow<IConnectionState>(IConnectionState.Disconnected)
+  var address by mutableStateOf("")
+  var isAvailableAddress by mutableStateOf(false)
+  var addressEditable by mutableStateOf(true)
+  var sendData by mutableStateOf("")
+  var sendType by mutableStateOf<ISendType>(ISendType.Hex)
+  var sendEnabled by mutableStateOf(false)
+  val sendDataList = mutableStateListOf<Message>()
 
-  val address: State<String> = _address
-  val isAvailableAddress: State<Boolean> = _isAvailableAddress
-  val connectionState: SharedFlow<IConnectionState> = _connectionState.asSharedFlow()
+  private var connectState = MutableStateFlow<IConnectionState>(IConnectionState.Disconnected)
+
+  private var sendDataChannel: Channel<ByteArray>? = null
 
   fun updateIp(ip: String) {
-    _address.value = ip
-    _isAvailableAddress.value = isAvailableAddress(ip)
+    address = ip
+    isAvailableAddress = isAvailableAddress(ip)
   }
 
   private fun isAvailableAddress(ip: String): Boolean {
@@ -48,17 +50,76 @@ class TcpClientViewModel {
     return regex.matches(ip)
   }
 
-  fun connect() =
-      scope.launch(Dispatchers.IO) {
-        runCatching {
-              _connectionState.emit(IConnectionState.Connecting)
-              socket = Socket(_address.value.split(":")[0], _address.value.split(":")[1].toInt())
+  fun connect() {
+    sendDataChannel?.close()
+
+    val ipPort = address.split(":")
+
+    val socket =
+        runCatching { Socket(ipPort[0], ipPort[1].toInt()) }
+            .onFailure { connectState.value = IConnectionState.Error(it) }
+            .onSuccess { connectState.value = IConnectionState.Connected }
+            .getOrNull()
+
+    if (socket != null) {
+      val receiveDataJob =
+          scope.launch {
+            channelFlow<IConnectionState> {
+                  withContext(Dispatchers.IO) {
+                    while (isActive && socket.isConnected) {
+                      val inputStream = socket.getInputStream()
+                      val read = inputStream.read()
+                      if (read != -1) {
+                        send(IConnectionState.Received(read.toByte()))
+                      } else {
+                        delay(1000)
+                      }
+                    }
+                  }
+                  awaitClose { socket.close() }
+                }
+                .let { scope.launch { it.stateIn(scope).collectLatest { connectState.emit(it) } } }
+          }
+
+      sendDataChannel = Channel<ByteArray> {}
+
+      sendDataChannel?.let {
+        scope.launch {
+          it.receiveAsFlow().collectLatest {
+            withContext(Dispatchers.IO) {
+              val outputStream = socket.getOutputStream()
+              outputStream.write(it)
+              outputStream.flush()
             }
-            .onFailure { _connectionState.emit(IConnectionState.Error(it)) }
-            .onSuccess { _connectionState.emit(IConnectionState.Connected) }
+          }
+        }
+
+        it.invokeOnClose { receiveDataJob.cancel() }
+      }
+    }
+  }
+
+  fun sendRequest() =
+      scope.launch {
+        sendDataList.add(Message.fromMeNow(sendData))
+
+        sendDataChannel?.send(
+            when (sendType) {
+              ISendType.Hex -> sendData.toHexByteArray()
+              ISendType.Str -> sendData.toByteArray()
+            })
       }
 
-  suspend fun send(dataType: DataType) = withContext(Dispatchers.IO) {}
+  fun sendDataChanged(text: String) {
+    sendData = text
+    sendEnabled = sendData.isNotEmpty() && sendDataChannel != null
+  }
 
-  fun clear() {}
+  fun sendTypeChanged(type: ISendType) {
+    sendType = type
+  }
+
+  fun clear() {
+    sendDataChannel?.close()
+  }
 }

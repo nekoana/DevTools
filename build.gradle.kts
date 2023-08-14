@@ -8,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.diffplug.spotless:spotless-plugin-gradle:6.13.0")
+        classpath(libs.spotless.gradle)
     }
 }
 
@@ -34,6 +34,10 @@ allprojects {
             target("*.gradle.kts") // default target for kotlinGradle
             ktlint() // or ktfmt() or prettier()
         }
+    }
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).configureEach {
+        dependsOn("spotlessApply")
     }
 }
 

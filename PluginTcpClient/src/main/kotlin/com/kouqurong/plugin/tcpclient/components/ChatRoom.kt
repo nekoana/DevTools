@@ -10,13 +10,20 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.kouqurong.plugin.tcpclient.model.ISendType
 import com.kouqurong.plugin.tcpclient.model.Message
 import com.kouqurong.plugin.tcpclient.model.Whoami
 
 @Composable
 fun ChatRoom(
-    messages: List<Message>,
     modifier: Modifier = Modifier,
+    messages: List<Message>,
+    sendData: String,
+    sendType: ISendType,
+    sendEnabled: Boolean,
+    onSendRequest: () -> Unit,
+    onSendTextChanged: (String) -> Unit,
+    onSendTypeChanged: (ISendType) -> Unit,
 ) {
   val scrollState = rememberLazyListState()
 
@@ -24,14 +31,23 @@ fun ChatRoom(
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         state = scrollState,
+        reverseLayout = true,
     ) {
+      item {
+        UserInput(
+            modifier = Modifier.padding(bottom = 16.dp, top = 16.dp),
+            sendData = sendData,
+            sendType = sendType,
+            sendEnabled = sendEnabled,
+            onSendRequest = onSendRequest,
+            onTextChanged = onSendTextChanged,
+            onSendTypeChanged = onSendTypeChanged)
+      }
       items(messages, key = { it }) {
         ChatMessage(
             message = it,
         )
       }
-
-      item { UserInput(modifier = Modifier.padding(bottom = 16.dp, top = 16.dp)) }
     }
   }
 }
@@ -65,5 +81,10 @@ fun PreviewChatRoom() {
 
   ChatRoom(
       messages = messages,
-  )
+      sendData = "",
+      sendType = ISendType.Hex,
+      sendEnabled = false,
+      onSendTypeChanged = {},
+      onSendTextChanged = {},
+      onSendRequest = {})
 }

@@ -22,12 +22,20 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.kouqurong.plugin.tcpclient.model.ISendType
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun UserInput(modifier: Modifier = Modifier) {
+fun UserInput(
+    modifier: Modifier = Modifier,
+    sendData: String,
+    sendType: ISendType,
+    sendEnabled: Boolean,
+    onSendRequest: () -> Unit,
+    onTextChanged: (String) -> Unit,
+    onSendTypeChanged: (ISendType) -> Unit,
+) {
   Surface(modifier = modifier, elevation = 4.dp) {
     Column(
         modifier =
@@ -37,8 +45,8 @@ fun UserInput(modifier: Modifier = Modifier) {
                   Modifier.fillMaxWidth().height(64.dp).semantics {
                     contentDescription = "User input"
                   },
-              onTextChanged = { /*TODO*/},
-              textFieldValue = TextFieldValue(""),
+              onTextChanged = onTextChanged,
+              text = sendData,
               onTextFieldFocused = { /*TODO*/},
               focusState = false)
 
@@ -49,8 +57,10 @@ fun UserInput(modifier: Modifier = Modifier) {
                   Modifier.fillMaxWidth()
                       .height(36.dp)
                       .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-              onMessageSent = { /*TODO*/},
-              sendMessageEnabled = false,
+              sendType = sendType,
+              sendEnabled = sendEnabled,
+              onSendRequest = onSendRequest,
+              onSendTypeChanged = onSendTypeChanged,
           )
         }
   }
@@ -60,9 +70,9 @@ fun UserInput(modifier: Modifier = Modifier) {
 @Composable
 private fun UserInputText(
     modifier: Modifier = Modifier,
+    text: String,
     keyboardType: KeyboardType = KeyboardType.Text,
-    onTextChanged: (TextFieldValue) -> Unit,
-    textFieldValue: TextFieldValue,
+    onTextChanged: (String) -> Unit,
     onTextFieldFocused: (Boolean) -> Unit,
     focusState: Boolean
 ) {
@@ -73,7 +83,7 @@ private fun UserInputText(
     Surface {
       Box(modifier = Modifier.height(64.dp).weight(1f).align(Alignment.Bottom)) {
         BasicTextField(
-            value = textFieldValue,
+            value = text,
             onValueChange = { onTextChanged(it) },
             modifier =
                 Modifier.fillMaxWidth()
@@ -93,7 +103,7 @@ private fun UserInputText(
             textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current))
 
         val disableContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        if (textFieldValue.text.isEmpty() && !focusState) {
+        if (text.isEmpty() && !focusState) {
           Text(
               modifier = Modifier.align(Alignment.CenterStart).padding(start = 32.dp),
               text = "User input",
@@ -107,17 +117,25 @@ private fun UserInputText(
 @Composable
 fun UserInputType(
     modifier: Modifier = Modifier,
-    sendMessageEnabled: Boolean,
-    onMessageSent: () -> Unit
+    sendEnabled: Boolean,
+    sendType: ISendType,
+    onSendTypeChanged: (ISendType) -> Unit,
+    onSendRequest: () -> Unit
 ) {
   Row {
     TypeRadioButton(
-        modifier = Modifier.height(36.dp), selected = true, onClick = { /*TODO*/}, label = "HEX")
+        modifier = Modifier.height(36.dp),
+        selected = sendType == ISendType.Hex,
+        onClick = { onSendTypeChanged(ISendType.Hex) },
+        label = "HEX")
 
     Spacer(modifier = Modifier.width(8.dp))
 
     TypeRadioButton(
-        modifier = Modifier.height(36.dp), selected = false, onClick = { /*TODO*/}, label = "ASCII")
+        modifier = Modifier.height(36.dp),
+        selected = sendType == ISendType.Str,
+        onClick = { onSendTypeChanged(ISendType.Str) },
+        label = "ASCII")
 
     Spacer(modifier = Modifier.weight(1f))
 
@@ -128,7 +146,7 @@ fun UserInputType(
             disabledContainerColor = Color.Transparent, disabledContentColor = disabledContentColor)
 
     val border =
-        if (!sendMessageEnabled) {
+        if (!sendEnabled) {
           BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f))
         } else {
           null
@@ -137,8 +155,8 @@ fun UserInputType(
     // Send button
     Button(
         modifier = Modifier.height(36.dp),
-        enabled = sendMessageEnabled,
-        onClick = onMessageSent,
+        enabled = sendEnabled,
+        onClick = onSendRequest,
         colors = buttonColors,
         border = border,
         contentPadding = PaddingValues(0.dp)) {
@@ -177,7 +195,14 @@ fun TypeRadioButton(
 @Preview
 @Composable
 fun PreviewUserInput() {
-  UserInput()
+  UserInput(
+      sendData = "",
+      sendType = ISendType.Hex,
+      sendEnabled = false,
+      onSendRequest = {},
+      onTextChanged = {},
+      onSendTypeChanged = {},
+  )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -188,7 +213,7 @@ fun previewUserInputText() {
       modifier = Modifier.background(MaterialTheme.colorScheme.background),
       keyboardType = KeyboardType.Text,
       onTextChanged = {},
-      textFieldValue = TextFieldValue(""),
+      text = "",
       onTextFieldFocused = {},
       focusState = false)
 }
@@ -198,8 +223,10 @@ fun previewUserInputText() {
 fun PreviewUserInputType() {
   UserInputType(
       modifier = Modifier.background(MaterialTheme.colorScheme.background),
-      sendMessageEnabled = true,
-      onMessageSent = {})
+      sendEnabled = true,
+      sendType = ISendType.Hex,
+      onSendTypeChanged = {},
+      onSendRequest = {})
 }
 
 @Preview

@@ -1,9 +1,10 @@
 package com.kouqurong.plugin.tcpclient.utils
 
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-val formater = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss SSS")
 
-fun Long.toDateTimeString(): String {
-  return formater.format(java.time.Instant.ofEpochMilli(this))
+fun LocalDateTime.toDateTimeString(): String {
+  return formatter.format(this)
 }
