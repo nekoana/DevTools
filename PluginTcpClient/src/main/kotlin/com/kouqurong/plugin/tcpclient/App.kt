@@ -6,21 +6,27 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.kouqurong.plugin.tcpclient.components.ChatRoom
+import com.kouqurong.plugin.tcpclient.viewmodel.IConnectionState
 import com.kouqurong.plugin.tcpclient.viewmodel.TcpClientViewModel
 
 @Composable
 fun App(viewModel: TcpClientViewModel) {
+
+  val connectState = viewModel.connectState.collectAsState()
+
   Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
     Column {
       AddressEdit(
           address = viewModel.address,
-          onUpdateIp = viewModel::updateIp,
+          connectState = connectState.value,
+          onUpdateIp = viewModel::updateAddress,
           isAvailableAddress = viewModel.isAvailableAddress,
           isEnabledEdit = viewModel.addressEditable,
           onConnect = viewModel::connect,
@@ -44,6 +50,7 @@ fun AddressEdit(
     address: String,
     isEnabledEdit: Boolean,
     isAvailableAddress: Boolean,
+    connectState: IConnectionState,
     onUpdateIp: (String) -> Unit,
     onConnect: () -> Unit,
 ) {
@@ -54,7 +61,10 @@ fun AddressEdit(
         TextField(
             modifier = Modifier.width(260.dp),
             value = address,
-            enabled = isEnabledEdit,
+            enabled =
+                isEnabledEdit &&
+                    connectState != IConnectionState.Connecting &&
+                    connectState != IConnectionState.Connected,
             label = {
               Text(
                   text = "Address",
@@ -69,6 +79,14 @@ fun AddressEdit(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        Button(onClick = onConnect, enabled = isAvailableAddress) { Text(text = "Connect") }
+        Button(onClick = onConnect, enabled = isAvailableAddress) {
+          Text(
+              text =
+                  when (connectState) {
+                    IConnectionState.Connected -> "Disconnect"
+                    IConnectionState.Connecting -> "Connecting"
+                    else -> "Connect"
+                  })
+        }
       }
 }

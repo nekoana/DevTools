@@ -18,12 +18,21 @@ sealed interface IConnectionState {
   object Disconnected : IConnectionState
   object Connecting : IConnectionState
   object Connected : IConnectionState
-  class Received(val data: Byte) : IConnectionState
   class Error(val throwable: Throwable) : IConnectionState
 }
 
+// 判断是否是合法的IP 端口
+val regex =
+    """^((\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.){3}(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5]):\d{1,5}$""".toRegex()
+
 class TcpClientViewModel {
-  private val scope = CoroutineScope(MainUIDispatcher + SupervisorJob())
+  private val scope =
+      CoroutineScope(
+          MainUIDispatcher +
+              SupervisorJob() +
+              CoroutineExceptionHandler { coroutineContext, throwable ->
+                throwable.printStackTrace()
+              })
 
   var address by mutableStateOf("")
   var isAvailableAddress by mutableStateOf(false)
@@ -31,26 +40,33 @@ class TcpClientViewModel {
   var sendData by mutableStateOf("")
   var sendType by mutableStateOf<ISendType>(ISendType.Hex)
   var sendEnabled by mutableStateOf(false)
+
   private val _sendDataList = mutableStateListOf<Message>()
   val sendDataList: List<Message> = _sendDataList
 
-  private var connectState = MutableStateFlow<IConnectionState>(IConnectionState.Disconnected)
+  val connectState = MutableStateFlow<IConnectionState>(IConnectionState.Disconnected)
 
   private var sendDataChannel: Channel<ByteArray>? = null
 
-  fun updateIp(ip: String) {
-    address = ip
-    isAvailableAddress = isAvailableAddress(ip)
+  fun updateAddress(addr: String) {
+    address = addr
+    isAvailableAddress = isAvailableAddress(addr)
   }
 
   private fun isAvailableAddress(ip: String): Boolean {
-    // 判断是否是合法的IP 端口
-    val regex =
-        """^((\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.){3}(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5]):\d{1,5}$""".toRegex()
     return regex.matches(ip)
   }
 
   fun connect() {
+    if (connectState.value == IConnectionState.Connecting) {
+      return
+    }
+
+    if (connectState.value == IConnectionState.Connected) {
+      sendDataChannel?.close()
+      return
+    }
+
     sendDataChannel?.close()
 
     val ipPort = address.split(":")
@@ -62,24 +78,33 @@ class TcpClientViewModel {
             .getOrNull()
 
     if (socket != null) {
-      val receiveDataJob =
-          scope.launch {
-            channelFlow<IConnectionState> {
-                  withContext(Dispatchers.IO) {
-                    while (isActive && socket.isConnected) {
-                      val inputStream = socket.getInputStream()
-                      val read = inputStream.read()
-                      if (read != -1) {
-                        send(IConnectionState.Received(read.toByte()))
-                      } else {
-                        delay(1000)
-                      }
-                    }
-                  }
-                  awaitClose { socket.close() }
-                }
-                .let { scope.launch { it.stateIn(scope).collectLatest { connectState.emit(it) } } }
+      val flow = channelFlow {
+        try {
+          withContext(Dispatchers.IO) {
+            val inputStream = socket.getInputStream().buffered()
+
+            while (isActive && socket.isConnected) {
+              if (inputStream.available() == 0) {
+                delay(1000)
+                continue
+              }
+              val read = inputStream.read()
+              if (read != -1) {
+                send(read.toByte())
+              }
+            }
           }
+        } finally {
+          awaitClose {
+            println("close socket")
+            socket.close()
+
+            scope.launch { connectState.emit(IConnectionState.Disconnected) }
+          }
+        }
+      }
+
+      val receiveDataJob = scope.launch { flow.collectLatest { println("receive data: $it") } }
 
       sendDataChannel =
           Channel<ByteArray>().apply {
@@ -101,7 +126,6 @@ class TcpClientViewModel {
   fun sendRequest() =
       scope.launch {
         _sendDataList.add(0, Message.fromMeNow(sendData))
-
         sendDataChannel?.send(
             when (sendType) {
               ISendType.Hex -> sendData.toHexByteArray()
