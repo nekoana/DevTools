@@ -23,7 +23,6 @@ sealed interface IConnectionState {
 }
 
 class TcpClientViewModel {
-
   private val scope = CoroutineScope(MainUIDispatcher + SupervisorJob())
 
   var address by mutableStateOf("")
@@ -32,7 +31,8 @@ class TcpClientViewModel {
   var sendData by mutableStateOf("")
   var sendType by mutableStateOf<ISendType>(ISendType.Hex)
   var sendEnabled by mutableStateOf(false)
-  val sendDataList = mutableStateListOf<Message>()
+  private val _sendDataList = mutableStateListOf<Message>()
+  val sendDataList: List<Message> = _sendDataList
 
   private var connectState = MutableStateFlow<IConnectionState>(IConnectionState.Disconnected)
 
@@ -81,27 +81,26 @@ class TcpClientViewModel {
                 .let { scope.launch { it.stateIn(scope).collectLatest { connectState.emit(it) } } }
           }
 
-      sendDataChannel = Channel<ByteArray> {}
-
-      sendDataChannel?.let {
-        scope.launch {
-          it.receiveAsFlow().collectLatest {
-            withContext(Dispatchers.IO) {
-              val outputStream = socket.getOutputStream()
-              outputStream.write(it)
-              outputStream.flush()
+      sendDataChannel =
+          Channel<ByteArray>().apply {
+            scope.launch {
+              receiveAsFlow().collectLatest {
+                withContext(Dispatchers.IO) {
+                  val outputStream = socket.getOutputStream()
+                  outputStream.write(it)
+                  outputStream.flush()
+                }
+              }
             }
-          }
-        }
 
-        it.invokeOnClose { receiveDataJob.cancel() }
-      }
+            invokeOnClose { receiveDataJob.cancel() }
+          }
     }
   }
 
   fun sendRequest() =
       scope.launch {
-        sendDataList.add(Message.fromMeNow(sendData))
+        _sendDataList.add(0, Message.fromMeNow(sendData))
 
         sendDataChannel?.send(
             when (sendType) {
