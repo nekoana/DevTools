@@ -15,5 +15,9 @@ data class Message(val whoami: Whoami, val content: String, val timestamp: Strin
     fun fromMe(content: String, timestamp: String) = Message(Whoami.Me, content, timestamp)
 
     fun fromMeNow(content: String) = fromMe(content, LocalDateTime.now().toDateTimeString())
+
+    fun fromOther(content: String, timestamp: String) = Message(Whoami.Other, content, timestamp)
+
+    fun fromOtherNow(content: String) = fromOther(content, LocalDateTime.now().toDateTimeString())
   }
 }

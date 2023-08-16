@@ -6,12 +6,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.kouqurong.plugin.tcpclient.model.ISendType
 import com.kouqurong.plugin.tcpclient.model.Message
+import com.kouqurong.plugin.tcpclient.model.Whoami
+import com.kouqurong.plugin.tcpclient.utils.toHex
 import com.kouqurong.plugin.tcpclient.utils.toHexByteArray
 import java.net.Socket
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.receiveAsFlow
 import org.jetbrains.skiko.MainUIDispatcher
 
 sealed interface IConnectionState {
@@ -104,7 +109,18 @@ class TcpClientViewModel {
         }
       }
 
-      val receiveDataJob = scope.launch { flow.collectLatest { println("receive data: $it") } }
+      val receiveDataJob =
+          scope.launch {
+            flow.collectLatest {
+              val msg = _sendDataList.lastOrNull()
+              if (msg == null || msg.whoami == Whoami.Me) {
+                _sendDataList.add(Message.fromOtherNow(it.toHex()))
+              } else {
+                val newMsg = msg.copy(content = msg.content + it.toHex())
+                _sendDataList[_sendDataList.lastIndex] = newMsg
+              }
+            }
+          }
 
       sendDataChannel =
           Channel<ByteArray>().apply {

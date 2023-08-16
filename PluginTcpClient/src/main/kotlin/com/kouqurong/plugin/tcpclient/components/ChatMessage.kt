@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.LastBaseline
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -90,7 +91,7 @@ fun TextBubble(message: Message, modifier: Modifier = Modifier) {
     Column {
       Surface(
           color = backgroundBubbleColor,
-          shape = ChatBubbleShape,
+          modifier = Modifier.clip(ChatBubbleShape)
       ) {
         SelectionContainer(modifier) {
           Text(
