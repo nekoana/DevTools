@@ -26,11 +26,13 @@ import androidx.compose.ui.window.*
 import com.kouqurong.plugin.view.IPluginView
 import java.util.*
 
+// todo for test
 val classLoader =
     PathClassLoader(
         "/Users/codin/MyCode/DevTools/PluginHello/build/libs/PluginHello.jar",
         "/Users/codin/MyCode/DevTools/PluginHex/build/libs/PluginHex.jar",
-        "/Users/codin/MyCode/DevTools/PluginTcpClient/build/libs/PluginTcpClient.jar")
+        "/Users/codin/MyCode/DevTools/PluginTcpClient/build/libs/PluginTcpClient.jar",
+        "/Users/codin/MyCode/DevTools/PluginTcpServer/build/libs/PluginTcpServer.jar")
 
 @Composable
 fun Home(onDisplay: (IPluginView) -> Unit) {

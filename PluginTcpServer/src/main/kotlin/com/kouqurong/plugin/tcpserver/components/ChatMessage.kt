@@ -1,4 +1,4 @@
-package com.kouqurong.plugin.tcpclient.components
+package com.kouqurong.plugin.tcpserver.components
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
@@ -16,8 +16,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.LastBaseline
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.kouqurong.plugin.tcpclient.model.Message
-import com.kouqurong.plugin.tcpclient.model.Whoami
+import com.kouqurong.plugin.tcpserver.model.Message
+import com.kouqurong.plugin.tcpserver.model.Whoami
 import com.kouqurong.plugin.view.recomposeHighlighter
 
 @Composable
@@ -108,6 +108,7 @@ fun PrewViewChatMeMessage() {
   ChatMessage(
       message =
           Message(
+              id = 1,
               whoami = Whoami.Me,
               content = "Hello",
               timestamp = "2021-10-01 12:00:00",
