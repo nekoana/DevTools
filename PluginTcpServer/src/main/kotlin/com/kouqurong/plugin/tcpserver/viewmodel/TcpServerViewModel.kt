@@ -89,12 +89,13 @@ data class Client(private val address: SocketAddress) {
 
   fun send(channel: SocketChannel) =
       scope.launch(Dispatchers.IO) {
-        while (isActive && sendList.isNotEmpty()) {
-          val data = sendList.removeAt(0)
+        mutex.withLock {
+          val data = sendList.firstOrNull() ?: return@launch
           val buffer = ByteBuffer.wrap(data)
           while (buffer.hasRemaining()) {
             channel.write(buffer)
           }
+          sendList.remove(data)
         }
       }
 
@@ -134,6 +135,7 @@ class TcpServerViewModel {
   fun listen() {
     if (listenJob != null) {
       listenJob!!.cancel()
+      listenJob = null
       return
     }
 

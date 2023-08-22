@@ -34,7 +34,7 @@ fun App(viewModel: TcpClientViewModel) {
       )
 
       ChatRoom(
-          messages = viewModel.sendDataList,
+          messages = viewModel.messages,
           sendData = viewModel.sendData,
           sendType = viewModel.sendType,
           sendEnabled = viewModel.sendEnabled,
