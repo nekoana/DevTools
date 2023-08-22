@@ -5,6 +5,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.kouqurong.plugin.tcpclient.model.ISendType
 import com.kouqurong.plugin.tcpclient.model.Message
 import com.kouqurong.plugin.tcpclient.utils.toHexByteArray
+import com.kouqurong.plugin.view.ViewModel
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.SelectionKey
@@ -14,15 +15,6 @@ import java.util.concurrent.CopyOnWriteArrayList
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
-import org.jetbrains.skiko.MainUIDispatcher
-
-private val scope =
-    CoroutineScope(
-        MainUIDispatcher +
-            SupervisorJob() +
-            CoroutineExceptionHandler { coroutineContext, throwable ->
-              throwable.printStackTrace()
-            })
 
 sealed interface IConnectionState {
   object Disconnected : IConnectionState
@@ -36,6 +28,7 @@ val regex =
     """^((\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.){3}(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5]):\d{1,5}$""".toRegex()
 
 data class UiState(
+    private val viewModelScope: CoroutineScope,
     private val _address: MutableState<String> = mutableStateOf(""),
     private val _sendData: MutableState<String> = mutableStateOf(""),
     private val _sendType: MutableState<ISendType> = mutableStateOf(ISendType.Hex),
@@ -93,19 +86,18 @@ data class UiState(
   val isAvailableAddress: StateFlow<Boolean> =
       snapshotFlow { _address.value }
           .mapLatest { regex.matches(it) }
-          .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+          .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
   val sendEnabled: StateFlow<Boolean> =
       snapshotFlow { _sendData.value }
           .combine(snapshotFlow { _connectState.value }) { data, state ->
             data.isNotEmpty() && state == IConnectionState.Connected
           }
-          .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+          .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 }
 
-class TcpClientViewModel {
-
-  val uiState = UiState()
+class TcpClientViewModel : ViewModel() {
+  val uiState = UiState(viewModelScope)
 
   private val sendList = CopyOnWriteArrayList<ByteArray>()
 
@@ -133,10 +125,12 @@ class TcpClientViewModel {
                   .also { it.register(selector, SelectionKey.OP_WRITE or SelectionKey.OP_READ) }
             }
             .onFailure {
-              scope.launch { uiState.setConnectState(IConnectionState.Error(it)) }
+              viewModelScope.launch { uiState.setConnectState(IConnectionState.Error(it)) }
               println("connect error: $it")
             }
-            .onSuccess { scope.launch { uiState.setConnectState(IConnectionState.Connected) } }
+            .onSuccess {
+              viewModelScope.launch { uiState.setConnectState(IConnectionState.Connected) }
+            }
             .getOrNull()
 
     if (socketChannel != null) {
@@ -196,13 +190,13 @@ class TcpClientViewModel {
             selector.close()
             socketChannel.close()
 
-            scope.launch { uiState.setConnectState(IConnectionState.Disconnected) }
+            viewModelScope.launch { uiState.setConnectState(IConnectionState.Disconnected) }
           }
         }
       }
 
       sendJob =
-          scope.launch {
+          viewModelScope.launch {
             sendDataChannelFlow.collect {
               if (it.isNotEmpty()) {
                 uiState.addMessage(0, Message.fromOtherNow(it))
@@ -213,7 +207,7 @@ class TcpClientViewModel {
   }
 
   fun sendRequest() =
-      scope.launch {
+      viewModelScope.launch {
         uiState.addMessage(0, Message.fromMeNow(uiState.getSendData()))
         sendList.add(uiState.getSendDataBytes())
       }

@@ -1,6 +1,7 @@
 package com.kouqurong.plugin.tcpclient.components
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
@@ -88,15 +89,13 @@ fun TextBubble(message: Message, modifier: Modifier = Modifier) {
       )
 
   CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColors) {
-    Column {
-      Surface(color = backgroundBubbleColor, modifier = Modifier.clip(ChatBubbleShape)) {
-        SelectionContainer(modifier = Modifier.recomposeHighlighter()) {
-          Text(
-              text = message.content,
-              style = MaterialTheme.typography.bodyLarge.copy(color = LocalContentColor.current),
-              modifier = Modifier.padding(16.dp).recomposeHighlighter(),
-          )
-        }
+    Surface(color = backgroundBubbleColor, modifier = Modifier.clip(ChatBubbleShape)) {
+      SelectionContainer(modifier = Modifier.recomposeHighlighter().focusable(enabled = false)) {
+        Text(
+            text = message.content,
+            style = MaterialTheme.typography.bodyLarge.copy(color = LocalContentColor.current),
+            modifier = Modifier.padding(16.dp),
+        )
       }
     }
   }
