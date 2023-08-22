@@ -20,24 +20,26 @@ import com.kouqurong.plugin.view.recomposeHighlighter
 @Composable
 fun App(viewModel: TcpClientViewModel) {
 
-  val connectState = viewModel.connectState.collectAsState()
+  val isAvailableAddress = viewModel.uiState.isAvailableAddress.collectAsState()
+
+  val sendEnabled = viewModel.uiState.sendEnabled.collectAsState()
 
   Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
     Column {
       AddressEdit(
-          address = viewModel.address,
-          connectState = connectState.value,
+          address = viewModel.uiState.address,
+          connectState = viewModel.uiState.connectState,
           onUpdateIp = viewModel::updateAddress,
-          isAvailableAddress = viewModel.isAvailableAddress,
-          isEnabledEdit = viewModel.addressEditable,
+          isAvailableAddress = isAvailableAddress.value,
+          isEnabledEdit = true,
           onConnect = viewModel::connect,
       )
 
       ChatRoom(
-          messages = viewModel.messages,
-          sendData = viewModel.sendData,
-          sendType = viewModel.sendType,
-          sendEnabled = viewModel.sendEnabled,
+          messages = viewModel.uiState.messages,
+          sendData = viewModel.uiState.sendData,
+          sendType = viewModel.uiState.sendType,
+          sendEnabled = sendEnabled.value,
           onSendRequest = viewModel::sendRequest,
           onSendTextChanged = viewModel::sendDataChanged,
           onSendTypeChanged = viewModel::sendTypeChanged,
@@ -62,10 +64,7 @@ fun AddressEdit(
         TextField(
             modifier = Modifier.width(260.dp).recomposeHighlighter(),
             value = address,
-            enabled =
-                isEnabledEdit &&
-                    connectState != IConnectionState.Connecting &&
-                    connectState != IConnectionState.Connected,
+            enabled = isEnabledEdit,
             label = {
               Text(
                   text = "Address",
