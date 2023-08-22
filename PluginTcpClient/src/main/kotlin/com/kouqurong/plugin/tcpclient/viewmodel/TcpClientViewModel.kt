@@ -94,6 +94,11 @@ data class UiState(
             data.isNotEmpty() && state == IConnectionState.Connected
           }
           .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+
+  val editEnabled =
+      snapshotFlow { _connectState.value }
+          .mapLatest { it == IConnectionState.Disconnected }
+          .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 }
 
 class TcpClientViewModel : ViewModel() {

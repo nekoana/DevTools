@@ -24,6 +24,8 @@ fun App(viewModel: TcpClientViewModel) {
 
   val sendEnabled = viewModel.uiState.sendEnabled.collectAsState()
 
+  val editEnabled = viewModel.uiState.editEnabled.collectAsState()
+
   Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
     Column {
       AddressEdit(
@@ -31,7 +33,7 @@ fun App(viewModel: TcpClientViewModel) {
           connectState = viewModel.uiState.connectState,
           onUpdateIp = viewModel::updateAddress,
           isAvailableAddress = isAvailableAddress.value,
-          isEnabledEdit = true,
+          isEnabledEdit = editEnabled.value,
           onConnect = viewModel::connect,
       )
 
