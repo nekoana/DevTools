@@ -11,7 +11,7 @@ import java.nio.channels.SelectionKey
 import java.nio.channels.Selector
 import java.nio.channels.ServerSocketChannel
 import java.nio.channels.SocketChannel
-import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.ArrayBlockingQueue
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.sync.Mutex
@@ -45,7 +45,7 @@ data class Client(private val address: SocketAddress) {
 
   val messages: List<Message> = _messages
 
-  private val sendList = CopyOnWriteArrayList<ByteArray>()
+  private val sendList = ArrayBlockingQueue<ByteArray>(8)
 
   var sendData by mutableStateOf("")
 
@@ -71,6 +71,7 @@ data class Client(private val address: SocketAddress) {
   fun sendRequest() {
     _messages.add(0, Message.fromMeNow(sendData))
 
+    // todo 性能优化 可能会阻塞
     sendList.add(
         when (sendType) {
           ISendType.Hex -> sendData.toHexByteArray()
@@ -89,13 +90,10 @@ data class Client(private val address: SocketAddress) {
 
   fun send(channel: SocketChannel) =
       scope.launch(Dispatchers.IO) {
-        mutex.withLock {
-          val data = sendList.firstOrNull() ?: return@launch
-          val buffer = ByteBuffer.wrap(data)
-          while (buffer.hasRemaining()) {
-            channel.write(buffer)
-          }
-          sendList.remove(data)
+        val data = sendList.poll() ?: return@launch
+        val buffer = ByteBuffer.wrap(data)
+        while (buffer.hasRemaining()) {
+          channel.write(buffer)
         }
       }
 

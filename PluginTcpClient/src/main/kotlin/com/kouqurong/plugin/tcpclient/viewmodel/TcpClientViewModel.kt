@@ -52,7 +52,6 @@ class TcpClientViewModel {
 
   val connectState = MutableStateFlow<IConnectionState>(IConnectionState.Disconnected)
 
-  private val buffer = ByteBuffer.allocate(1024)
   private var sendJob: Job? = null
 
   fun updateAddress(addr: String) {
@@ -90,9 +89,11 @@ class TcpClientViewModel {
 
     if (socketChannel != null) {
       val sendDataChannelFlow =
-          channelFlow<String> {
+          channelFlow {
             try {
               withContext(Dispatchers.IO) {
+                val buffer = ByteBuffer.allocate(1024)
+
                 while (selector.select() > 0) {
                   if (!isActive) return@withContext
 
@@ -114,6 +115,8 @@ class TcpClientViewModel {
                           append(bytes.decodeToString())
                         }
                       }
+
+                      buffer.clear()
 
                       send(text)
                     }
