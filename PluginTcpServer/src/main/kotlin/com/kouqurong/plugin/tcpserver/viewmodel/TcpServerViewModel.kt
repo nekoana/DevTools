@@ -12,8 +12,12 @@ import java.nio.channels.Selector
 import java.nio.channels.ServerSocketChannel
 import java.nio.channels.SocketChannel
 import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.jetbrains.skiko.MainUIDispatcher
@@ -51,19 +55,29 @@ data class Client(private val address: SocketAddress) {
 
   var sendType by mutableStateOf<ISendType>(ISendType.Hex)
 
-  var sendEnabled by mutableStateOf(false)
+  @OptIn(ExperimentalCoroutinesApi::class)
+  val sendEnabled =
+      snapshotFlow { sendData }
+          .mapLatest { it.isNotEmpty() }
+          .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
   suspend fun read(channel: SocketChannel) =
       withContext(Dispatchers.IO) {
         mutex.withLock {
-          buildString {
-            while (isActive && channel.read(buffer) > 0) {
-              buffer.flip()
-              val bytes = ByteArray(buffer.limit())
-              buffer.get(bytes)
-              append(bytes.decodeToString())
+          val read = channel.read(buffer)
+
+          if (read > 0) {
+            buildString {
+              do {
+                buffer.flip()
+                val bytes = ByteArray(buffer.limit())
+                buffer.get(bytes)
+                append(bytes.decodeToString())
+              } while (isActive && channel.read(buffer) > 0)
+              buffer.clear()
             }
-            buffer.clear()
+          } else {
+            null
           }
         }
       }
@@ -81,7 +95,6 @@ data class Client(private val address: SocketAddress) {
 
   fun sendDataChanged(text: String) {
     sendData = text
-    sendEnabled = sendData.isNotEmpty()
   }
 
   fun sendTypeChanged(type: ISendType) {
@@ -119,7 +132,7 @@ class TcpServerViewModel {
 
   val listenState = MutableStateFlow<IListenState>(IListenState.Closed)
 
-  private val channelClientMap = mutableMapOf<SocketAddress, Client>()
+  private val channelClientMap = ConcurrentHashMap<SocketAddress, Client>()
 
   fun updatePort(p: String) {
     port = p
@@ -211,15 +224,24 @@ class TcpServerViewModel {
             if (key.isAcceptable) {
               accept(selector, key.channel() as ServerSocketChannel)
             } else {
+              val channel = key.channel() as SocketChannel
+
+              if (!channel.isOpen) {
+                val client = channelClientMap.remove(channel.remoteAddress)
+                scope.launch { _clients.remove(client) }
+                continue
+              }
+
               if (key.isReadable) {
-                val channel = key.channel() as SocketChannel
                 channelClientMap[channel.remoteAddress]?.run {
                   val data = read(channel)
-                  received(data)
+                  if (data != null) {
+                    received(data)
+                  }
                 }
               }
+
               if (key.isWritable) {
-                val channel = key.channel() as SocketChannel
                 channelClientMap[channel.remoteAddress]?.run { send(channel) }
               }
             }

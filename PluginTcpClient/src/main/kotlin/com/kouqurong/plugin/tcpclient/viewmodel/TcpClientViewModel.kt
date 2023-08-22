@@ -88,65 +88,66 @@ class TcpClientViewModel {
             .getOrNull()
 
     if (socketChannel != null) {
-      val sendDataChannelFlow =
-          channelFlow {
-            try {
-              withContext(Dispatchers.IO) {
-                val buffer = ByteBuffer.allocate(1024)
+      val sendDataChannelFlow = channelFlow {
+        try {
+          withContext(Dispatchers.IO) {
+            val buffer = ByteBuffer.allocate(1024)
 
-                while (selector.select() > 0) {
-                  if (!isActive) return@withContext
+            while (selector.select() > 0) {
+              if (!isActive) return@withContext
 
-                  val keys = selector.selectedKeys()
-                  val iter = keys.iterator()
+              val keys = selector.selectedKeys()
+              val iter = keys.iterator()
 
-                  while (iter.hasNext()) {
-                    val key = iter.next()
+              while (iter.hasNext()) {
+                val key = iter.next()
 
-                    if (key.isReadable) {
-                      val channel = key.channel() as SocketChannel
+                if (key.isReadable) {
+                  val channel = key.channel() as SocketChannel
 
-                      val text = buildString {
-                        while (channel.read(buffer) > 0) {
-                          buffer.flip()
-                          val bytes = ByteArray(buffer.limit())
-                          buffer.get(bytes)
+                  val read = channel.read(buffer)
 
-                          append(bytes.decodeToString())
-                        }
-                      }
-
-                      buffer.clear()
-
-                      send(text)
+                  if (read > 0) {
+                    val text = buildString {
+                      do {
+                        buffer.flip()
+                        val bytes = ByteArray(buffer.limit())
+                        buffer.get(bytes)
+                        append(bytes.decodeToString())
+                      } while (channel.read(buffer) > 0)
                     }
-
-                    if (key.isWritable) {
-                      val channel = key.channel() as SocketChannel
-
-                      val data = sendList.firstOrNull() ?: continue
-                      val buffer = ByteBuffer.wrap(data)
-
-                      while (buffer.hasRemaining()) {
-                        channel.write(buffer)
-                      }
-                      sendList.remove(data)
-                    }
+                    send(text)
                   }
-                  iter.remove()
+                  buffer.clear()
+                }
+
+                if (key.isWritable) {
+                  val channel = key.channel() as SocketChannel
+
+                  val data = sendList.firstOrNull() ?: continue
+                  val buffer = ByteBuffer.wrap(data)
+
+                  while (buffer.hasRemaining()) {
+                    channel.write(buffer)
+                  }
+                  sendList.remove(data)
                 }
               }
-            } catch (e: Exception) {
-              println("sendDataChannelFlow error: $e")
-            } finally {
-              awaitClose {
-                println("close socket")
-                socketChannel.close()
-
-                scope.launch { connectState.emit(IConnectionState.Disconnected) }
-              }
+              iter.remove()
             }
           }
+        } catch (e: Exception) {
+          println("sendDataChannelFlow error: $e")
+        } finally {
+          awaitClose {
+            println("close socket")
+            selector.close()
+            socketChannel.close()
+
+            scope.launch { connectState.emit(IConnectionState.Disconnected) }
+          }
+        }
+      }
 
       sendJob =
           scope.launch {

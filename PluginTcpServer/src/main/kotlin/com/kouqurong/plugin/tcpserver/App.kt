@@ -51,11 +51,13 @@ fun App(viewModel: TcpServerViewModel) {
         )
 
         viewModel.selectedClient?.run {
+          val sendEnabled = sendEnabled.collectAsState()
+
           ChatRoom(
               messages = messages,
               sendData = sendData,
               sendType = sendType,
-              sendEnabled = sendEnabled,
+              sendEnabled = sendEnabled.value,
               onSendRequest = ::sendRequest,
               onSendTextChanged = ::sendDataChanged,
               onSendTypeChanged = ::sendTypeChanged,
