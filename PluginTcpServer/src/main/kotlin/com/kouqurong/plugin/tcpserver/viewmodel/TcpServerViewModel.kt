@@ -172,7 +172,45 @@ class TcpServerViewModel {
               listenState.emit(IListenState.Listening)
 
               try {
-                listening(selector)
+                withContext(Dispatchers.IO) {
+                  while (isActive) {
+                    if (selector.select(300) <= 0) {
+                      continue
+                    }
+
+                    val keys = selector.selectedKeys()
+                    val iter = keys.iterator()
+
+                    while (iter.hasNext()) {
+                      val key = iter.next()
+                      if (key.isAcceptable) {
+                        accept(selector, key.channel() as ServerSocketChannel)
+                      } else {
+                        val channel = key.channel() as SocketChannel
+
+                        if (!channel.isOpen) {
+                          val client = channelClientMap.remove(channel.remoteAddress)
+                          scope.launch { _clients.remove(client) }
+                          continue
+                        }
+
+                        if (key.isReadable) {
+                          channelClientMap[channel.remoteAddress]?.run {
+                            val data = read(channel)
+                            if (data != null) {
+                              received(data)
+                            }
+                          }
+                        }
+
+                        if (key.isWritable) {
+                          channelClientMap[channel.remoteAddress]?.run { send(channel) }
+                        }
+                      }
+                      iter.remove()
+                    }
+                  }
+                }
               } finally {
                 selector.close()
                 server.close()
@@ -209,44 +247,5 @@ class TcpServerViewModel {
                 }
               }
             }
-      }
-
-  private suspend fun listening(selector: Selector) =
-      withContext(Dispatchers.IO) {
-        while (selector.select() > 0) {
-          if (!isActive) return@withContext
-
-          val keys = selector.selectedKeys()
-          val iter = keys.iterator()
-
-          while (iter.hasNext()) {
-            val key = iter.next()
-            if (key.isAcceptable) {
-              accept(selector, key.channel() as ServerSocketChannel)
-            } else {
-              val channel = key.channel() as SocketChannel
-
-              if (!channel.isOpen) {
-                val client = channelClientMap.remove(channel.remoteAddress)
-                scope.launch { _clients.remove(client) }
-                continue
-              }
-
-              if (key.isReadable) {
-                channelClientMap[channel.remoteAddress]?.run {
-                  val data = read(channel)
-                  if (data != null) {
-                    received(data)
-                  }
-                }
-              }
-
-              if (key.isWritable) {
-                channelClientMap[channel.remoteAddress]?.run { send(channel) }
-              }
-            }
-            iter.remove()
-          }
-        }
       }
 }
