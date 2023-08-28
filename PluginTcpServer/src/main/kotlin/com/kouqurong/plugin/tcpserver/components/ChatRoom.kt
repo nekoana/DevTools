@@ -5,14 +5,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.kouqurong.plugin.tcpserver.model.ISendType
 import com.kouqurong.plugin.tcpserver.model.Message
 import com.kouqurong.plugin.tcpserver.model.Whoami
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChatRoom(
@@ -21,11 +24,22 @@ fun ChatRoom(
     sendData: String,
     sendType: ISendType,
     sendEnabled: Boolean,
+    scrollState: LazyListState,
     onSendRequest: () -> Unit,
     onSendTextChanged: (String) -> Unit,
     onSendTypeChanged: (ISendType) -> Unit,
 ) {
-  val scrollState = rememberLazyListState()
+  val scope = rememberCoroutineScope()
+
+  val jumpThreshold = with(LocalDensity.current) { JumpToBottomThreshold.toPx() }
+
+  val jumpToBottomButtonEnabled by
+      remember(scrollState) {
+        derivedStateOf {
+          scrollState.firstVisibleItemIndex != 0 ||
+              scrollState.firstVisibleItemScrollOffset > jumpThreshold
+        }
+      }
 
   Box(modifier = modifier) {
     LazyColumn(
@@ -49,6 +63,11 @@ fun ChatRoom(
         )
       }
     }
+
+    JumpToBottom(
+        enabled = jumpToBottomButtonEnabled,
+        onClicked = { scope.launch { scrollState.animateScrollToItem(0) } },
+        modifier = Modifier.align(Alignment.TopCenter))
   }
 }
 
@@ -88,7 +107,10 @@ fun PreviewChatRoom() {
       sendData = "",
       sendType = ISendType.Hex,
       sendEnabled = false,
+      scrollState = LazyListState(),
       onSendTypeChanged = {},
       onSendTextChanged = {},
       onSendRequest = {})
 }
+
+private val JumpToBottomThreshold = 56.dp

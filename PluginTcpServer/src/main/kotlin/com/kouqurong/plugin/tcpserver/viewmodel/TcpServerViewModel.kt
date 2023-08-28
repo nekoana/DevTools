@@ -1,5 +1,6 @@
 package com.kouqurong.plugin.tcpserver.viewmodel
 
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.*
 import com.kouqurong.plugin.tcpserver.model.ISendType
 import com.kouqurong.plugin.tcpserver.model.Message
@@ -40,6 +41,8 @@ val regex = """^\d{1,5}$""".toRegex()
 @Immutable
 data class Client(private val address: SocketAddress) {
   val remoteAddress: String = address.toString()
+
+  val scrollState: LazyListState = LazyListState()
 
   private val buffer = ByteBuffer.allocate(1024)
 
@@ -117,14 +120,28 @@ data class Client(private val address: SocketAddress) {
   }
 }
 
+@Stable
+data class UiState(
+    internal val _port: MutableState<String> = mutableStateOf(""),
+    internal val _selectedClient: MutableState<Client?> = mutableStateOf(null),
+    private val scope: CoroutineScope,
+) {
+  @OptIn(ExperimentalCoroutinesApi::class)
+  val isAvailableAddress =
+      snapshotFlow { _port.value }
+          .mapLatest { regex.matches(it) }
+          .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+  val selectedClient: Client?
+    get() = _selectedClient.value
+  internal val port: String
+    get() = _port.value
+}
+
 class TcpServerViewModel {
-  var selectedClient: Client? by mutableStateOf(null)
+  val uiState = UiState(scope = scope)
 
   private var listenJob: Job? = null
-
-  var port by mutableStateOf("")
-  var isAvailableAddress by mutableStateOf(false)
-  var addressEditable by mutableStateOf(true)
 
   private val _clients = mutableStateListOf<Client>()
 
@@ -135,8 +152,7 @@ class TcpServerViewModel {
   private val channelClientMap = ConcurrentHashMap<SocketAddress, Client>()
 
   fun updatePort(p: String) {
-    port = p
-    isAvailableAddress = isAvailablePort(p)
+    uiState._port.value = p
   }
 
   private fun isAvailablePort(ip: String): Boolean {
@@ -154,7 +170,7 @@ class TcpServerViewModel {
         runCatching {
               ServerSocketChannel.open().apply {
                 configureBlocking(false)
-                bind(InetSocketAddress(port.toInt()))
+                bind(InetSocketAddress(uiState.port.toInt()))
               }
             }
             .onFailure { listenState.value = IListenState.Error(it) }
@@ -225,7 +241,7 @@ class TcpServerViewModel {
   }
 
   fun selectClient(client: Client) {
-    selectedClient = client
+    uiState._selectedClient.value = client
   }
 
   private suspend fun accept(selector: Selector, server: ServerSocketChannel) =
@@ -242,8 +258,8 @@ class TcpServerViewModel {
               withContext(MainUIDispatcher) {
                 _clients.add(client)
 
-                if (selectedClient == null) {
-                  selectedClient = client
+                if (uiState._selectedClient.value == null) {
+                  uiState._selectedClient.value = client
                 }
               }
             }

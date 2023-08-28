@@ -35,6 +35,7 @@ import java.net.InetSocketAddress
 fun App(viewModel: TcpServerViewModel) {
 
   val connectState = viewModel.listenState.collectAsState()
+  val isAvailableAddress = viewModel.uiState.isAvailableAddress.collectAsState()
 
   Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
     Row(
@@ -42,22 +43,24 @@ fun App(viewModel: TcpServerViewModel) {
     ) {
       Column(modifier = Modifier.weight(1F)) {
         PortEdit(
-            port = viewModel.port,
+            port = viewModel.uiState.port,
             listenState = connectState.value,
             onUpdateIp = viewModel::updatePort,
-            isAvailableAddress = viewModel.isAvailableAddress,
-            isEnabledEdit = viewModel.addressEditable,
+            isAvailableAddress = isAvailableAddress.value,
+            isEnabledEdit = true,
             onListen = viewModel::listen,
         )
 
-        viewModel.selectedClient?.run {
+        viewModel.uiState.selectedClient?.run {
           val sendEnabled = sendEnabled.collectAsState()
+          println("App.kt: ${scrollState.canScrollForward} ${scrollState.canScrollBackward}")
 
           ChatRoom(
               messages = messages,
               sendData = sendData,
               sendType = sendType,
               sendEnabled = sendEnabled.value,
+              scrollState = scrollState,
               onSendRequest = ::sendRequest,
               onSendTextChanged = ::sendDataChanged,
               onSendTypeChanged = ::sendTypeChanged,
@@ -68,7 +71,7 @@ fun App(viewModel: TcpServerViewModel) {
       ClientList(
           modifier = Modifier.width(180.dp),
           clients = viewModel.clients,
-          selectedClient = viewModel.selectedClient,
+          selectedClient = viewModel.uiState.selectedClient,
           onClientSelected = viewModel::selectClient)
     }
   }
