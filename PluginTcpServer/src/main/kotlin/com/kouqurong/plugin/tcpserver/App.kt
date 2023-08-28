@@ -53,7 +53,6 @@ fun App(viewModel: TcpServerViewModel) {
 
         viewModel.uiState.selectedClient?.run {
           val sendEnabled = sendEnabled.collectAsState()
-          println("App.kt: ${scrollState.canScrollForward} ${scrollState.canScrollBackward}")
 
           ChatRoom(
               messages = messages,

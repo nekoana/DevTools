@@ -7,12 +7,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.kouqurong.plugin.tcpclient.model.ISendType
 import com.kouqurong.plugin.tcpclient.model.Message
 import com.kouqurong.plugin.tcpclient.model.Whoami
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChatRoom(
@@ -26,6 +29,18 @@ fun ChatRoom(
     onSendTypeChanged: (ISendType) -> Unit,
 ) {
   val scrollState = rememberLazyListState()
+
+  val scope = rememberCoroutineScope()
+
+  val jumpThreshold = with(LocalDensity.current) { JumpToBottomThreshold.toPx() }
+
+  val jumpToBottomButtonEnabled by
+      remember(scrollState) {
+        derivedStateOf {
+          scrollState.firstVisibleItemIndex != 0 ||
+              scrollState.firstVisibleItemScrollOffset > jumpThreshold
+        }
+      }
 
   Box(modifier = modifier) {
     LazyColumn(
@@ -49,6 +64,11 @@ fun ChatRoom(
         )
       }
     }
+
+    JumpToBottom(
+        enabled = jumpToBottomButtonEnabled,
+        onClicked = { scope.launch { scrollState.animateScrollToItem(0) } },
+        modifier = Modifier.align(Alignment.TopCenter))
   }
 }
 
@@ -88,3 +108,5 @@ fun PreviewChatRoom() {
       onSendTextChanged = {},
       onSendRequest = {})
 }
+
+private val JumpToBottomThreshold = 56.dp
