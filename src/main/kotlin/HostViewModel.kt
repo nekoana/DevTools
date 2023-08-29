@@ -3,8 +3,6 @@ import androidx.compose.runtime.mutableStateListOf
 import com.kouqurong.plugin.view.IPluginView
 import com.kouqurong.plugin.view.ViewModel
 import java.util.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class HostViewModel : ViewModel() {
   val pluginViewWindowState = mutableStateListOf<PluginViewWindowState>()
@@ -19,13 +17,10 @@ class HostViewModel : ViewModel() {
     pluginViewWindowState.removeIf(state::equals)
   }
 
-  fun loadPluginView(paths: Array<String>) =
-      viewModelScope.launch(Dispatchers.IO) {
-        // todo for test
-        val classLoader = PathClassLoader(*paths)
-
-        ServiceLoader.load(IPluginView::class.java, classLoader).toCollection(pluginViews)
-      }
+  fun loadPluginView(paths: Array<String>) {
+    val classLoader = PathClassLoader(*paths)
+    ServiceLoader.load(IPluginView::class.java, classLoader).toCollection(pluginViews)
+  }
 
   fun loadTestPluginView() {
     val paths =
