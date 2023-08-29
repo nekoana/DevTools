@@ -33,7 +33,6 @@ import java.net.InetSocketAddress
 
 @Composable
 fun App(viewModel: TcpServerViewModel) {
-
   val connectState = viewModel.listenState.collectAsState()
   val isAvailableAddress = viewModel.uiState.isAvailableAddress.collectAsState()
 
@@ -45,7 +44,7 @@ fun App(viewModel: TcpServerViewModel) {
         PortEdit(
             port = viewModel.uiState.port,
             listenState = connectState.value,
-            onUpdateIp = viewModel::updatePort,
+            onSetPort = viewModel.uiState::setPort,
             isAvailableAddress = isAvailableAddress.value,
             isEnabledEdit = true,
             onListen = viewModel::listen,
@@ -69,9 +68,9 @@ fun App(viewModel: TcpServerViewModel) {
 
       ClientList(
           modifier = Modifier.width(180.dp),
-          clients = viewModel.clients,
+          clients = viewModel.uiState.clients,
           selectedClient = viewModel.uiState.selectedClient,
-          onClientSelected = viewModel::selectClient)
+          onClientSelected = viewModel.uiState::select)
     }
   }
 }
@@ -82,7 +81,7 @@ fun PortEdit(
     isEnabledEdit: Boolean,
     isAvailableAddress: Boolean,
     listenState: IListenState,
-    onUpdateIp: (String) -> Unit,
+    onSetPort: (String) -> Unit,
     onListen: () -> Unit,
 ) {
   Row(
@@ -98,7 +97,7 @@ fun PortEdit(
                   text = "Port",
               )
             },
-            onValueChange = onUpdateIp,
+            onValueChange = onSetPort,
             maxLines = 1,
             keyboardOptions =
                 KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next),

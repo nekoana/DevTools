@@ -2,11 +2,13 @@ package com.kouqurong.plugin.tcpserver.viewmodel
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.kouqurong.plugin.tcpserver.model.ISendType
 import com.kouqurong.plugin.tcpserver.model.Message
 import com.kouqurong.plugin.tcpserver.utils.toHexByteArray
 import java.net.InetSocketAddress
 import java.net.SocketAddress
+import java.net.SocketException
 import java.nio.ByteBuffer
 import java.nio.channels.SelectionKey
 import java.nio.channels.Selector
@@ -19,8 +21,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import org.jetbrains.skiko.MainUIDispatcher
 
 private val scope =
@@ -46,8 +46,6 @@ data class Client(private val address: SocketAddress) {
 
   private val buffer = ByteBuffer.allocate(1024)
 
-  private val mutex = Mutex()
-
   private val _messages = mutableStateListOf<Message>()
 
   val messages: List<Message> = _messages
@@ -64,24 +62,23 @@ data class Client(private val address: SocketAddress) {
           .mapLatest { it.isNotEmpty() }
           .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
+  @Throws(SocketException::class)
   suspend fun read(channel: SocketChannel) =
       withContext(Dispatchers.IO) {
-        mutex.withLock {
-          val read = channel.read(buffer)
+        val read = channel.read(buffer)
 
-          if (read > 0) {
-            buildString {
-              do {
-                buffer.flip()
-                val bytes = ByteArray(buffer.limit())
-                buffer.get(bytes)
-                append(bytes.decodeToString())
-              } while (isActive && channel.read(buffer) > 0)
-              buffer.clear()
-            }
-          } else {
-            null
+        if (read > 0) {
+          buildString {
+            do {
+              buffer.flip()
+              val bytes = ByteArray(buffer.limit())
+              buffer.get(bytes)
+              append(bytes.decodeToString())
+            } while (isActive && channel.read(buffer) > 0)
+            buffer.clear()
           }
+        } else {
+          throw SocketException("read error")
         }
       }
 
@@ -122,8 +119,9 @@ data class Client(private val address: SocketAddress) {
 
 @Stable
 data class UiState(
-    internal val _port: MutableState<String> = mutableStateOf(""),
-    internal val _selectedClient: MutableState<Client?> = mutableStateOf(null),
+    private val _port: MutableState<String> = mutableStateOf(""),
+    private val _selectedClient: MutableState<Client?> = mutableStateOf(null),
+    private val _clients: SnapshotStateList<Client> = mutableStateListOf(),
     private val scope: CoroutineScope,
 ) {
   @OptIn(ExperimentalCoroutinesApi::class)
@@ -136,6 +134,31 @@ data class UiState(
     get() = _selectedClient.value
   internal val port: String
     get() = _port.value
+
+  val clients: List<Client>
+    get() = _clients
+
+  internal fun remove(client: Client?) {
+    _clients.remove(client)
+    if (_selectedClient.value == client) {
+      _selectedClient.value = null
+    }
+  }
+
+  fun add(client: Client) {
+    _clients.add(client)
+    if (_selectedClient.value == null) {
+      _selectedClient.value = client
+    }
+  }
+
+  fun select(client: Client) {
+    _selectedClient.value = client
+  }
+
+  fun setPort(port: String) {
+    _port.value = port
+  }
 }
 
 class TcpServerViewModel {
@@ -143,21 +166,9 @@ class TcpServerViewModel {
 
   private var listenJob: Job? = null
 
-  private val _clients = mutableStateListOf<Client>()
-
-  val clients = _clients
-
   val listenState = MutableStateFlow<IListenState>(IListenState.Closed)
 
   private val channelClientMap = ConcurrentHashMap<SocketAddress, Client>()
-
-  fun updatePort(p: String) {
-    uiState._port.value = p
-  }
-
-  private fun isAvailablePort(ip: String): Boolean {
-    return regex.matches(ip)
-  }
 
   fun listen() {
     if (listenJob != null) {
@@ -206,16 +217,18 @@ class TcpServerViewModel {
 
                         if (!channel.isOpen) {
                           val client = channelClientMap.remove(channel.remoteAddress)
-                          scope.launch { _clients.remove(client) }
+                          scope.launch { uiState.remove(client) }
                           continue
                         }
 
                         if (key.isReadable) {
                           channelClientMap[channel.remoteAddress]?.run {
-                            val data = read(channel)
-                            if (data != null) {
-                              received(data)
-                            }
+                            runCatching { received(read(channel)) }
+                                .onFailure {
+                                  it.printStackTrace()
+                                  val client = channelClientMap.remove(channel.remoteAddress)
+                                  scope.launch { uiState.remove(client) }
+                                }
                           }
                         }
 
@@ -240,10 +253,6 @@ class TcpServerViewModel {
     }
   }
 
-  fun selectClient(client: Client) {
-    uiState._selectedClient.value = client
-  }
-
   private suspend fun accept(selector: Selector, server: ServerSocketChannel) =
       withContext(Dispatchers.IO) {
         server
@@ -255,13 +264,7 @@ class TcpServerViewModel {
             .run {
               val client = channelClientMap.computeIfAbsent(remoteAddress) { Client(remoteAddress) }
 
-              withContext(MainUIDispatcher) {
-                _clients.add(client)
-
-                if (uiState._selectedClient.value == null) {
-                  uiState._selectedClient.value = client
-                }
-              }
+              withContext(MainUIDispatcher) { uiState.add(client) }
             }
       }
 }
