@@ -24,19 +24,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import com.kouqurong.plugin.view.IPluginView
-import java.util.*
-
-// todo for test
-val classLoader =
-    PathClassLoader(
-        "/Users/codin/MyCode/DevTools/PluginHello/build/libs/PluginHello.jar",
-        "/Users/codin/MyCode/DevTools/PluginHex/build/libs/PluginHex.jar",
-        "/Users/codin/MyCode/DevTools/PluginTcpClient/build/libs/PluginTcpClient.jar",
-        "/Users/codin/MyCode/DevTools/PluginTcpServer/build/libs/PluginTcpServer.jar")
 
 @Composable
-fun Home(onDisplay: (IPluginView) -> Unit) {
-  val views = remember { ServiceLoader.load(IPluginView::class.java, classLoader).map { it } }
+fun Home(views: List<IPluginView>, onDisplay: (IPluginView) -> Unit) {
   LazyVerticalGrid(
       columns = GridCells.FixedSize(120.dp),
       verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -168,7 +158,7 @@ fun ApplicationScope.HostWindow(
                     if (it != null) {
                       it.view()
                     } else {
-                      Home(onDisplay = { displayPluginView = it })
+                      Home(views = viewModel.pluginViews, onDisplay = { displayPluginView = it })
                     }
                   }
                 }
@@ -177,6 +167,11 @@ fun ApplicationScope.HostWindow(
 
 fun main() = application {
   val viewModel = remember { HostViewModel() }
+
+  LaunchedEffect(viewModel) {
+    // todo for test
+    viewModel.loadTestPluginView()
+  }
 
   val pluginViewWindowState = remember { viewModel.pluginViewWindowState }
   val windowState = rememberWindowState()
