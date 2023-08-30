@@ -168,10 +168,7 @@ fun ApplicationScope.HostWindow(
 fun main() = application {
   val viewModel = remember { HostViewModel() }
 
-  LaunchedEffect(viewModel) {
-    // todo for test
-    viewModel.loadTestPluginView()
-  }
+  LaunchedEffect(viewModel) { viewModel.loadSelfPluginView() }
 
   val pluginViewWindowState = remember { viewModel.pluginViewWindowState }
   val windowState = rememberWindowState()

@@ -17,9 +17,13 @@ class HostViewModel : ViewModel() {
     pluginViewWindowState.removeIf(state::equals)
   }
 
-  fun loadPluginView(paths: Array<String>) {
+  fun loadThirdPluginView(paths: Array<String>) {
     val classLoader = PathClassLoader(*paths)
     ServiceLoader.load(IPluginView::class.java, classLoader).toCollection(pluginViews)
+  }
+
+  fun loadSelfPluginView() {
+    ServiceLoader.load(IPluginView::class.java).toCollection(pluginViews)
   }
 
   fun loadTestPluginView() {
@@ -30,7 +34,7 @@ class HostViewModel : ViewModel() {
             "/Users/codin/MyCode/DevTools/PluginTcpClient/build/libs/PluginTcpClient.jar",
             "/Users/codin/MyCode/DevTools/PluginTcpServer/build/libs/PluginTcpServer.jar")
 
-    loadPluginView(paths)
+    loadThirdPluginView(paths)
   }
 
   fun exit() {

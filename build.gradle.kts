@@ -62,6 +62,10 @@ dependencies {
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
     implementation(project(":PluginView"))
+    implementation(project(":PluginHello"))
+    implementation(project(":PluginHex"))
+    implementation(project(":PluginTcpClient"))
+    implementation(project(":PluginTcpServer"))
     implementation(project(":resource"))
     // https://mvnrepository.com/artifact/org.jetbrains.compose.material3/material3-desktop
     implementation(libs.material3.desktop)
