@@ -1,7 +1,6 @@
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -96,13 +95,9 @@ fun App(
               })
         },
     ) {
-      Surface(
-          modifier =
-              Modifier.padding(top = it.calculateTopPadding())
-                  .fillMaxSize()
-                  .background(MaterialTheme.colorScheme.background)) {
-            content()
-          }
+      Surface(modifier = Modifier.padding(top = it.calculateTopPadding()).fillMaxSize()) {
+        content()
+      }
     }
   }
 }
@@ -110,8 +105,7 @@ fun App(
 @Composable
 fun ApplicationScope.PluginViewWindow(state: PluginViewWindowState) =
     Window(onCloseRequest = state::close, title = state.pluginView.label) {
-      println("PluginViewWindow")
-      state.pluginView.view()
+      MaterialTheme { state.pluginView.view() }
     }
 
 @Composable
