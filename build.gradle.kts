@@ -66,6 +66,7 @@ dependencies {
     implementation(project(":PluginHex"))
     implementation(project(":PluginTcpClient"))
     implementation(project(":PluginTcpServer"))
+    implementation(project(":PluginSignIn"))
     implementation(project(":resource"))
     // https://mvnrepository.com/artifact/org.jetbrains.compose.material3/material3-desktop
     implementation(libs.material3.desktop)
