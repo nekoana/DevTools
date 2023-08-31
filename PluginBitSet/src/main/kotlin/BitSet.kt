@@ -28,7 +28,7 @@ class BitSet private constructor(private val buffer: ByteBuffer) {
       val newBitset = bitset.padEnd((2 - bitset.length % 2), '0')
       val bytes = newBitset.chunked(2).map { it.reversed().toUByte(16).toByte() }.toByteArray()
 
-      return BitSet.valueOf(bytes)
+      return valueOf(bytes)
     }
   }
 }
