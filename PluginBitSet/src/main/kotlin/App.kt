@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.util.*
 
 @Composable
 fun App() {
@@ -126,8 +125,7 @@ fun BitSetIndicator(bitset: String, type: IBitSetType, modifier: Modifier = Modi
                       Modifier.fillMaxWidth()
                           .background(
                               color =
-                                  if (bitsets[bitsets.length() - i - 1])
-                                      MaterialTheme.colorScheme.primary
+                                  if (bitsets[i]) MaterialTheme.colorScheme.primary
                                   else MaterialTheme.colorScheme.surfaceVariant,
                               shape = RoundedCornerShape(16.dp)),
               )
@@ -145,7 +143,7 @@ fun PreviewBitSetTypeRadioButton() {
   TypeRadioButton(selected = true, label = "Hex", onClick = {})
 }
 
-val types = listOf(IBitSetType.Hex, IBitSetType.Binary, IBitSetType.Decimal)
+val types = listOf(IBitSetType.Hex, IBitSetType.Binary)
 
 sealed interface IBitSetType {
   fun toBitSet(bitset: String): BitSet
@@ -154,17 +152,13 @@ sealed interface IBitSetType {
     return when (this) {
       Hex -> "Hex"
       Binary -> "Binary"
-      Decimal -> "Decimal"
     }
   }
 
   // 16进制
   object Hex : IBitSetType {
     override fun toBitSet(bitset: String): BitSet {
-      // bitset 每两个字符转换为一个字节
-      val bytes = bitset.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-
-      return BitSet.valueOf(bytes)
+      return BitSet.hexOf(bitset)
     }
 
     override fun isAvailable(bitset: String): Boolean {
@@ -175,12 +169,7 @@ sealed interface IBitSetType {
 
   object Binary : IBitSetType {
     override fun toBitSet(bitset: String): BitSet {
-      // bitset 末尾补0，每8个字符转换为一个字节
-      val newBitset = bitset.padEnd(bitset.length + bitset.length % 8, '0')
-
-      val bytes = newBitset.chunked(8).map { it.toInt(2).toByte() }.toByteArray()
-
-      return BitSet.valueOf(bytes)
+      return BitSet.binaryOf(bitset)
     }
 
     override fun isAvailable(bitset: String): Boolean {
@@ -189,20 +178,20 @@ sealed interface IBitSetType {
     }
   }
 
-  object Decimal : IBitSetType {
-    override fun toBitSet(bitset: String): BitSet {
-      // 十进制转换为字节数组
-      val bytes = bitset.toInt().toByteArray()
-
-      return BitSet.valueOf(bytes)
-    }
-
-    override fun isAvailable(bitset: String): Boolean {
-      // 检查是否是十进制, 不能以0开头
-      // todo 检查 最大值为Int.MAX_VALUE ???
-      return bitset.matches(Regex("[1-9][0-9]*"))
-    }
-  }
+  //  object Decimal : IBitSetType {
+  //    override fun toBitSet(bitset: String): BitSet {
+  //      // 十进制转换为字节数组
+  //      val bytes = bitset.toInt().toByteArray()
+  //
+  //      return BitSet.valueOf(bytes)
+  //    }
+  //
+  //    override fun isAvailable(bitset: String): Boolean {
+  //      // 检查是否是十进制, 不能以0开头
+  //      // todo 检查 最大值为Int.MAX_VALUE ???
+  //      return bitset.matches(Regex("[1-9][0-9]*"))
+  //    }
+  //  }
 }
 
 private fun Int.toByteArray(): ByteArray {

@@ -105,7 +105,7 @@ fun App(
 @Composable
 fun ApplicationScope.PluginViewWindow(state: PluginViewWindowState) =
     Window(onCloseRequest = state::close, title = state.pluginView.label) {
-      MaterialTheme { state.pluginView.view() }
+      MaterialTheme { Surface { state.pluginView.view() } }
     }
 
 @Composable
