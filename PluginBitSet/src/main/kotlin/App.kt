@@ -1,3 +1,4 @@
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -102,32 +103,35 @@ fun TypeRadioButton(
 @Composable
 fun BitSetIndicator(bitset: String, type: IBitSetType, modifier: Modifier = Modifier) {
   val isAvailable by remember(bitset, type) { derivedStateOf { type.isAvailable(bitset) } }
-  if (isAvailable) {
-    val bitsets = type.toBitSet(bitset)
-
-    Column(modifier = modifier) {
-      LazyVerticalGrid(
-          modifier = Modifier.fillMaxWidth(),
-          columns = GridCells.Fixed(8),
-          contentPadding = PaddingValues(0.dp),
-          verticalArrangement = Arrangement.spacedBy(4.dp),
-          horizontalArrangement = Arrangement.spacedBy(4.dp),
-      ) {
-        for (i in 0 until bitsets.length()) {
-          item(key = i) {
-            Text(
-                text = "${i + 1}",
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyLarge,
-                lineHeight = TextUnit(32.sp.value, TextUnitType.Sp),
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .background(
-                            color =
-                                if (bitsets[i]) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.surfaceVariant,
-                            shape = RoundedCornerShape(16.dp)),
-            )
+  AnimatedVisibility(visible = isAvailable) {
+    if (isAvailable) {
+      val bitsets = type.toBitSet(bitset)
+      Column(modifier = modifier) {
+        LazyVerticalGrid(
+            modifier = Modifier.fillMaxWidth(),
+            columns = GridCells.Fixed(8),
+            contentPadding = PaddingValues(0.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          for (i in 0 until bitsets.length()) {
+            item(key = i) {
+              // 大端在前
+              Text(
+                  text = "${i + 1}",
+                  textAlign = TextAlign.Center,
+                  style = MaterialTheme.typography.bodyLarge,
+                  lineHeight = TextUnit(32.sp.value, TextUnitType.Sp),
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .background(
+                              color =
+                                  if (bitsets[bitsets.length() - i - 1])
+                                      MaterialTheme.colorScheme.primary
+                                  else MaterialTheme.colorScheme.surfaceVariant,
+                              shape = RoundedCornerShape(16.dp)),
+              )
+            }
           }
         }
       }
@@ -157,17 +161,15 @@ sealed interface IBitSetType {
   // 16进制
   object Hex : IBitSetType {
     override fun toBitSet(bitset: String): BitSet {
-      // bitset 末尾补0，每两个字符转换为一个字节
-      val newBitset = bitset.padEnd(bitset.length + bitset.length % 2, '0')
-
-      val bytes = newBitset.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+      // bitset 每两个字符转换为一个字节
+      val bytes = bitset.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
 
       return BitSet.valueOf(bytes)
     }
 
     override fun isAvailable(bitset: String): Boolean {
-      // 检查是否是16进制
-      return bitset.matches(Regex("[0-9a-fA-F]+"))
+      // 检查是否是16进制 长度为偶数
+      return bitset.matches(Regex("[0-9a-fA-F]+")) && bitset.length % 2 == 0
     }
   }
 
