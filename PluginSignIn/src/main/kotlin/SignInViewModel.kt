@@ -1,5 +1,7 @@
 import Option.None
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TimePickerState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
@@ -13,6 +15,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 sealed interface Option<in T> {
   object None : Option<Any>
@@ -22,6 +26,7 @@ sealed interface Option<in T> {
 @OptIn(ExperimentalMaterial3Api::class)
 class SignInViewModel : ViewModel() {
   val token = mutableStateOf("")
+  val snackbarHostState = SnackbarHostState()
   private val libraryPath = mutableStateOf<Option<String>>(None)
   private val bmpPath = mutableStateOf<Option<String>>(None)
 
@@ -72,11 +77,26 @@ class SignInViewModel : ViewModel() {
 
   fun setLibraryFile(path: String) {
     libraryPath.value = if (path.isEmpty()) None else Option.Some(path)
+
+    signin()
   }
 
   fun setBmpFile(path: String) {
     bmpPath.value = if (path.isEmpty()) None else Option.Some(path)
   }
 
-  external fun signin(number: Int, token: String, bmpPath: String): String
+  fun signin() {
+    viewModelScope.launch {
+      val result = withContext(Dispatchers.IO) { signin(1234, "", "") }
+      viewModelScope.launch {
+        snackbarHostState.showSnackbar(
+            message = result,
+            actionLabel = "TIPS",
+            withDismissAction = true,
+            duration = SnackbarDuration.Indefinite)
+      }
+    }
+  }
+
+  private external fun signin(number: Int, token: String, bmpPath: String): String
 }

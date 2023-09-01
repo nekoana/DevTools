@@ -2,10 +2,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.TimePicker
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,11 +25,12 @@ import androidx.compose.ui.unit.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App(viewModel: SignInViewModel) {
-
   val libraryVersion = viewModel.libraryVersion.collectAsState()
   val bmp = viewModel.bmp.collectAsState()
 
   Box(modifier = Modifier.padding(16.dp).fillMaxSize()) {
+    SnackbarHost(
+        hostState = viewModel.snackbarHostState, modifier = Modifier.align(Alignment.TopCenter))
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)) {
