@@ -6,8 +6,8 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberTimePickerState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
@@ -24,28 +24,22 @@ import androidx.compose.ui.unit.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun App() {
-  var token by remember { mutableStateOf("") }
-  var libraryFile by remember { mutableStateOf("") }
+fun App(viewModel: SignInViewModel) {
 
-  val libraryText by remember {
-    derivedStateOf { libraryFile.ifEmpty { "Api Library, Click To Choose" } }
-  }
-
-  val timePickerState = rememberTimePickerState()
+  val libraryVersion = viewModel.libraryVersion.collectAsState()
 
   Box(modifier = Modifier.padding(16.dp).fillMaxSize()) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)) {
           OutlinedTextField(
-              value = token,
-              onValueChange = { token = it },
+              value = viewModel.token.value,
+              onValueChange = viewModel::setToken,
               label = { Text(text = "Token") },
               modifier = Modifier.fillMaxWidth())
 
           Text(
-              text = libraryText,
+              text = libraryVersion.value,
               textAlign = TextAlign.Center,
               fontSize = TextUnit(22.sp.value, TextUnitType.Sp),
               style = MaterialTheme.typography.body1,
@@ -60,7 +54,7 @@ fun App() {
                         if (dialog.file == null) return@clickable
                         if (dialog.directory == null) return@clickable
 
-                        libraryFile = dialog.directory + dialog.file
+                        viewModel.setLibraryFile(dialog.directory + dialog.file)
 
                         //
                         // JFileChooser(System.getProperty("user.home")).apply {
@@ -70,7 +64,7 @@ fun App() {
                       })
 
           Row {
-            TimePicker(state = timePickerState, modifier = Modifier.weight(1F))
+            TimePicker(state = viewModel.timePickerState, modifier = Modifier.weight(1F))
 
             Box(
                 modifier =

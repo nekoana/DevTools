@@ -8,13 +8,10 @@ import com.kouqurong.plugin.view.IPluginView
 
 @AutoService(IPluginView::class)
 class PluginSignIn : IPluginView {
-  init {
+  private val viewModel = SignInViewModel()
 
-  }
-
-  external fun add(a: Int, b: Int): Int
   override val view: @Composable () -> Unit
-    get() = { App() }
+    get() = { App(viewModel) }
   override val icon: @Composable () -> Painter
     get() = { rememberVectorPainter(Icons.Default.Face) }
   override val label: String
