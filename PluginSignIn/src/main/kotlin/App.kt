@@ -1,3 +1,4 @@
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -6,8 +7,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TimePicker
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
@@ -18,6 +18,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.*
 fun App(viewModel: SignInViewModel) {
 
   val libraryVersion = viewModel.libraryVersion.collectAsState()
+  val bmp = viewModel.bmp.collectAsState()
 
   Box(modifier = Modifier.padding(16.dp).fillMaxSize()) {
     Column(
@@ -39,7 +41,11 @@ fun App(viewModel: SignInViewModel) {
               modifier = Modifier.fillMaxWidth())
 
           Text(
-              text = libraryVersion.value,
+              text =
+                  when (val lib = libraryVersion.value) {
+                    Option.None -> "Select Api Library"
+                    is Option.Some<String> -> lib.value
+                  },
               textAlign = TextAlign.Center,
               fontSize = TextUnit(22.sp.value, TextUnitType.Sp),
               style = MaterialTheme.typography.body1,
@@ -72,13 +78,29 @@ fun App(viewModel: SignInViewModel) {
                         .fillMaxHeight()
                         .clip(RoundedCornerShape(16.dp))
                         .dashedBorder(4.dp, Color.Gray, 16.dp)
-                        .clickable {}) {
-                  Text(
-                      text = "Photos",
-                      textAlign = TextAlign.Center,
-                      fontSize = TextUnit(22.sp.value, TextUnitType.Sp),
-                      style = MaterialTheme.typography.body1,
-                      modifier = Modifier.align(Alignment.Center))
+                        .clickable {
+                          val dialog =
+                              java.awt.FileDialog(ComposeWindow()).apply { isVisible = true }
+
+                          if (dialog.file == null) return@clickable
+                          if (dialog.directory == null) return@clickable
+
+                          viewModel.setBmpFile(dialog.directory + dialog.file)
+                        }) {
+                  when (val b = bmp.value) {
+                    Option.None ->
+                        Text(
+                            text = "Photos",
+                            textAlign = TextAlign.Center,
+                            fontSize = TextUnit(22.sp.value, TextUnitType.Sp),
+                            style = MaterialTheme.typography.body1,
+                            modifier = Modifier.align(Alignment.Center))
+                    is Option.Some<BitmapPainter> ->
+                        Image(
+                            painter = b.value,
+                            contentDescription = "bmp",
+                            modifier = Modifier.fillMaxSize())
+                  }
                 }
           }
         }
