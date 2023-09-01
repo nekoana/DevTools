@@ -1,0 +1,3 @@
+[submodule "PluginSignIn/paxinfo_api"]
+	path = PluginSignIn/paxinfo_api
+	url = https://github.com/nekoana/paxinfo_api.git
