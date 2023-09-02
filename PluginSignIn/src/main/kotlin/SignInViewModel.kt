@@ -11,10 +11,7 @@ import com.kouqurong.plugin.view.ViewModel
 import java.nio.file.Paths
 import kotlin.io.path.inputStream
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -26,7 +23,9 @@ sealed interface Option<in T> {
 @OptIn(ExperimentalMaterial3Api::class)
 class SignInViewModel : ViewModel() {
   val token = mutableStateOf("")
+  val number = mutableStateOf("")
   val snackbarHostState = SnackbarHostState()
+
   private val libraryPath = mutableStateOf<Option<String>>(None)
   private val bmpPath = mutableStateOf<Option<String>>(None)
 
@@ -46,8 +45,7 @@ class SignInViewModel : ViewModel() {
             }
           }
           .flowOn(Dispatchers.IO)
-          .stateIn(
-              viewModelScope, SharingStarted.WhileSubscribed(), Option.Some("Select Api Library"))
+          .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), None)
 
   val bmp =
       snapshotFlow { bmpPath.value }
@@ -73,6 +71,10 @@ class SignInViewModel : ViewModel() {
 
   fun setToken(t: String) {
     token.value = t
+  }
+
+  fun setNumber(n: String) {
+    number.value = n
   }
 
   fun setLibraryFile(path: String) {
