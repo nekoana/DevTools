@@ -65,6 +65,7 @@ fun App(viewModel: SignInViewModel) {
           LoginInfo(
               token = token,
               number = number,
+              editabled = !isWaitSignIn,
               onTokenChange = { token = it },
               onNumberChange = {
                 // 判断是否是数字
@@ -79,6 +80,7 @@ fun App(viewModel: SignInViewModel) {
                     Option.None -> "Select Api Library"
                     is Option.Some -> v.value
                   },
+              clickabled = !isWaitSignIn,
               onLibChanged = { viewModel.setLibraryFile(it) })
 
           Row {
@@ -115,6 +117,7 @@ fun App(viewModel: SignInViewModel) {
             Column(
                 modifier = Modifier.weight(1F), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                   BmpInfo(
+                      clickable = !isWaitSignIn,
                       paintFor = {
                         when (val v = bmp.value) {
                           Option.None -> null
@@ -184,6 +187,7 @@ fun WarningDialog() {
 fun LoginInfo(
     token: String,
     number: TextFieldValue,
+    editabled: Boolean = true,
     onTokenChange: (String) -> Unit,
     onNumberChange: (TextFieldValue) -> Unit
 ) {
@@ -193,6 +197,7 @@ fun LoginInfo(
       verticalAlignment = Alignment.CenterVertically) {
         OutlinedTextField(
             value = number,
+            enabled = editabled,
             singleLine = true,
             onValueChange = { onNumberChange(it) },
             label = { Text(text = "Number") },
@@ -200,6 +205,7 @@ fun LoginInfo(
 
         OutlinedTextField(
             value = token,
+            enabled = editabled,
             singleLine = true,
             onValueChange = onTokenChange,
             label = { Text(text = "Token") },
@@ -208,7 +214,7 @@ fun LoginInfo(
 }
 
 @Composable
-fun ApiLibInfo(version: String, onLibChanged: (String) -> Unit) {
+fun ApiLibInfo(version: String, clickabled: Boolean, onLibChanged: (String) -> Unit) {
   Text(
       text = version,
       textAlign = TextAlign.Center,
@@ -219,16 +225,22 @@ fun ApiLibInfo(version: String, onLibChanged: (String) -> Unit) {
               .fillMaxWidth()
               .clip(RoundedCornerShape(16.dp))
               .dashedBorder(4.dp, Color.Gray, 16.dp)
-              .clickable { fileChooser { onLibChanged(it) } })
+              .clickable(enabled = clickabled) { fileChooser { onLibChanged(it) } })
 }
 
 @Composable
-fun BmpInfo(paintFor: () -> Painter?, onBmpChanged: (String) -> Unit, modifier: Modifier) {
+fun BmpInfo(
+    clickable: Boolean,
+    paintFor: () -> Painter?,
+    onBmpChanged: (String) -> Unit,
+    modifier: Modifier
+) {
   Box(
       modifier =
-          modifier.clip(RoundedCornerShape(16.dp)).dashedBorder(4.dp, Color.Gray, 16.dp).clickable {
-            fileChooser(filter = ".bmp") { onBmpChanged(it) }
-          }) {
+          modifier.clip(RoundedCornerShape(16.dp)).dashedBorder(4.dp, Color.Gray, 16.dp).clickable(
+              enabled = clickable) {
+                fileChooser(filter = ".bmp") { onBmpChanged(it) }
+              }) {
         Text(
             text = "Photos",
             textAlign = TextAlign.Center,
