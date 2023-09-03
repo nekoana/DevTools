@@ -103,7 +103,7 @@ fun TextBubble(message: Message, modifier: Modifier = Modifier) {
 
 @Preview
 @Composable
-fun PrewViewChatMeMessage() {
+fun PreviewChatMeMessage() {
   ChatMessage(
       message =
           Message(
