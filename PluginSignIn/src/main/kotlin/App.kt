@@ -7,9 +7,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.TimePicker
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +21,10 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
@@ -53,6 +55,8 @@ fun App(viewModel: SignInViewModel) {
   }
 
   Box(modifier = Modifier.padding(16.dp).fillMaxSize()) {
+    WarningDialog()
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -130,6 +134,47 @@ fun App(viewModel: SignInViewModel) {
 
     SnackbarHost(
         hostState = viewModel.snackBarHostState, modifier = Modifier.align(Alignment.BottomCenter))
+  }
+}
+
+@Composable
+fun WarningDialog() {
+  var isShowWaringDialog by remember { mutableStateOf(true) }
+  if (isShowWaringDialog) {
+    AlertDialog(
+        onDismissRequest = {},
+        title = { Text(text = "Warning", fontWeight = FontWeight.Bold) },
+        text = {
+          val text = buildAnnotatedString {
+            // 加粗
+            pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
+            append("This application is only for learning and reference, please do not spread it!")
+            pop()
+            // 如何获取number和token,以firefox为例
+            append("\n\n")
+            append("How to get number and token? (firefox)")
+            append("\n")
+            append("1. Open the firefox browser, press F12 to open the developer tool")
+            append("\n")
+            // 选择localStorage
+            append("2. Storage -> Local Storage -> https://info2.paxsz.com")
+            append("\n")
+            append("3. Click the user key value, and then click the value to copy")
+            append("\n")
+          }
+
+          Column {
+            Text(text = text)
+            Image(
+                painter = painterResource("firefox.jpg"),
+                contentDescription = "firefox",
+            )
+          }
+        },
+        confirmButton = {
+          TextButton(onClick = { isShowWaringDialog = false }) { Text(text = "OK") }
+        },
+    )
   }
 }
 
