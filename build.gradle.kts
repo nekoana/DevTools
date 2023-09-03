@@ -86,6 +86,10 @@ compose.desktop {
             macOS {
                 iconFile.set(project.file("icon.svg"))
             }
+
+            windows {
+                iconFile.set(project.file("icon.svg"))
+            }
         }
     }
 }

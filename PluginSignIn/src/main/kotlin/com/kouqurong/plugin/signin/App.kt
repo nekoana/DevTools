@@ -1,3 +1,5 @@
+package com.kouqurong.plugin.signin
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable

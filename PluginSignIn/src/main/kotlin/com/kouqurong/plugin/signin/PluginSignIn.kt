@@ -1,3 +1,5 @@
+package com.kouqurong.plugin.signin
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.runtime.Composable

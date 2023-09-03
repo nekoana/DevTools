@@ -1,4 +1,5 @@
-import Option.None
+package com.kouqurong.plugin.signin
+
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TimePickerState
@@ -6,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.res.loadImageBitmap
+import com.kouqurong.plugin.signin.Option.None
 import com.kouqurong.plugin.view.ViewModel
 import java.nio.file.Paths
 import kotlin.io.path.inputStream
