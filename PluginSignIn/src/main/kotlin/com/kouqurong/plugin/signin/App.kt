@@ -227,7 +227,7 @@ fun BmpInfo(paintFor: () -> Painter?, onBmpChanged: (String) -> Unit, modifier: 
   Box(
       modifier =
           modifier.clip(RoundedCornerShape(16.dp)).dashedBorder(4.dp, Color.Gray, 16.dp).clickable {
-            fileChooser { onBmpChanged(it) }
+            fileChooser(filter = ".bmp") { onBmpChanged(it) }
           }) {
         Text(
             text = "Photos",
@@ -276,8 +276,16 @@ fun ProduceCountDownTimeState(hour: Int, minute: Int) =
       }
     }
 
-fun fileChooser(onFileChoose: (String) -> Unit) {
-  val dialog = java.awt.FileDialog(ComposeWindow()).apply { isVisible = true }
+fun fileChooser(filter: String = "*", onFileChoose: (String) -> Unit) {
+  val dialog =
+      java.awt.FileDialog(ComposeWindow()).apply {
+        // file 过滤
+        setFilenameFilter { _, name ->
+          if (filter == "*") return@setFilenameFilter true
+          name.endsWith(filter)
+        }
+        isVisible = true
+      }
 
   if (dialog.file == null) return
   if (dialog.directory == null) return
