@@ -2,7 +2,7 @@
 kotlin = "1.8.20"
 compose = "1.5.0"
 material3 = "1.5.0"
-autoservice = "1.0-rc7"
+autoservice = "1.1.1"
 spotless = "6.12.0"
 
 [libraries]
