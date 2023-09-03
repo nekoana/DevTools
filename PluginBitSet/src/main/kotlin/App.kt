@@ -194,7 +194,7 @@ sealed interface IBitSetType {
   //  }
 }
 
-//private fun Int.toByteArray(): ByteArray {
+// private fun Int.toByteArray(): ByteArray {
 //  val result = ByteArray(4)
 //
 //  result[0] = (this shr 24 and 0xFF).toByte()
@@ -203,4 +203,4 @@ sealed interface IBitSetType {
 //  result[3] = (this and 0xFF).toByte()
 //
 //  return result
-//}
+// }
