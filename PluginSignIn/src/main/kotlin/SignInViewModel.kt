@@ -1,6 +1,5 @@
 import Option.None
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TimePickerState
 import androidx.compose.runtime.mutableStateOf
@@ -10,10 +9,11 @@ import androidx.compose.ui.res.loadImageBitmap
 import com.kouqurong.plugin.view.ViewModel
 import java.nio.file.Paths
 import kotlin.io.path.inputStream
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 sealed interface Option<in T> {
   object None : Option<Any>
@@ -22,9 +22,7 @@ sealed interface Option<in T> {
 
 @OptIn(ExperimentalMaterial3Api::class)
 class SignInViewModel : ViewModel() {
-  val token = mutableStateOf("")
-  val number = mutableStateOf("")
-  val snackbarHostState = SnackbarHostState()
+  val snackBarHostState = SnackbarHostState()
 
   private val libraryPath = mutableStateOf<Option<String>>(None)
   private val bmpPath = mutableStateOf<Option<String>>(None)
@@ -67,38 +65,25 @@ class SignInViewModel : ViewModel() {
 
   val timePickerState = TimePickerState(initialHour = 0, initialMinute = 0, is24Hour = false)
 
-  private external fun version(): String
-
-  fun setToken(t: String) {
-    token.value = t
-  }
-
-  fun setNumber(n: String) {
-    number.value = n
-  }
-
   fun setLibraryFile(path: String) {
     libraryPath.value = if (path.isEmpty()) None else Option.Some(path)
-
-    signin()
   }
 
   fun setBmpFile(path: String) {
     bmpPath.value = if (path.isEmpty()) None else Option.Some(path)
   }
 
-  fun signin() {
+  fun signin(number: Int, token: String) {
     viewModelScope.launch {
-      val result = withContext(Dispatchers.IO) { signin(1234, "", "") }
-      viewModelScope.launch {
-        snackbarHostState.showSnackbar(
-            message = result,
-            actionLabel = "TIPS",
-            withDismissAction = true,
-            duration = SnackbarDuration.Indefinite)
-      }
+      val result =
+          withContext(Dispatchers.IO) {
+            signin(number, token, (bmpPath.value as Option.Some).value)
+          }
+
+      snackBarHostState.showSnackbar(result)
     }
   }
 
+  private external fun version(): String
   private external fun signin(number: Int, token: String, bmpPath: String): String
 }

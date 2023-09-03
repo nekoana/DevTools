@@ -1,3 +1,4 @@
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,10 +10,7 @@ import androidx.compose.material.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.TimePicker
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
@@ -25,8 +23,13 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
+import java.time.Duration
+import java.time.LocalDateTime
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,26 +37,35 @@ fun App(viewModel: SignInViewModel) {
   val libraryVersion = viewModel.libraryVersion.collectAsState()
   val bmp = viewModel.bmp.collectAsState()
 
+  var number by remember { mutableStateOf(TextFieldValue("")) }
+
+  var token by remember { mutableStateOf("") }
+
+  var isWaitSignIn by remember { mutableStateOf(false) }
+
   val isSignInEnabled = remember {
     derivedStateOf {
       libraryVersion.value is Option.Some &&
           bmp.value is Option.Some &&
-          viewModel.token.value.isNotBlank() &&
-          viewModel.number.value.isNotBlank()
+          token.isNotBlank() &&
+          number.text.isNotBlank()
     }
   }
 
   Box(modifier = Modifier.padding(16.dp).fillMaxSize()) {
-    SnackbarHost(
-        hostState = viewModel.snackbarHostState, modifier = Modifier.align(Alignment.TopCenter))
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)) {
           LoginInfo(
-              token = viewModel.token.value,
-              number = viewModel.number.value,
-              onTokenChange = viewModel::setToken,
-              onNumberChange = viewModel::setNumber)
+              token = token,
+              number = number,
+              onTokenChange = { token = it },
+              onNumberChange = {
+                // 判断是否是数字
+                if (it.text.all { c -> c.isDigit() }) {
+                  number = it
+                }
+              })
 
           ApiLibInfo(
               version =
@@ -64,7 +76,35 @@ fun App(viewModel: SignInViewModel) {
               onLibChanged = { viewModel.setLibraryFile(it) })
 
           Row {
-            TimePicker(state = viewModel.timePickerState, modifier = Modifier.weight(1F))
+            AnimatedContent(
+                targetState = isWaitSignIn,
+                modifier = Modifier.weight(1F).fillMaxHeight(),
+            ) {
+              if (it) {
+                val countDownTimeState =
+                    ProduceCountDownTimeState(
+                        viewModel.timePickerState.hour, viewModel.timePickerState.minute)
+
+                val isSignIn by remember {
+                  derivedStateOf { countDownTimeState.value == "00:00:00" }
+                }
+                if (isSignIn) {
+                  LaunchedEffect(Unit) { viewModel.signin(number.text.toInt(), token) }
+
+                  isWaitSignIn = false
+                }
+
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                  Text(
+                      text = countDownTimeState.value,
+                      textAlign = TextAlign.Center,
+                      fontSize = MaterialTheme.typography.h3.fontSize,
+                      style = MaterialTheme.typography.h3)
+                }
+              } else {
+                TimePicker(state = viewModel.timePickerState, modifier = Modifier.fillMaxSize())
+              }
+            }
 
             Column(
                 modifier = Modifier.weight(1F), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -79,23 +119,26 @@ fun App(viewModel: SignInViewModel) {
                       modifier = Modifier.fillMaxWidth().weight(1F))
 
                   OutlinedButton(
-                      onClick = viewModel::signin,
+                      onClick = { isWaitSignIn = !isWaitSignIn },
                       enabled = isSignInEnabled.value,
                       modifier = Modifier.fillMaxWidth()) {
-                        Text(text = "Sign In")
+                        Text(text = if (isWaitSignIn) "Cancel" else "Sign In")
                       }
                 }
           }
         }
+
+    SnackbarHost(
+        hostState = viewModel.snackBarHostState, modifier = Modifier.align(Alignment.BottomCenter))
   }
 }
 
 @Composable
 fun LoginInfo(
     token: String,
-    number: String,
+    number: TextFieldValue,
     onTokenChange: (String) -> Unit,
-    onNumberChange: (String) -> Unit
+    onNumberChange: (TextFieldValue) -> Unit
 ) {
   Row(
       modifier = Modifier.fillMaxWidth(),
@@ -151,6 +194,40 @@ fun BmpInfo(paintFor: () -> Painter?, onBmpChanged: (String) -> Unit, modifier: 
         }
       }
 }
+
+@Composable
+fun ProduceCountDownTimeState(hour: Int, minute: Int) =
+    produceState(initialValue = "99:99") {
+      // 获取当前时间,判断是否在签到时间范围内，不是则为下一天
+      var nowTime = LocalDateTime.now()
+      // 判断是否是今天的签到时间
+      var signinTime =
+          LocalDateTime.of(nowTime.year, nowTime.month, nowTime.dayOfMonth, hour, minute, 0)
+      if (signinTime.isBefore(nowTime)) {
+        signinTime = signinTime.plusDays(1)
+      }
+      // 计算等待时间
+      while (isActive) {
+        nowTime = LocalDateTime.now()
+        // 如果当前时间大于等待时间，则开始签到
+        if (nowTime.isAfter(signinTime)) {
+          value = "00:00:00"
+          break
+        } else {
+          // 否则等待1s,倒计时
+          delay(1000 * 1)
+
+          // 更新倒计时，使用waitTime - nowTime
+          val duration = Duration.between(nowTime, signinTime).toSeconds()
+
+          val diffHour = duration / (60 * 60)
+          val diffMinute = (duration - diffHour * 60 * 60) / 60
+          val diffSecond = duration - diffHour * 60 * 60 - diffMinute * 60
+
+          value = String.format("%02d:%02d:%02d", diffHour, diffMinute, diffSecond)
+        }
+      }
+    }
 
 fun fileChooser(onFileChoose: (String) -> Unit) {
   val dialog = java.awt.FileDialog(ComposeWindow()).apply { isVisible = true }
