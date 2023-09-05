@@ -239,7 +239,7 @@ fun BmpInfo(
       modifier =
           modifier.clip(RoundedCornerShape(16.dp)).dashedBorder(4.dp, Color.Gray, 16.dp).clickable(
               enabled = clickable) {
-                fileChooser(filter = ".bmp") { onBmpChanged(it) }
+                fileChooser { onBmpChanged(it) }
               }) {
         Text(
             text = "Photos",

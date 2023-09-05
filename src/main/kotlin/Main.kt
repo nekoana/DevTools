@@ -126,14 +126,6 @@ fun ApplicationScope.HostWindow(
         icon = icon) {
           var displayPluginView by remember { mutableStateOf<IPluginView?>(null) }
 
-          MenuBar {
-            Menu(
-                text = "DevTools",
-            ) {
-              Item(text = "Quit", onClick = { exitApplication() })
-            }
-          }
-
           WindowDraggableArea {
             App(
                 onClose = { onCloseRequest() },
