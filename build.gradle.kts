@@ -18,21 +18,28 @@ allprojects {
         maven("https://maven.aliyun.com/repository/public")
         maven("https://maven.aliyun.com/repository/central")
     }
-
-    apply(plugin = "com.diffplug.spotless")
+    apply<com.diffplug.gradle.spotless.SpotlessPlugin>()
 
     configure<com.diffplug.gradle.spotless.SpotlessExtension> {
-        // configure<com.diffplug.gradle.spotless.SpotlessExtension> {
         kotlin {
             // by default the target is every '.kt' and '.kts` file in the java sourcesets
             target("**/*.kt")
-            targetExclude("${layout.buildDirectory}/**/*.kt")
+            targetExclude("**/build/**/*.kt")
             targetExclude("bin/**/*.kt")
+            licenseHeaderFile(rootProject.file("spotless/copyright.kt"))
             ktfmt() // has its own section below
         }
         kotlinGradle {
-            target("*.gradle.kts") // default target for kotlinGradle
+            target("**/*.kts") // default target for kotlinGradle
+            targetExclude("**/build/**/*.kts")
+//            licenseHeaderFile(rootProject.file("spotless/copyright.kts"), "(^(?![\\/ ]\\*).*$)")
             ktlint() // or ktfmt() or prettier()
+        }
+        format("xml") {
+            target("**/*.xml")
+            targetExclude("**/build/**/*.xml")
+            // Look for the first XML tag that isn't a comment (<!--) or the xml declaration (<?xml)
+            licenseHeaderFile(rootProject.file("spotless/copyright.xml"), "(<[^!?])")
         }
     }
 
