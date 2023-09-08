@@ -26,7 +26,7 @@ allprojects {
         kotlin {
             // by default the target is every '.kt' and '.kts` file in the java sourcesets
             target("**/*.kt")
-            targetExclude("$buildDir/**/*.kt")
+            targetExclude("${layout.buildDirectory}/**/*.kt")
             targetExclude("bin/**/*.kt")
             ktfmt() // has its own section below
         }
@@ -79,7 +79,7 @@ compose.desktop {
         mainClass = "MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb)
             packageName = "DevTools"
             packageVersion = "1.0.0"
 
@@ -88,7 +88,7 @@ compose.desktop {
             }
 
             windows {
-                iconFile.set(project.file("icon.svg"))
+                iconFile.set(project.file("icon.ico"))
             }
         }
     }
