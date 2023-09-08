@@ -43,7 +43,7 @@ allprojects {
 
 plugins {
     kotlin("jvm")
-    id("org.jetbrains.compose")
+    alias(libs.plugins.jetbrains.compose)
 }
 
 group = "com.kouqurong.devtools"
