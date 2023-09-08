@@ -70,7 +70,7 @@ fun App(
         modifier = Modifier.clip(RoundedCornerShape(16.dp)),
         topBar = {
           TopAppBar(
-              title = { Text(text = stringResource(R.id.APP_NAME)) },
+              title = { Text(text = "DevTools") },
               navigationIcon = {
                 Row {
                   IconButton(onClick = { onClose() }) {

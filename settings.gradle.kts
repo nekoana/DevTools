@@ -28,7 +28,6 @@ dependencyResolutionManagement {
 rootProject.name = "DevTools"
 include("PluginView")
 include("PluginHex")
-include("resource")
 include("PluginTcpClient")
 include("PluginTcpServer")
 include("PluginBitSet")
