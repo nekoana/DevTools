@@ -26,7 +26,7 @@ allprojects {
             target("**/*.kt")
             targetExclude("**/build/**/*.kt")
             targetExclude("bin/**/*.kt")
-            licenseHeaderFile(rootProject.file("spotless/copyright.kt"))
+            licenseHeaderFile(rootProject.file("spotless/copyright.kt"), "(package|import|public|class|/\\\\*)")
             ktfmt() // has its own section below
         }
         kotlinGradle {
@@ -35,12 +35,12 @@ allprojects {
 //            licenseHeaderFile(rootProject.file("spotless/copyright.kts"), "(^(?![\\/ ]\\*).*$)")
             ktlint() // or ktfmt() or prettier()
         }
-        format("xml") {
-            target("**/*.xml")
-            targetExclude("**/build/**/*.xml")
-            // Look for the first XML tag that isn't a comment (<!--) or the xml declaration (<?xml)
-            licenseHeaderFile(rootProject.file("spotless/copyright.xml"), "(<[^!?])")
-        }
+//        format("xml") {
+//            target("**/*.xml")
+//            targetExclude("**/build/**/*.xml")
+//            // Look for the first XML tag that isn't a comment (<!--) or the xml declaration (<?xml)
+//            licenseHeaderFile(rootProject.file("spotless/copyright.xml"), "(<[^!?])")
+//        }
     }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).configureEach {
