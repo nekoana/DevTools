@@ -1,4 +1,4 @@
-package com.kouqurong.devtools.utils/*
+/*
  * Copyright 2023 The Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,8 @@ package com.kouqurong.devtools.utils/*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package com.kouqurong.devtools.utils
 
 import java.io.File
 import java.net.URLClassLoader

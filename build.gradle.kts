@@ -72,7 +72,7 @@ dependencies {
 
 compose.desktop {
   application {
-    mainClass = "MainKt"
+    mainClass = "com.kouqurong.devtools.MainKt"
 
     nativeDistributions {
       targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb)

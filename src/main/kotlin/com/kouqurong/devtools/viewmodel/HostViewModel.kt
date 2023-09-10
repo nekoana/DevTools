@@ -1,4 +1,4 @@
-package com.kouqurong.devtools.viewmodel/*
+/*
  * Copyright 2023 The Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +14,11 @@ package com.kouqurong.devtools.viewmodel/*
  * limitations under the License.
  */
 
-import com.kouqurong.devtools.utils.PathClassLoader
+package com.kouqurong.devtools.viewmodel
+
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateListOf
+import com.kouqurong.devtools.utils.PathClassLoader
 import com.kouqurong.plugin.view.IPluginView
 import com.kouqurong.plugin.view.ViewModel
 import java.util.*
