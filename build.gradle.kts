@@ -68,6 +68,7 @@ dependencies {
   implementation(libs.material3.desktop)
   // https://mvnrepository.com/artifact/org.jetbrains.compose.material/material-icons-extended-desktop
   implementation(libs.material.icons.extended.desktop)
+  implementation(libs.bundles.androix.datastore)
 }
 
 compose.desktop {
