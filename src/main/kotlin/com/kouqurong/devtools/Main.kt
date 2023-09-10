@@ -1,4 +1,4 @@
-/*
+package com.kouqurong.devtools/*
  * Copyright 2023 The Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,10 +25,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.MoveUp
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -38,6 +35,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
+import com.kouqurong.devtools.viewmodel.HostViewModel
+import com.kouqurong.devtools.viewmodel.PluginViewWindowState
 import com.kouqurong.plugin.view.IPluginView
 
 @Composable
@@ -105,6 +104,11 @@ fun App(
                 }
               },
               actions = {
+                IconButton(
+                    onClick = {},
+                ) {
+                  Icon(imageVector = Icons.Default.Settings, contentDescription = "Setting")
+                }
                 IconButton(onClick = { onMoveUp() }) {
                   Icon(imageVector = Icons.Default.MoveUp, contentDescription = "Float")
                 }

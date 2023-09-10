@@ -1,4 +1,4 @@
-/*
+package com.kouqurong.devtools.utils/*
  * Copyright 2023 The Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
