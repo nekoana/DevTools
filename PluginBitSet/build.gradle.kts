@@ -21,5 +21,5 @@ dependencies {
   implementation(libs.auto.service.annotations)
   kapt(libs.auto.service.processor)
   // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-swing
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.7.3")
+  implementation(libs.kotlinx.coroutines.swing)
 }

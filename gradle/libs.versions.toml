@@ -4,6 +4,7 @@ compose = "1.5.1"
 material3 = "1.5.0"
 autoservice = "1.1.1"
 spotless = "6.12.0"
+swing = "1.7.3"
 
 [libraries]
 material3-desktop = { module = "org.jetbrains.compose.material3:material3-desktop", version.ref = "material3" }
@@ -11,7 +12,7 @@ auto-service-annotations = { module = "com.google.auto.service:auto-service-anno
 auto-service-processor = { module = "com.google.auto.service:auto-service", version.ref = "autoservice" }
 material-icons-extended-desktop = { module = "org.jetbrains.compose.material:material-icons-extended-desktop", version.ref = "material3" }
 spotless-gradle = {module = "com.diffplug.spotless:spotless-plugin-gradle",version.ref = "spotless"}
-
+kotlinx-coroutines-swing = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing",version.ref = "swing"}
 [plugins]
 jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
