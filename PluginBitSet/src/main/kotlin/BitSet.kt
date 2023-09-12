@@ -16,8 +16,16 @@
 
 import java.nio.ByteBuffer
 
-class BitSet private constructor(private val buffer: ByteBuffer) {
-  operator fun get(index: Int): Boolean {
+sealed class BitSet private constructor(protected val buffer: ByteBuffer) {
+  class BinaryBitSet(buffer: ByteBuffer) : BitSet(buffer)
+
+  class HexBitSet(buffer: ByteBuffer) : BitSet(buffer) {
+    override operator fun get(index: Int): Boolean {
+      return buffer.get(index / 8).toInt() and (1 shl (7 - (index % 8))) != 0
+    }
+  }
+
+  open operator fun get(index: Int): Boolean {
     return buffer.get(index / 8).toInt() and (1 shl (index % 8)) != 0
   }
 
@@ -26,9 +34,6 @@ class BitSet private constructor(private val buffer: ByteBuffer) {
   }
 
   companion object {
-    fun valueOf(bytes: ByteArray): BitSet {
-      return BitSet(ByteBuffer.wrap(bytes))
-    }
 
     fun binaryOf(bitset: String): BitSet {
       // bitset 末尾补0，每8个字符转换为一个字节
@@ -36,15 +41,15 @@ class BitSet private constructor(private val buffer: ByteBuffer) {
 
       val bytes = newBitset.chunked(8).map { it.reversed().toUByte(2).toByte() }.toByteArray()
 
-      return valueOf(bytes)
+      return BinaryBitSet(ByteBuffer.wrap(bytes))
     }
 
     fun hexOf(bitset: String): BitSet {
       // bitset 每两个字符转换为一个字节, 末尾补0
       val newBitset = bitset.padEnd((2 - bitset.length % 2), '0')
-      val bytes = newBitset.chunked(2).map { it.reversed().toUByte(16).toByte() }.toByteArray()
+      val bytes = newBitset.chunked(2).map { it.toUByte(16).toByte() }.toByteArray()
 
-      return valueOf(bytes)
+      return HexBitSet(ByteBuffer.wrap(bytes))
     }
   }
 }
