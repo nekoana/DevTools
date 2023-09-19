@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+package com.kouqurong.bitset
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background

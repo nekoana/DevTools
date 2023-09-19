@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+package com.kouqurong.bitset
+
 import java.nio.ByteBuffer
 
 sealed class BitSet private constructor(protected val buffer: ByteBuffer) {

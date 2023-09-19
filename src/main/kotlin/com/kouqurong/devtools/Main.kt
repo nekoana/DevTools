@@ -46,7 +46,7 @@ fun Home(views: List<IPluginView>, onDisplay: (IPluginView) -> Unit) {
   LazyVerticalGrid(
       columns = GridCells.FixedSize(120.dp),
       verticalArrangement = Arrangement.spacedBy(16.dp),
-      horizontalArrangement = Arrangement.spacedBy(16.dp),
+      horizontalArrangement = Arrangement.SpaceAround,
       contentPadding = PaddingValues(16.dp)) {
         items(views) {
           ElevatedCard(

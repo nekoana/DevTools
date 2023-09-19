@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+package com.kouqurong.iso8583
+
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -23,11 +25,11 @@ import com.google.auto.service.AutoService
 import com.kouqurong.plugin.view.IPluginView
 
 @AutoService(IPluginView::class)
-class PluginBitSet : IPluginView {
+class PluginISO8583 : IPluginView {
   override val view: @Composable () -> Unit
     get() = { App() }
   override val icon: @Composable () -> Painter
-    get() = { rememberVectorPainter(Icons.Default.Close) }
+    get() = { rememberVectorPainter(Icons.Default.Add) }
   override val label: String
-    get() = "BitSet"
+    get() = "ISO8583"
 }

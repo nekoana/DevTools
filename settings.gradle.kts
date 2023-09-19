@@ -33,3 +33,5 @@ include("PluginTcpServer")
 include("PluginBitSet")
 
 include("PluginSignIn")
+
+include("PluginISO8583")
