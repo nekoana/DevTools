@@ -51,7 +51,8 @@ fun App() {
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        BitSetInput(bitset = bitset, onBitSetChanged = { bitset = it })
+        BitSetInput(
+            bitset = bitset, onBitSetChanged = { bitset = it }, modifier = Modifier.weight(1F))
         BitSetType(type = type, onBitSetTypeChanged = { type = it })
       }
 
