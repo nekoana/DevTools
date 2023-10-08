@@ -20,26 +20,36 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import com.kouqurong.devtools.viewmodel.HostViewModel
 import com.kouqurong.devtools.viewmodel.PluginViewWindowState
 import com.kouqurong.plugin.view.IPluginView
+import java.awt.MouseInfo
+import java.awt.Point
+import java.awt.Window
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
+import java.awt.event.MouseMotionAdapter
 
 @Composable
 fun Home(views: List<IPluginView>, onDisplay: (IPluginView) -> Unit) {
@@ -75,6 +85,7 @@ fun Home(views: List<IPluginView>, onDisplay: (IPluginView) -> Unit) {
 @Composable
 @Preview
 fun App(
+    window: Window,
     onClose: () -> Unit,
     onMinimize: () -> Unit,
     onBack: () -> Unit,
@@ -87,6 +98,7 @@ fun App(
         modifier = Modifier.clip(RoundedCornerShape(16.dp)),
         topBar = {
           TopAppBar(
+              modifier = Modifier.draggableArea(window),
               title = { Text(text = "DevTools") },
               navigationIcon = {
                 Row {
@@ -148,30 +160,74 @@ fun ApplicationScope.HostWindow(
         icon = icon) {
           var displayPluginView by remember { mutableStateOf<IPluginView?>(null) }
 
-          WindowDraggableArea {
-            App(
-                onClose = { onCloseRequest() },
-                onMinimize = { windowState.isMinimized = true },
-                onBack = { displayPluginView = null },
-                onDisplay = { displayPluginView = it },
-                onMoveUp = {
-                  if (displayPluginView != null) {
-                    viewModel.openNewPluginViewWindow(displayPluginView!!)
-                    displayPluginView = null
-                  }
-                }) {
-                  AnimatedContent(
-                      targetState = displayPluginView,
-                  ) {
-                    if (it != null) {
-                      it.view()
-                    } else {
-                      Home(views = viewModel.pluginViews, onDisplay = { displayPluginView = it })
-                    }
+          App(
+              window,
+              onClose = { onCloseRequest() },
+              onMinimize = { windowState.isMinimized = true },
+              onBack = { displayPluginView = null },
+              onDisplay = { displayPluginView = it },
+              onMoveUp = {
+                if (displayPluginView != null) {
+                  viewModel.openNewPluginViewWindow(displayPluginView!!)
+                  displayPluginView = null
+                }
+              }) {
+                AnimatedContent(
+                    targetState = displayPluginView,
+                ) {
+                  if (it != null) {
+                    it.view()
+                  } else {
+                    Home(views = viewModel.pluginViews, onDisplay = { displayPluginView = it })
                   }
                 }
-          }
+              }
         }
+
+fun Modifier.draggableArea(window: Window) =
+    then(
+        Modifier.composed {
+          class DragHandler(private val window: Window) {
+            private var location = window.location.toComposeOffset()
+            private var pointStart = MouseInfo.getPointerInfo().location.toComposeOffset()
+
+            private val dragListener =
+                object : MouseMotionAdapter() {
+                  override fun mouseDragged(event: MouseEvent) = drag()
+                }
+            private val removeListener =
+                object : MouseAdapter() {
+                  override fun mouseReleased(event: MouseEvent) {
+                    window.removeMouseMotionListener(dragListener)
+                    window.removeMouseListener(this)
+                  }
+                }
+
+            fun register() {
+              location = window.location.toComposeOffset()
+              pointStart = MouseInfo.getPointerInfo().location.toComposeOffset()
+              window.addMouseListener(removeListener)
+              window.addMouseMotionListener(dragListener)
+            }
+
+            private fun drag() {
+              val point = MouseInfo.getPointerInfo().location.toComposeOffset()
+              val location = location + (point - pointStart)
+              window.setLocation(location.x, location.y)
+            }
+
+            private fun Point.toComposeOffset() = IntOffset(x, y)
+          }
+
+          val handler = remember { DragHandler(window) }
+
+          Modifier.pointerInput(Unit) {
+            awaitEachGesture {
+              awaitFirstDown()
+              handler.register()
+            }
+          }
+        })
 
 fun main() = application {
   val viewModel = remember { HostViewModel() }
