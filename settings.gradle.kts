@@ -11,10 +11,10 @@ pluginManagement {
 
 dependencyResolutionManagement {
   repositories {
+    mavenCentral()
     maven("https://maven.aliyun.com/repository/public")
     maven("https://maven.aliyun.com/repository/central")
     google()
-    mavenCentral()
     gradlePluginPortal()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
   }

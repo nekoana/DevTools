@@ -2,6 +2,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 buildscript {
   repositories {
+    mavenCentral()
     maven("https://maven.aliyun.com/repository/public")
     maven("https://maven.aliyun.com/repository/central")
     gradlePluginPortal()
