@@ -18,16 +18,17 @@ package com.kouqurong.iso8583
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -37,7 +38,7 @@ fun App() {
   }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ISO8583HexInput(
     modifier: Modifier = Modifier,
@@ -48,18 +49,29 @@ fun ISO8583HexInput(
   val state = rememberSwipeableState(SwipeCrossFadeState.FORE)
   Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
     SwipeCrossFadeLayout(
-        swipeableState = state,
-        modifier = Modifier.fillMaxSize().background(Color.Blue),
+        swipeState = state,
+        modifier = Modifier.fillMaxSize(),
         background = { Box(modifier = Modifier.fillMaxSize().background(Color.Black)) },
-        foreground = { Box(modifier = Modifier.fillMaxSize().background(Color.Red)) })
+        foreground = {
+          LazyColumn(
+              modifier = Modifier.fillMaxWidth().background(Color.Green),
+              horizontalAlignment = Alignment.CenterHorizontally) {
+                item {
+                  androidx.compose.material3.Button(
+                      onClick = {},
+                  ) {
+                    androidx.compose.material3.Text("Click To Add New Field")
+                  }
+                }
+              }
+        },
+        indicate = {
+          androidx.compose.material3.Text(
+              "Swipe",
+              modifier = Modifier.fillMaxWidth().background(Color.Green),
+              textAlign = TextAlign.Center)
+        })
   }
-  //  OutlinedTextField(
-  //      modifier = modifier,
-  //      value = text,
-  //      onValueChange = onValueChanged,
-  //      placeholder = {
-  //
-  //      })
 }
 
 enum class SwipeCrossFadeState {
@@ -71,30 +83,44 @@ enum class SwipeCrossFadeState {
 @Composable
 fun SwipeCrossFadeLayout(
     modifier: Modifier,
-    swipeableState: SwipeableState<SwipeCrossFadeState> =
+    swipeState: SwipeableState<SwipeCrossFadeState> =
         rememberSwipeableState(SwipeCrossFadeState.FORE),
+    swipeEnabled: Boolean = true,
     background: @Composable () -> Unit,
     foreground: @Composable () -> Unit,
+    indicate: @Composable () -> Unit = {},
 ) {
   var maxHeight by remember { mutableStateOf(100) }
   SubcomposeLayout(
       modifier =
           modifier.swipeable(
-              state = swipeableState,
+              state = swipeState,
+              enabled = swipeEnabled,
               anchors =
                   mapOf(
-                      0F to SwipeCrossFadeState.FORE,
-                      maxHeight.toFloat() to SwipeCrossFadeState.BACK),
+                      maxHeight.toFloat() to SwipeCrossFadeState.FORE,
+                      0F to SwipeCrossFadeState.BACK),
               orientation = Orientation.Vertical,
               thresholds = { _, _ -> FractionalThreshold(0.1F) })) { constraints ->
-        val backgroundPlaceable =
-            subcompose("BACKGROUND", background)
+        // 上拉指示器
+        val indicatePlaceable =
+            subcompose("INDICATE", indicate)
                 .first()
                 .measure(constraints.copy(minWidth = 0, minHeight = 0))
 
+        // 计算back的大小，减去指示器高度
+        val backgroundPlaceable =
+            subcompose("BACKGROUND", background)
+                .first()
+                .measure(
+                    constraints.copy(
+                        minWidth = 0,
+                        minHeight = 0,
+                        maxHeight = constraints.maxHeight - indicatePlaceable.height))
+        // 可用的容器最大高度
         maxHeight = backgroundPlaceable.height
-
-        val progress = 1F - (swipeableState.offset.value / maxHeight).coerceIn(0F, 1F)
+        // 根据滑动距离计算滑动进度
+        val progress = 1F - ((maxHeight - swipeState.offset.value) / maxHeight).coerceIn(0F, 1F)
 
         val foregroundHeight = (maxHeight * progress).toInt()
 
@@ -108,8 +134,9 @@ fun SwipeCrossFadeLayout(
                     ))
 
         layout(constraints.maxWidth, constraints.maxHeight) {
-          backgroundPlaceable.placeRelativeWithLayer(0, 0) { alpha = 1 - progress }
-          foregroundPlaceable.placeRelativeWithLayer(0, maxHeight - foregroundHeight)
+          backgroundPlaceable.placeRelativeWithLayer(0, indicatePlaceable.height)
+          foregroundPlaceable.placeRelativeWithLayer(0, 0)
+          indicatePlaceable.placeRelativeWithLayer(0, foregroundPlaceable.height)
         }
       }
 }
