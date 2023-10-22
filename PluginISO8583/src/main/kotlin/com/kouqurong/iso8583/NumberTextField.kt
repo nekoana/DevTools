@@ -61,17 +61,44 @@ fun NumberTextField(
 @Composable
 fun SingleChatTextField(
     modifier: Modifier = Modifier,
-    value: TextFieldValue,
+    value: String,
     readOnly: Boolean = false,
-    onValueChange: (TextFieldValue) -> Unit,
+    onValueChange: (String) -> Unit,
 ) {
+
+  // Holds the latest internal TextFieldValue state. We need to keep it to have the correct value
+  // of the composition.
+  var textFieldValueState by remember { mutableStateOf(TextFieldValue(text = value)) }
+  // Holds the latest TextFieldValue that BasicTextField was recomposed with. We couldn't simply
+  // pass `TextFieldValue(text = value)` to the CoreTextField because we need to preserve the
+  // composition.
+  val textFieldValue = textFieldValueState.copy(text = value)
+
+  SideEffect {
+    if (textFieldValue.selection != textFieldValueState.selection ||
+        textFieldValue.composition != textFieldValueState.composition) {
+      textFieldValueState = textFieldValue
+    }
+  }
+
+  var lastTextValue by remember(value) { mutableStateOf(value) }
+
   FixedLengthTextField(
       modifier = modifier,
-      value = value,
+      value = textFieldValue,
       readOnly = readOnly,
       singleLine = true,
       maxLength = 1,
-      onValueChange = onValueChange,
+      onValueChange = { newTextFieldValueState ->
+        textFieldValueState = newTextFieldValueState
+
+        val stringChangedSinceLastInvocation = lastTextValue != newTextFieldValueState.text
+        lastTextValue = newTextFieldValueState.text
+
+        if (stringChangedSinceLastInvocation) {
+          onValueChange(newTextFieldValueState.text)
+        }
+      },
       keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
       textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center))
 }
@@ -89,8 +116,8 @@ fun FixedLengthTextField(
 ) {
   val isOverLength by remember(value) { derivedStateOf { value.text.length > maxLength } }
 
-  var lastValue by remember { mutableStateOf(value) }
-  SideEffect { if (!isOverLength) lastValue = value }
+  var lastTextValue by remember { mutableStateOf(value) }
+  SideEffect { if (!isOverLength) lastTextValue = value }
 
   val errorColor = MaterialTheme.colorScheme.error
   val normalColor = MaterialTheme.colorScheme.onBackground
@@ -105,7 +132,7 @@ fun FixedLengthTextField(
 
   BasicTextField(
       modifier = modifier,
-      value = if (isOverLength) lastValue else value,
+      value = if (isOverLength) lastTextValue else value,
       onValueChange = onValueChange,
       keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
       readOnly = readOnly,

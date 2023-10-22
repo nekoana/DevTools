@@ -18,11 +18,15 @@ package com.kouqurong.iso8583
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.*
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,75 +35,190 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 
+sealed class IAttr(val value: String) {
+  data object ASCII : IAttr("ASCII")
+  data object BCD : IAttr("BCD")
+  data object BINARY : IAttr("BINARY")
+}
+
+private val AttrList = listOf(IAttr.ASCII, IAttr.BCD, IAttr.BINARY)
+
+sealed class IFormat(val value: String) {
+  data object VAR : IFormat("VAR")
+  data object FIX : IFormat("FIX")
+}
+
+private val FormatList = listOf(IFormat.VAR, IFormat.FIX)
+
+sealed class IAlign(val value: String) {
+  data object LEFT : IAlign("LEFT")
+  data object RIGHT : IAlign("RIGHT")
+}
+
+private val AlignList = listOf(IAlign.LEFT, IAlign.RIGHT)
+
 @Composable
 fun FieldItem(
     modifier: Modifier = Modifier,
     field: Int,
+    attr: IAttr = IAttr.ASCII,
+    format: IFormat = IFormat.FIX,
+    align: IAlign = IAlign.LEFT,
 ) {
   var fieldTextValue by remember { mutableStateOf(TextFieldValue(field.toString())) }
   var padding by remember { mutableStateOf(TextFieldValue("0")) }
 
+  var isShowAttrMenu by remember { mutableStateOf(false) }
   var isShowFormatMenu by remember { mutableStateOf(false) }
-  var isShowLengthMenu by remember { mutableStateOf(false) }
-  var length by remember { mutableStateOf(TextFieldValue("11")) }
   var isShowAlignMenu by remember { mutableStateOf(false) }
+  var length by remember { mutableStateOf(11) }
 
   Row(
       modifier = modifier,
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.SpaceBetween,
   ) {
+    FieldInputItem(field = 1) {}
+    AttrSelectItem(attr = attr) {}
+    LengthAndFormatItem(
+        length = length, format = format, onLengthChange = { length = it }, onFormatChange = {})
+    PaddingAndAlignItem(padding = "0", align = align, onPaddingChange = {}, onAlignChange = {})
+  }
+}
+
+@Composable
+fun FieldInputItem(modifier: Modifier = Modifier, field: Int, onFieldChange: (Int) -> Unit) {
+  // Holds the latest internal TextFieldValue state. We need to keep it to have the correct value
+  // of the composition.
+  var textFieldValueState by remember { mutableStateOf(TextFieldValue(text = field.toString())) }
+  // Holds the latest TextFieldValue that BasicTextField was recomposed with. We couldn't simply
+  // pass `TextFieldValue(text = value)` to the CoreTextField because we need to preserve the
+  // composition.
+  val textFieldValue = textFieldValueState.copy(text = field.toString())
+
+  SideEffect {
+    if (textFieldValue.selection != textFieldValueState.selection ||
+        textFieldValue.composition != textFieldValueState.composition) {
+      textFieldValueState = textFieldValue
+    }
+  }
+
+  var lastTextValue by remember(field) { mutableStateOf(field.toString()) }
+
+  NumberTextField(
+      modifier = Modifier.width(48.dp).height(IntrinsicSize.Min),
+      value = textFieldValue,
+      maxLength = 3,
+      onValueChange = { newTextFieldValueState ->
+        textFieldValueState = newTextFieldValueState
+
+        val stringChangedSinceLastInvocation = lastTextValue != newTextFieldValueState.text
+        lastTextValue = newTextFieldValueState.text
+
+        if (stringChangedSinceLastInvocation) {
+          onFieldChange(newTextFieldValueState.text.toIntOrNull() ?: 0)
+        }
+      },
+  )
+}
+
+@Composable
+fun AttrSelectItem(modifier: Modifier = Modifier, attr: IAttr, onAttrChange: (IAttr) -> Unit) {
+  var isShowAttrMenu by remember { mutableStateOf(false) }
+
+  Row(
+      modifier = modifier.clickable { isShowAttrMenu = !isShowAttrMenu },
+  ) {
+    Text(text = attr.value)
+    Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
+
+    DropdownMenu(isShowAttrMenu, onDismissRequest = { isShowAttrMenu = false }) {
+      AttrList.forEach { attr ->
+        DropdownMenuItem(text = { Text(attr.value) }, onClick = { onAttrChange(attr) })
+      }
+    }
+  }
+}
+
+@Composable
+fun LengthAndFormatItem(
+    modifier: Modifier = Modifier,
+    length: Int,
+    format: IFormat,
+    onLengthChange: (Int) -> Unit,
+    onFormatChange: (IFormat) -> Unit,
+) {
+  // Holds the latest internal TextFieldValue state. We need to keep it to have the correct value
+  // of the composition.
+  var textFieldValueState by remember { mutableStateOf(TextFieldValue(text = length.toString())) }
+  // Holds the latest TextFieldValue that BasicTextField was recomposed with. We couldn't simply
+  // pass `TextFieldValue(text = value)` to the CoreTextField because we need to preserve the
+  // composition.
+  val textFieldValue = textFieldValueState.copy(text = length.toString())
+
+  SideEffect {
+    if (textFieldValue.selection != textFieldValueState.selection ||
+        textFieldValue.composition != textFieldValueState.composition) {
+      textFieldValueState = textFieldValue
+    }
+  }
+
+  var lastTextValue by remember(length) { mutableStateOf(length.toString()) }
+
+  var isShowFormatMenu by remember { mutableStateOf(false) }
+  Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween) {
     NumberTextField(
-        modifier = Modifier.width(48.dp).height(IntrinsicSize.Min),
-        value = fieldTextValue,
-        maxLength = 3,
-        onValueChange = { fieldTextValue = it },
-    )
+        modifier = Modifier.width(64.dp),
+        value = textFieldValue,
+        maxLength = 4,
+        onValueChange = { newTextFieldValueState ->
+          textFieldValueState = newTextFieldValueState
 
-    androidx.compose.material.IconButton(onClick = { isShowFormatMenu = true }) {
-      Row {
-        Text(text = "ASCII")
-        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
+          val stringChangedSinceLastInvocation = lastTextValue != newTextFieldValueState.text
+          lastTextValue = newTextFieldValueState.text
 
-        DropdownMenu(isShowFormatMenu, onDismissRequest = { isShowFormatMenu = false }) {
-          DropdownMenuItem(text = { Text("ASCII") }, onClick = {})
-          DropdownMenuItem(text = { Text("BCD") }, onClick = {})
-          DropdownMenuItem(text = { Text("BINARY") }, onClick = {})
-        }
-      }
-    }
-
-    Row(modifier = Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
-      NumberTextField(
-          modifier = Modifier.width(64.dp),
-          value = length,
-          maxLength = 4,
-          onValueChange = { length = it })
-
-      androidx.compose.material.IconButton(onClick = { isShowLengthMenu = true }) {
-        Row {
-          Text(text = "VAR")
-          Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
-
-          DropdownMenu(isShowLengthMenu, onDismissRequest = { isShowLengthMenu = false }) {
-            DropdownMenuItem(text = { Text("VAR") }, onClick = {})
-            DropdownMenuItem(text = { Text("FIX") }, onClick = {})
+          if (stringChangedSinceLastInvocation) {
+            onLengthChange(newTextFieldValueState.text.toIntOrNull() ?: 0)
           }
+        })
+
+    Row(
+        modifier = Modifier.clickable { isShowFormatMenu = !isShowFormatMenu },
+    ) {
+      Text(text = format.value)
+      Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
+
+      DropdownMenu(isShowFormatMenu, onDismissRequest = { isShowFormatMenu = false }) {
+        FormatList.forEach { format ->
+          DropdownMenuItem(text = { Text(format.value) }, onClick = { onFormatChange(format) })
         }
       }
     }
+  }
+}
 
+@Composable
+fun PaddingAndAlignItem(
+    modifier: Modifier = Modifier,
+    padding: String,
+    align: IAlign,
+    onPaddingChange: (String) -> Unit,
+    onAlignChange: (IAlign) -> Unit
+) {
+  var isShowAlignMenu by remember { mutableStateOf(false) }
+
+  Row(modifier = modifier) {
     SingleChatTextField(
-        modifier = Modifier.width(24.dp), value = padding, onValueChange = { padding = it })
+        modifier = Modifier.width(24.dp), value = padding, onValueChange = { onPaddingChange(it) })
+    Row(
+        modifier = Modifier.clickable { isShowAlignMenu = !isShowAlignMenu },
+    ) {
+      Text(text = align.value)
+      Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
 
-    androidx.compose.material.IconButton(onClick = { isShowLengthMenu = true }) {
-      Row {
-        Text(text = "Left")
-        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
-
-        DropdownMenu(isShowAlignMenu, onDismissRequest = { isShowAlignMenu = false }) {
-          DropdownMenuItem(text = { Text("Left") }, onClick = {})
-          DropdownMenuItem(text = { Text("Right") }, onClick = {})
+      DropdownMenu(isShowAlignMenu, onDismissRequest = { isShowAlignMenu = false }) {
+        AlignList.forEach { align ->
+          DropdownMenuItem(text = { Text(align.value) }, onClick = { onAlignChange(align) })
         }
       }
     }
