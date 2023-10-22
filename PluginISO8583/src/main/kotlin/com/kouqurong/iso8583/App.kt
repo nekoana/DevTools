@@ -17,126 +17,108 @@
 package com.kouqurong.iso8583
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Text
+import androidx.compose.material.rememberSwipeableState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun App() {
-  Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+  Surface(modifier = Modifier.fillMaxSize().padding(16.dp)) {
     ISO8583HexInput(modifier = Modifier.fillMaxSize(), text = TextFieldValue("")) {}
   }
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ISO8583HexInput(
     modifier: Modifier = Modifier,
     text: TextFieldValue,
     onValueChanged: (TextFieldValue) -> Unit
 ) {
-
   val state = rememberSwipeableState(SwipeCrossFadeState.FORE)
+
   Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
     SwipeCrossFadeLayout(
         swipeState = state,
         modifier = Modifier.fillMaxSize(),
-        background = { Box(modifier = Modifier.fillMaxSize().background(Color.Black)) },
+        background = {
+          Surface(modifier = Modifier.fillMaxSize()) { androidx.compose.material3.Text("BACK") }
+        },
         foreground = {
-          LazyColumn(
-              modifier = Modifier.fillMaxWidth().background(Color.Green),
-              horizontalAlignment = Alignment.CenterHorizontally) {
-                item {
-                  androidx.compose.material3.Button(
-                      onClick = {},
-                  ) {
-                    androidx.compose.material3.Text("Click To Add New Field")
+          Surface(modifier = Modifier.fillMaxSize()) {
+            FieldTitle(modifier = Modifier.fillMaxWidth().height(32.dp))
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(top = 32.dp)) {
+                  item {
+                    FieldItem(
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1F))
+                                .padding(8.dp),
+                        field = 1)
+                  }
+
+                  item {
+                    FieldItem(
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1F))
+                                .padding(8.dp),
+                        field = 1)
+                  }
+
+                  item {
+                    FieldItem(
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1F))
+                                .padding(8.dp),
+                        field = 1)
+                  }
+
+                  item {
+                    FieldItem(
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1F))
+                                .padding(8.dp),
+                        field = 1)
                   }
                 }
-              }
+          }
         },
-        indicate = {
-          androidx.compose.material3.Text(
-              "Swipe",
-              modifier = Modifier.fillMaxWidth().background(Color.Green),
-              textAlign = TextAlign.Center)
-        })
+        indicate = { SwipeRefreshContent(state.currentValue) })
   }
 }
 
-enum class SwipeCrossFadeState {
-  FORE,
-  BACK,
-}
-
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun SwipeCrossFadeLayout(
-    modifier: Modifier,
-    swipeState: SwipeableState<SwipeCrossFadeState> =
-        rememberSwipeableState(SwipeCrossFadeState.FORE),
-    swipeEnabled: Boolean = true,
-    background: @Composable () -> Unit,
-    foreground: @Composable () -> Unit,
-    indicate: @Composable () -> Unit = {},
-) {
-  var maxHeight by remember { mutableStateOf(100) }
-  SubcomposeLayout(
-      modifier =
-          modifier.swipeable(
-              state = swipeState,
-              enabled = swipeEnabled,
-              anchors =
-                  mapOf(
-                      maxHeight.toFloat() to SwipeCrossFadeState.FORE,
-                      0F to SwipeCrossFadeState.BACK),
-              orientation = Orientation.Vertical,
-              thresholds = { _, _ -> FractionalThreshold(0.1F) })) { constraints ->
-        // 上拉指示器
-        val indicatePlaceable =
-            subcompose("INDICATE", indicate)
-                .first()
-                .measure(constraints.copy(minWidth = 0, minHeight = 0))
-
-        // 计算back的大小，减去指示器高度
-        val backgroundPlaceable =
-            subcompose("BACKGROUND", background)
-                .first()
-                .measure(
-                    constraints.copy(
-                        minWidth = 0,
-                        minHeight = 0,
-                        maxHeight = constraints.maxHeight - indicatePlaceable.height))
-        // 可用的容器最大高度
-        maxHeight = backgroundPlaceable.height
-        // 根据滑动距离计算滑动进度
-        val progress = 1F - ((maxHeight - swipeState.offset.value) / maxHeight).coerceIn(0F, 1F)
-
-        val foregroundHeight = (maxHeight * progress).toInt()
-
-        val foregroundPlaceable =
-            subcompose("FOREGROUND", foreground)
-                .first()
-                .measure(
-                    constraints.copy(
-                        minHeight = foregroundHeight,
-                        maxHeight = foregroundHeight,
-                    ))
-
-        layout(constraints.maxWidth, constraints.maxHeight) {
-          backgroundPlaceable.placeRelativeWithLayer(0, indicatePlaceable.height)
-          foregroundPlaceable.placeRelativeWithLayer(0, 0)
-          indicatePlaceable.placeRelativeWithLayer(0, foregroundPlaceable.height)
-        }
-      }
+fun FieldTitle(modifier: Modifier = Modifier) {
+  Row(modifier = modifier) {
+    Text(modifier = Modifier.weight(1F), text = "Field", textAlign = TextAlign.Center)
+    Text(modifier = Modifier.weight(1F), text = "Format", textAlign = TextAlign.Center)
+    Text(modifier = Modifier.weight(1F), text = "Length", textAlign = TextAlign.Center)
+    Text(modifier = Modifier.weight(1F), text = "Attr", textAlign = TextAlign.Center)
+    Text(modifier = Modifier.weight(1F), text = "Padding", textAlign = TextAlign.Center)
+    Text(modifier = Modifier.weight(1F), text = "Align", textAlign = TextAlign.Center)
+  }
 }
