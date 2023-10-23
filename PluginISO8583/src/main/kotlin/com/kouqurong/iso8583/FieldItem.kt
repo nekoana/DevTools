@@ -17,6 +17,8 @@
 package com.kouqurong.iso8583
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -34,28 +36,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-
-sealed class IAttr(val value: String) {
-  data object ASCII : IAttr("ASCII")
-  data object BCD : IAttr("BCD")
-  data object BINARY : IAttr("BINARY")
-}
-
-private val AttrList = listOf(IAttr.ASCII, IAttr.BCD, IAttr.BINARY)
-
-sealed class IFormat(val value: String) {
-  data object VAR : IFormat("VAR")
-  data object FIX : IFormat("FIX")
-}
-
-private val FormatList = listOf(IFormat.VAR, IFormat.FIX)
-
-sealed class IAlign(val value: String) {
-  data object LEFT : IAlign("LEFT")
-  data object RIGHT : IAlign("RIGHT")
-}
-
-private val AlignList = listOf(IAlign.LEFT, IAlign.RIGHT)
 
 @Composable
 fun FieldItem(
@@ -119,27 +99,31 @@ fun FieldInputItem(modifier: Modifier = Modifier, field: Int, onFieldChange: (In
           onFieldChange(newTextFieldValueState.text.toIntOrNull() ?: 0)
         }
       },
-  )
+      tooltip = { Text("Field") })
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AttrSelectItem(modifier: Modifier = Modifier, attr: IAttr, onAttrChange: (IAttr) -> Unit) {
   var isShowAttrMenu by remember { mutableStateOf(false) }
 
-  Row(
-      modifier = modifier.clickable { isShowAttrMenu = !isShowAttrMenu },
-  ) {
-    Text(text = attr.value)
-    Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
+  TooltipArea(tooltip = { Text(text = "Attr") }) {
+    Row(
+        modifier = modifier.clickable { isShowAttrMenu = !isShowAttrMenu },
+    ) {
+      Text(text = attr.value)
+      Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
 
-    DropdownMenu(isShowAttrMenu, onDismissRequest = { isShowAttrMenu = false }) {
-      AttrList.forEach { attr ->
-        DropdownMenuItem(text = { Text(attr.value) }, onClick = { onAttrChange(attr) })
+      DropdownMenu(isShowAttrMenu, onDismissRequest = { isShowAttrMenu = false }) {
+        AttrList.forEach { attr ->
+          DropdownMenuItem(text = { Text(attr.value) }, onClick = { onAttrChange(attr) })
+        }
       }
     }
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LengthAndFormatItem(
     modifier: Modifier = Modifier,
@@ -180,23 +164,27 @@ fun LengthAndFormatItem(
           if (stringChangedSinceLastInvocation) {
             onLengthChange(newTextFieldValueState.text.toIntOrNull() ?: 0)
           }
-        })
+        },
+        tooltip = { Text(text = "Length") })
 
-    Row(
-        modifier = Modifier.clickable { isShowFormatMenu = !isShowFormatMenu },
-    ) {
-      Text(text = format.value)
-      Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
+    TooltipArea(tooltip = { Text(text = "Format") }) {
+      Row(
+          modifier = Modifier.clickable { isShowFormatMenu = !isShowFormatMenu },
+      ) {
+        Text(text = format.value)
+        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
 
-      DropdownMenu(isShowFormatMenu, onDismissRequest = { isShowFormatMenu = false }) {
-        FormatList.forEach { format ->
-          DropdownMenuItem(text = { Text(format.value) }, onClick = { onFormatChange(format) })
+        DropdownMenu(isShowFormatMenu, onDismissRequest = { isShowFormatMenu = false }) {
+          FormatList.forEach { format ->
+            DropdownMenuItem(text = { Text(format.value) }, onClick = { onFormatChange(format) })
+          }
         }
       }
     }
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PaddingAndAlignItem(
     modifier: Modifier = Modifier,
@@ -209,16 +197,21 @@ fun PaddingAndAlignItem(
 
   Row(modifier = modifier) {
     SingleChatTextField(
-        modifier = Modifier.width(24.dp), value = padding, onValueChange = { onPaddingChange(it) })
-    Row(
-        modifier = Modifier.clickable { isShowAlignMenu = !isShowAlignMenu },
-    ) {
-      Text(text = align.value)
-      Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
+        modifier = Modifier.width(24.dp),
+        value = padding,
+        onValueChange = { onPaddingChange(it) },
+        tooltip = { Text(text = "Padding") })
+    TooltipArea(tooltip = { Text(text = "Align") }) {
+      Row(
+          modifier = Modifier.clickable { isShowAlignMenu = !isShowAlignMenu },
+      ) {
+        Text(text = align.value)
+        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
 
-      DropdownMenu(isShowAlignMenu, onDismissRequest = { isShowAlignMenu = false }) {
-        AlignList.forEach { align ->
-          DropdownMenuItem(text = { Text(align.value) }, onClick = { onAlignChange(align) })
+        DropdownMenu(isShowAlignMenu, onDismissRequest = { isShowAlignMenu = false }) {
+          AlignList.forEach { align ->
+            DropdownMenuItem(text = { Text(align.value) }, onClick = { onAlignChange(align) })
+          }
         }
       }
     }

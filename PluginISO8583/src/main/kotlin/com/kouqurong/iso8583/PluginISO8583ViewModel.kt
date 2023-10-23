@@ -18,4 +18,36 @@ package com.kouqurong.iso8583
 
 import com.kouqurong.plugin.view.ViewModel
 
+sealed class IAttr(val value: String) {
+  data object ASCII : IAttr("ASCII")
+  data object BCD : IAttr("BCD")
+  data object BINARY : IAttr("BINARY")
+}
+
+val AttrList = listOf(IAttr.ASCII, IAttr.BCD, IAttr.BINARY)
+
+sealed class IFormat(val value: String) {
+  data object VAR : IFormat("VAR")
+  data object FIX : IFormat("FIX")
+}
+
+val FormatList = listOf(IFormat.VAR, IFormat.FIX)
+
+sealed class IAlign(val value: String) {
+  data object LEFT : IAlign("LEFT")
+  data object RIGHT : IAlign("RIGHT")
+}
+
+val AlignList = listOf(IAlign.LEFT, IAlign.RIGHT)
+
+data class FieldItem(
+    val field: Int,
+    val attr: IAttr = IAttr.ASCII,
+    val format: IFormat = IFormat.FIX,
+    val align: IAlign = IAlign.LEFT,
+    val length: Int = 0,
+    val padding: String = "0",
+    val value: String = "",
+)
+
 class PluginISO8583ViewModel : ViewModel() {}

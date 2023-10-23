@@ -31,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -59,66 +58,23 @@ fun ISO8583HexInput(
         },
         foreground = {
           Surface(modifier = Modifier.fillMaxSize()) {
-            FieldTitle(modifier = Modifier.fillMaxWidth().height(32.dp))
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(top = 32.dp)) {
-                  item {
-                    FieldItem(
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1F))
-                                .padding(8.dp),
-                        field = 1)
-                  }
-
-                  item {
-                    FieldItem(
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1F))
-                                .padding(8.dp),
-                        field = 1)
-                  }
-
-                  item {
-                    FieldItem(
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1F))
-                                .padding(8.dp),
-                        field = 1)
-                  }
-
-                  item {
-                    FieldItem(
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1F))
-                                .padding(8.dp),
-                        field = 1)
-                  }
-                }
+            ) {
+              item {
+                FieldItem(
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1F))
+                            .padding(8.dp),
+                    field = 1)
+              }
+            }
           }
         },
         indicate = { SwipeRefreshContent(state.currentValue) })
-  }
-}
-
-@Composable
-fun FieldTitle(modifier: Modifier = Modifier) {
-  Row(modifier = modifier) {
-    Text(modifier = Modifier.weight(1F), text = "Field", textAlign = TextAlign.Center)
-    Text(modifier = Modifier.weight(1F), text = "Format", textAlign = TextAlign.Center)
-    Text(modifier = Modifier.weight(1F), text = "Length", textAlign = TextAlign.Center)
-    Text(modifier = Modifier.weight(1F), text = "Attr", textAlign = TextAlign.Center)
-    Text(modifier = Modifier.weight(1F), text = "Padding", textAlign = TextAlign.Center)
-    Text(modifier = Modifier.weight(1F), text = "Align", textAlign = TextAlign.Center)
   }
 }

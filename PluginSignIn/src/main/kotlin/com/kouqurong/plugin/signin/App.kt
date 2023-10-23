@@ -30,15 +30,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -46,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
+import com.kouqurong.plugin.view.defaultDashedBorder
 import java.time.Duration
 import java.time.LocalDateTime
 import kotlinx.coroutines.delay
@@ -240,7 +234,7 @@ fun ApiLibInfo(version: String, clickabled: Boolean, onLibChanged: (String) -> U
           Modifier.height(32.dp)
               .fillMaxWidth()
               .clip(RoundedCornerShape(16.dp))
-              .dashedBorder(4.dp, Color.Gray, 16.dp)
+              .defaultDashedBorder()
               .clickable(enabled = clickabled) { fileChooser { onLibChanged(it) } })
 }
 
@@ -253,7 +247,7 @@ fun BmpInfo(
 ) {
   Box(
       modifier =
-          modifier.clip(RoundedCornerShape(16.dp)).dashedBorder(4.dp, Color.Gray, 16.dp).clickable(
+          modifier.clip(RoundedCornerShape(16.dp)).defaultDashedBorder().clickable(
               enabled = clickable) {
                 fileChooser { onBmpChanged(it) }
               }) {
@@ -320,23 +314,3 @@ fun fileChooser(filter: String = "*", onFileChoose: (String) -> Unit) {
 
   onFileChoose(dialog.directory + dialog.file)
 }
-
-fun Modifier.dashedBorder(strokeWidth: Dp, color: Color, cornerRadius: Dp) =
-    composed(
-        factory = {
-          val density = LocalDensity.current
-          val strokeWidthPx = density.run { strokeWidth.toPx() }
-          val cornerRadiusPx = density.run { cornerRadius.toPx() }
-
-          then(
-              Modifier.drawWithCache {
-                onDrawBehind {
-                  val stroke =
-                      Stroke(
-                          width = strokeWidthPx,
-                          pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f))
-                  drawRoundRect(
-                      color = color, style = stroke, cornerRadius = CornerRadius(cornerRadiusPx))
-                }
-              })
-        })

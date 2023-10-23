@@ -18,6 +18,8 @@ package com.kouqurong.iso8583
 
 import androidx.compose.animation.Animatable
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -46,6 +48,7 @@ fun NumberTextField(
     singleLine: Boolean = true,
     maxLength: Int = Int.MAX_VALUE,
     onValueChange: (TextFieldValue) -> Unit,
+    tooltip: @Composable () -> Unit,
 ) {
   FixedLengthTextField(
       modifier = modifier,
@@ -55,7 +58,8 @@ fun NumberTextField(
       maxLength = maxLength,
       onValueChange = onValueChange,
       keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-      textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center))
+      textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+      tooltip = tooltip)
 }
 
 @Composable
@@ -64,6 +68,7 @@ fun SingleChatTextField(
     value: String,
     readOnly: Boolean = false,
     onValueChange: (String) -> Unit,
+    tooltip: @Composable () -> Unit,
 ) {
 
   // Holds the latest internal TextFieldValue state. We need to keep it to have the correct value
@@ -100,9 +105,11 @@ fun SingleChatTextField(
         }
       },
       keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-      textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center))
+      textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+      tooltip = tooltip)
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FixedLengthTextField(
     modifier: Modifier = Modifier,
@@ -113,6 +120,7 @@ fun FixedLengthTextField(
     onValueChange: (TextFieldValue) -> Unit,
     textStyle: TextStyle = LocalTextStyle.current,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    tooltip: @Composable () -> Unit,
 ) {
   val isOverLength by remember(value) { derivedStateOf { value.text.length > maxLength } }
 
@@ -129,22 +137,23 @@ fun FixedLengthTextField(
     delay(1000)
     underlineColor.animateTo(normalColor)
   }
-
-  BasicTextField(
-      modifier = modifier,
-      value = if (isOverLength) lastTextValue else value,
-      onValueChange = onValueChange,
-      keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-      readOnly = readOnly,
-      singleLine = singleLine,
-      textStyle = textStyle,
-      decorationBox = { innerTextField ->
-        Box(
-            modifier = Modifier.underline(underlineColor.value),
-        ) {
-          innerTextField()
-        }
-      })
+  TooltipArea(tooltip = tooltip) {
+    BasicTextField(
+        modifier = modifier,
+        value = if (isOverLength) lastTextValue else value,
+        onValueChange = onValueChange,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        readOnly = readOnly,
+        singleLine = singleLine,
+        textStyle = textStyle,
+        decorationBox = { innerTextField ->
+          Box(
+              modifier = Modifier.underline(underlineColor.value),
+          ) {
+            innerTextField()
+          }
+        })
+  }
 }
 
 @Composable
@@ -154,5 +163,6 @@ fun PreviewNumberTextField() {
       modifier = Modifier.width(72.dp).height(IntrinsicSize.Min).background(Color.Red),
       value = TextFieldValue("123"),
       onValueChange = {},
+      tooltip = {},
   )
 }
