@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.kouqurong.iso8583
+package com.kouqurong.iso8583.componet
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.gestures.Orientation
@@ -86,7 +86,8 @@ fun SwipeCrossFadeLayout(
               anchors =
                   mapOf(
                       maxHeight.toFloat() to SwipeCrossFadeState.FORE,
-                      0F to SwipeCrossFadeState.BACK),
+                      0F to SwipeCrossFadeState.BACK
+                  ),
               orientation = Orientation.Vertical,
               thresholds = { _, _ -> FractionalThreshold(0.1F) })) { constraints ->
         // 上拉指示器

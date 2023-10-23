@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.kouqurong.iso8583
+package com.kouqurong.iso8583.viewmodel
 
 import com.kouqurong.plugin.view.ViewModel
 

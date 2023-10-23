@@ -22,16 +22,20 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Text
 import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.kouqurong.iso8583.componet.FieldItem
+import com.kouqurong.iso8583.componet.SwipeCrossFadeLayout
+import com.kouqurong.iso8583.componet.SwipeCrossFadeState
+import com.kouqurong.iso8583.componet.SwipeRefreshContent
 
 @Composable
 fun App() {
@@ -54,7 +58,7 @@ fun ISO8583HexInput(
         swipeState = state,
         modifier = Modifier.fillMaxSize(),
         background = {
-          Surface(modifier = Modifier.fillMaxSize()) { androidx.compose.material3.Text("BACK") }
+          Surface(modifier = Modifier.fillMaxSize()) { Text("BACK") }
         },
         foreground = {
           Surface(modifier = Modifier.fillMaxSize()) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.kouqurong.iso8583
+package com.kouqurong.iso8583.componet
 
 import androidx.compose.animation.Animatable
 import androidx.compose.desktop.ui.tooling.preview.Preview

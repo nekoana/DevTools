@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.kouqurong.iso8583
+package com.kouqurong.iso8583.componet
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.kouqurong.iso8583.viewmodel.*
 
 @Composable
 fun FieldItem(
