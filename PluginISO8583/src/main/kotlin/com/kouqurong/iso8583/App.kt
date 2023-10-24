@@ -18,11 +18,11 @@ package com.kouqurong.iso8583
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.rememberSwipeableState
+import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -32,10 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.kouqurong.iso8583.componet.FieldItem
-import com.kouqurong.iso8583.componet.SwipeCrossFadeLayout
-import com.kouqurong.iso8583.componet.SwipeCrossFadeState
-import com.kouqurong.iso8583.componet.SwipeRefreshContent
+import com.kouqurong.iso8583.componet.*
 
 @Composable
 fun App() {
@@ -57,25 +54,49 @@ fun ISO8583HexInput(
     SwipeCrossFadeLayout(
         swipeState = state,
         modifier = Modifier.fillMaxSize(),
-        background = {
-          Surface(modifier = Modifier.fillMaxSize()) { Text("BACK") }
-        },
+        background = { Surface(modifier = Modifier.fillMaxSize()) { Text("BACK") } },
         foreground = {
           Surface(modifier = Modifier.fillMaxSize()) {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-              item {
-                FieldItem(
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1F))
-                            .padding(8.dp),
-                    field = 1)
+            Row(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+              Card(
+                  modifier = Modifier.width(500.dp).fillMaxHeight().padding(8.dp),
+              ) {
+                LazyColumn(
+                    modifier = Modifier.padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                  for (i in 0..10) {
+                    item {
+                      FieldItem(
+                          modifier =
+                              Modifier.fillMaxWidth()
+                                  .clip(RoundedCornerShape(8.dp))
+                                  .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1F))
+                                  .padding(8.dp),
+                          field = i)
+                    }
+                  }
+                }
               }
+
+              Spacer(modifier = Modifier.weight(1F))
+
+              Column(
+                  modifier = Modifier.padding(8.dp).width(200.dp).fillMaxSize(),
+                  horizontalAlignment = Alignment.End,
+                  verticalArrangement = Arrangement.SpaceAround) {
+                    AnimationSizeButton(onClick = {}) { Text("添加") }
+
+                    AnimationSizeButton(onClick = {}) { Text("删除") }
+
+                    AnimationSizeButton(onClick = {}) { Text("导出") }
+
+                    AnimationSizeButton(onClick = {}) { Text("导入") }
+
+                    AnimationSizeButton(onClick = {}) { Text("清空") }
+
+                    AnimationSizeButton(onClick = {}) { Text("模版") }
+                  }
             }
           }
         },

@@ -18,10 +18,7 @@ package com.kouqurong.iso8583.componet
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -86,8 +83,7 @@ fun SwipeCrossFadeLayout(
               anchors =
                   mapOf(
                       maxHeight.toFloat() to SwipeCrossFadeState.FORE,
-                      0F to SwipeCrossFadeState.BACK
-                  ),
+                      0F to SwipeCrossFadeState.BACK),
               orientation = Orientation.Vertical,
               thresholds = { _, _ -> FractionalThreshold(0.1F) })) { constraints ->
         // 上拉指示器
