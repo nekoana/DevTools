@@ -50,6 +50,16 @@ fun ISO8583HexInput(
 ) {
   val state = rememberSwipeableState(SwipeCrossFadeState.FORE)
 
+  val fieldMenuItems =
+      listOf(
+          FieldMenuItem("添加") {},
+          FieldMenuItem("删除") {},
+          FieldMenuItem("导出") {},
+          FieldMenuItem("导入") {},
+          FieldMenuItem("清空") {},
+          FieldMenuItem("模版") {},
+      )
+
   Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
     SwipeCrossFadeLayout(
         swipeState = state,
@@ -57,49 +67,57 @@ fun ISO8583HexInput(
         background = { Surface(modifier = Modifier.fillMaxSize()) { Text("BACK") } },
         foreground = {
           Surface(modifier = Modifier.fillMaxSize()) {
-            Row(modifier = Modifier.fillMaxSize().padding(8.dp)) {
-              Card(
-                  modifier = Modifier.width(500.dp).fillMaxHeight().padding(8.dp),
-              ) {
-                LazyColumn(
-                    modifier = Modifier.padding(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                  for (i in 0..10) {
-                    item {
-                      FieldItem(
-                          modifier =
-                              Modifier.fillMaxWidth()
-                                  .clip(RoundedCornerShape(8.dp))
-                                  .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1F))
-                                  .padding(8.dp),
-                          field = i)
-                    }
-                  }
+            Row(
+                modifier = Modifier.fillMaxSize().padding(12.dp),
+                horizontalArrangement = Arrangement.SpaceAround) {
+                  FieldDetailContent(
+                      modifier = Modifier.width(500.dp).fillMaxHeight().padding(8.dp))
+                  FieldMenuContent(
+                      modifier = Modifier.width(200.dp).fillMaxSize(),
+                      fieldMenuItems = fieldMenuItems)
                 }
-              }
-
-              Spacer(modifier = Modifier.weight(1F))
-
-              Column(
-                  modifier = Modifier.padding(8.dp).width(200.dp).fillMaxSize(),
-                  horizontalAlignment = Alignment.End,
-                  verticalArrangement = Arrangement.SpaceAround) {
-                    AnimationSizeButton(onClick = {}) { Text("添加") }
-
-                    AnimationSizeButton(onClick = {}) { Text("删除") }
-
-                    AnimationSizeButton(onClick = {}) { Text("导出") }
-
-                    AnimationSizeButton(onClick = {}) { Text("导入") }
-
-                    AnimationSizeButton(onClick = {}) { Text("清空") }
-
-                    AnimationSizeButton(onClick = {}) { Text("模版") }
-                  }
-            }
           }
         },
         indicate = { SwipeRefreshContent(state.currentValue) })
   }
+}
+
+data class FieldMenuItem(val text: String, val onClick: () -> Unit)
+
+@Composable
+fun FieldDetailContent(modifier: Modifier = Modifier) {
+  Card(
+      modifier = modifier,
+  ) {
+    LazyColumn(
+        modifier = Modifier.padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      for (i in 0..10) {
+        item {
+          FieldItem(
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .clip(RoundedCornerShape(8.dp))
+                      .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1F))
+                      .padding(8.dp),
+              field = i)
+        }
+      }
+    }
+  }
+}
+
+@Composable
+fun FieldMenuContent(modifier: Modifier = Modifier, fieldMenuItems: List<FieldMenuItem>) {
+  Column(
+      modifier = modifier,
+      horizontalAlignment = Alignment.End,
+      verticalArrangement = Arrangement.SpaceAround) {
+        fieldMenuItems.forEach {
+          AnimationSizeButton(modifier = Modifier.size(160.dp, 52.dp), onClick = {}) {
+            Text(it.text)
+          }
+        }
+      }
 }

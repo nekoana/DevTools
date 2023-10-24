@@ -17,10 +17,12 @@
 package com.kouqurong.iso8583.componet
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -31,19 +33,21 @@ import androidx.compose.ui.input.pointer.onPointerEvent
 fun AnimationSizeButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
+    fraction: Float = 0.8F,
     content: @Composable RowScope.() -> Unit,
 ) {
 
   var isHover by remember { mutableStateOf(false) }
-  // todo 如果modifier存在修饰符大小显示不正确
-  val fraction by animateFloatAsState(if (isHover) 1F else 0.8F)
 
-  Button(
-      modifier =
-          modifier
-              .fillMaxWidth(fraction = fraction)
-              .onPointerEvent(PointerEventType.Enter) { isHover = true }
-              .onPointerEvent(PointerEventType.Exit) { isHover = false },
-      onClick = onClick,
-      content = content)
+  val fractionAnim by animateFloatAsState(if (isHover) 1F else fraction)
+
+  Box(modifier = modifier, contentAlignment = Alignment.Center) {
+    Button(
+        modifier =
+            Modifier.fillMaxSize(fraction = fractionAnim)
+                .onPointerEvent(PointerEventType.Enter) { isHover = true }
+                .onPointerEvent(PointerEventType.Exit) { isHover = false },
+        onClick = onClick,
+        content = content)
+  }
 }
