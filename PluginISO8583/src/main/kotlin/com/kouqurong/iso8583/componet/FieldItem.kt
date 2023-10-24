@@ -16,6 +16,7 @@
 
 package com.kouqurong.iso8583.componet
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
@@ -25,19 +26,21 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.kouqurong.iso8583.viewmodel.*
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun FieldItem(
     modifier: Modifier = Modifier,
@@ -46,25 +49,41 @@ fun FieldItem(
     format: IFormat = IFormat.FIX,
     align: IAlign = IAlign.LEFT,
 ) {
-  var fieldTextValue by remember { mutableStateOf(TextFieldValue(field.toString())) }
-  var padding by remember { mutableStateOf(TextFieldValue("0")) }
 
-  var isShowAttrMenu by remember { mutableStateOf(false) }
-  var isShowFormatMenu by remember { mutableStateOf(false) }
-  var isShowAlignMenu by remember { mutableStateOf(false) }
+  var isHover by remember { mutableStateOf(false) }
+
+  val fractionAnim by animateFloatAsState(if (isHover) 1F else 0.9F)
+
   var length by remember { mutableStateOf(11) }
 
-  Row(
-      modifier = modifier,
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.SpaceBetween,
-  ) {
-    FieldInputItem(field = 1) {}
-    AttrSelectItem(attr = attr) {}
-    LengthAndFormatItem(
-        length = length, format = format, onLengthChange = { length = it }, onFormatChange = {})
-    PaddingAndAlignItem(padding = "0", align = align, onPaddingChange = {}, onAlignChange = {})
-  }
+  Box(
+      modifier =
+          modifier
+              .onPointerEvent(PointerEventType.Enter) { isHover = true }
+              .onPointerEvent(PointerEventType.Exit) { isHover = false },
+      contentAlignment = Alignment.Center) {
+        Card(modifier = Modifier.fillMaxSize(fraction = fractionAnim)) {
+          Row(
+              modifier = Modifier.padding(8.dp).fillMaxSize(),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.SpaceBetween,
+          ) {
+            FieldInputItem(field = 1) {}
+            AttrSelectItem(attr = attr) {}
+            LengthAndFormatItem(
+                length = length,
+                format = format,
+                onLengthChange = { length = it },
+                onFormatChange = {})
+            PaddingAndAlignItem(
+                padding = "0", align = align, onPaddingChange = {}, onAlignChange = {})
+
+            if (isHover) {
+              IconButton(onClick = {}) { Icon(imageVector = Icons.Default.Delete, "Delete") }
+            }
+          }
+        }
+      }
 }
 
 @Composable

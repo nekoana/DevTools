@@ -16,20 +16,15 @@
 
 package com.kouqurong.iso8583
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.rememberSwipeableState
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.kouqurong.iso8583.componet.*
@@ -53,7 +48,6 @@ fun ISO8583HexInput(
   val fieldMenuItems =
       listOf(
           FieldMenuItem("添加") {},
-          FieldMenuItem("删除") {},
           FieldMenuItem("导出") {},
           FieldMenuItem("导入") {},
           FieldMenuItem("清空") {},
@@ -86,24 +80,12 @@ data class FieldMenuItem(val text: String, val onClick: () -> Unit)
 
 @Composable
 fun FieldDetailContent(modifier: Modifier = Modifier) {
-  Card(
+  LazyColumn(
       modifier = modifier,
+      verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
-    LazyColumn(
-        modifier = Modifier.padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-      for (i in 0..10) {
-        item {
-          FieldItem(
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .clip(RoundedCornerShape(8.dp))
-                      .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1F))
-                      .padding(8.dp),
-              field = i)
-        }
-      }
+    for (i in 0..10) {
+      item { FieldItem(modifier = Modifier.fillMaxWidth().height(52.dp), field = i) }
     }
   }
 }
