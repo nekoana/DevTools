@@ -85,7 +85,7 @@ fun FieldDetailContent(modifier: Modifier = Modifier) {
       verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
     for (i in 0..10) {
-      item { FieldItem(modifier = Modifier.fillMaxWidth().height(52.dp), field = i) }
+      item { AnimationSizeFieldItem(modifier = Modifier.fillMaxWidth().height(52.dp), field = i) }
     }
   }
 }

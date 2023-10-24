@@ -42,7 +42,7 @@ import com.kouqurong.iso8583.viewmodel.*
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun FieldItem(
+fun AnimationSizeFieldItem(
     modifier: Modifier = Modifier,
     field: Int,
     attr: IAttr = IAttr.ASCII,
@@ -241,7 +241,7 @@ fun PaddingAndAlignItem(
 @Composable
 @Preview
 fun PreviewFieldItem() {
-  FieldItem(
+  AnimationSizeFieldItem(
       modifier =
           Modifier.fillMaxWidth()
               .clip(RoundedCornerShape(8.dp))
