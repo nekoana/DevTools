@@ -16,11 +16,13 @@
 
 package com.kouqurong.iso8583.viewmodel
 
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SwipeableState
 import androidx.compose.runtime.mutableStateListOf
 import com.kouqurong.iso8583.componet.SwipeCrossFadeState
 import com.kouqurong.plugin.view.ViewModel
+import kotlinx.coroutines.launch
 
 sealed class IAttr(val value: String) {
   data object ASCII : IAttr("ASCII")
@@ -67,14 +69,22 @@ class PluginISO8583ViewModel : ViewModel() {
           FieldMenuItem("添加") { addNewFieldItem() },
           FieldMenuItem("导出") {},
           FieldMenuItem("导入") {},
-          FieldMenuItem("清空") {},
+          FieldMenuItem("清空") { clearFieldItems() },
           FieldMenuItem("模版") {},
       )
 
   @OptIn(ExperimentalMaterialApi::class)
   val swipeCrossFadeState = SwipeableState(SwipeCrossFadeState.FORE)
 
+  val scrollFieldDetailState = LazyListState()
+
   private fun addNewFieldItem() {
     _fieldItems.add(FieldItem(field = _fieldItems.size + 1))
+
+    viewModelScope.launch { scrollFieldDetailState.scrollToItem(_fieldItems.size - 1) }
+  }
+
+  private fun clearFieldItems() {
+    _fieldItems.clear()
   }
 }

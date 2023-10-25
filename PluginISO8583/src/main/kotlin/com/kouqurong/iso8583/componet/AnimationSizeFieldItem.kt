@@ -96,7 +96,7 @@ fun FieldInputItem(modifier: Modifier = Modifier, field: Int, onFieldChange: (In
   var lastTextValue by remember(field) { mutableStateOf(field.toString()) }
 
   NumberTextField(
-      modifier = Modifier.width(48.dp).height(IntrinsicSize.Min),
+      modifier = modifier.width(48.dp).height(IntrinsicSize.Min),
       value = textFieldValue,
       maxLength = 3,
       onValueChange = { newTextFieldValueState ->
@@ -133,7 +133,6 @@ fun AttrSelectItem(modifier: Modifier = Modifier, attr: IAttr, onAttrChange: (IA
   }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LengthAndFormatItem(
     modifier: Modifier = Modifier,

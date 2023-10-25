@@ -42,6 +42,7 @@ fun App(viewModel: PluginISO8583ViewModel) {
         modifier = Modifier.fillMaxSize(),
         viewModel.fieldItems,
         viewModel.fieldMenuItems,
+        viewModel.scrollFieldDetailState,
         viewModel.swipeCrossFadeState,
     )
   }
@@ -53,6 +54,7 @@ fun ISO8583HexInput(
     modifier: Modifier = Modifier,
     fieldItems: List<FieldItem>,
     fieldMenuItems: List<FieldMenuItem>,
+    scrollFieldDetailState: LazyListState = rememberLazyListState(),
     swipeCrossFadeState: SwipeableState<SwipeCrossFadeState>
 ) {
 
@@ -68,7 +70,9 @@ fun ISO8583HexInput(
                 horizontalArrangement = Arrangement.SpaceAround) {
                   FieldDetailContent(
                       modifier = Modifier.width(500.dp).fillMaxHeight().padding(8.dp),
-                      fieldItems = fieldItems)
+                      fieldItems = fieldItems,
+                      scrollState = scrollFieldDetailState,
+                  )
                   FieldMenuContent(
                       modifier = Modifier.width(200.dp).fillMaxSize(),
                       fieldMenuItems = fieldMenuItems)
