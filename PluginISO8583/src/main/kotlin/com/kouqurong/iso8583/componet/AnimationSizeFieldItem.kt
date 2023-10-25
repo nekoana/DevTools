@@ -17,13 +17,10 @@
 package com.kouqurong.iso8583.componet
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
@@ -32,8 +29,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.text.input.TextFieldValue
@@ -42,19 +37,11 @@ import com.kouqurong.iso8583.viewmodel.*
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun AnimationSizeFieldItem(
-    modifier: Modifier = Modifier,
-    field: Int,
-    attr: IAttr = IAttr.ASCII,
-    format: IFormat = IFormat.FIX,
-    align: IAlign = IAlign.LEFT,
-) {
+fun AnimationSizeFieldItem(modifier: Modifier = Modifier, fieldItem: FieldItem) {
 
   var isHover by remember { mutableStateOf(false) }
 
-  val fractionAnim by animateFloatAsState(if (isHover) 1F else 0.9F)
-
-  var length by remember { mutableStateOf(11) }
+  val fractionAnim by animateFloatAsState(if (isHover) 1F else 0.95F)
 
   Box(
       modifier =
@@ -68,15 +55,18 @@ fun AnimationSizeFieldItem(
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.SpaceBetween,
           ) {
-            FieldInputItem(field = 1) {}
-            AttrSelectItem(attr = attr) {}
+            FieldInputItem(field = fieldItem.field) {}
+            AttrSelectItem(attr = fieldItem.attr) {}
             LengthAndFormatItem(
-                length = length,
-                format = format,
-                onLengthChange = { length = it },
+                length = fieldItem.length,
+                format = fieldItem.format,
+                onLengthChange = {},
                 onFormatChange = {})
             PaddingAndAlignItem(
-                padding = "0", align = align, onPaddingChange = {}, onAlignChange = {})
+                padding = fieldItem.padding,
+                align = fieldItem.align,
+                onPaddingChange = {},
+                onAlignChange = {})
 
             if (isHover) {
               IconButton(onClick = {}) { Icon(imageVector = Icons.Default.Delete, "Delete") }
@@ -147,57 +137,29 @@ fun AttrSelectItem(modifier: Modifier = Modifier, attr: IAttr, onAttrChange: (IA
 @Composable
 fun LengthAndFormatItem(
     modifier: Modifier = Modifier,
-    length: Int,
+    length: String,
     format: IFormat,
-    onLengthChange: (Int) -> Unit,
+    onLengthChange: (String) -> Unit,
     onFormatChange: (IFormat) -> Unit,
 ) {
-  // Holds the latest internal TextFieldValue state. We need to keep it to have the correct value
-  // of the composition.
-  var textFieldValueState by remember { mutableStateOf(TextFieldValue(text = length.toString())) }
-  // Holds the latest TextFieldValue that BasicTextField was recomposed with. We couldn't simply
-  // pass `TextFieldValue(text = value)` to the CoreTextField because we need to preserve the
-  // composition.
-  val textFieldValue = textFieldValueState.copy(text = length.toString())
-
-  SideEffect {
-    if (textFieldValue.selection != textFieldValueState.selection ||
-        textFieldValue.composition != textFieldValueState.composition) {
-      textFieldValueState = textFieldValue
-    }
-  }
-
-  var lastTextValue by remember(length) { mutableStateOf(length.toString()) }
-
   var isShowFormatMenu by remember { mutableStateOf(false) }
   Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween) {
     NumberTextField(
         modifier = Modifier.width(64.dp),
-        value = textFieldValue,
+        value = length,
         maxLength = 4,
-        onValueChange = { newTextFieldValueState ->
-          textFieldValueState = newTextFieldValueState
-
-          val stringChangedSinceLastInvocation = lastTextValue != newTextFieldValueState.text
-          lastTextValue = newTextFieldValueState.text
-
-          if (stringChangedSinceLastInvocation) {
-            onLengthChange(newTextFieldValueState.text.toIntOrNull() ?: 0)
-          }
-        },
+        onValueChange = onLengthChange,
         tooltip = { Text(text = "Length") })
 
-    TooltipArea(tooltip = { Text(text = "Format") }) {
-      Row(
-          modifier = Modifier.clickable { isShowFormatMenu = !isShowFormatMenu },
-      ) {
-        Text(text = format.value)
-        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
+    Row(
+        modifier = Modifier.clickable { isShowFormatMenu = !isShowFormatMenu },
+    ) {
+      Text(text = format.value)
+      Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
 
-        DropdownMenu(isShowFormatMenu, onDismissRequest = { isShowFormatMenu = false }) {
-          FormatList.forEach { format ->
-            DropdownMenuItem(text = { Text(format.value) }, onClick = { onFormatChange(format) })
-          }
+      DropdownMenu(isShowFormatMenu, onDismissRequest = { isShowFormatMenu = false }) {
+        FormatList.forEach { format ->
+          DropdownMenuItem(text = { Text(format.value) }, onClick = { onFormatChange(format) })
         }
       }
     }
@@ -216,7 +178,7 @@ fun PaddingAndAlignItem(
   var isShowAlignMenu by remember { mutableStateOf(false) }
 
   Row(modifier = modifier) {
-    SingleChatTextField(
+    SingleCharTextField(
         modifier = Modifier.width(24.dp),
         value = padding,
         onValueChange = { onPaddingChange(it) },
@@ -236,17 +198,4 @@ fun PaddingAndAlignItem(
       }
     }
   }
-}
-
-@Composable
-@Preview
-fun PreviewFieldItem() {
-  AnimationSizeFieldItem(
-      modifier =
-          Modifier.fillMaxWidth()
-              .clip(RoundedCornerShape(8.dp))
-              .background(Color.Gray)
-              .padding(8.dp),
-      field = 1,
-  )
 }

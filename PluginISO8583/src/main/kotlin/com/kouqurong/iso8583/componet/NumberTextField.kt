@@ -43,6 +43,28 @@ import kotlinx.coroutines.delay
 @Composable
 fun NumberTextField(
     modifier: Modifier = Modifier,
+    value: String,
+    readOnly: Boolean = false,
+    singleLine: Boolean = true,
+    maxLength: Int = Int.MAX_VALUE,
+    onValueChange: (String) -> Unit,
+    tooltip: @Composable () -> Unit,
+) {
+  FixedLengthTextField(
+      modifier = modifier,
+      value = value,
+      readOnly = readOnly,
+      singleLine = singleLine,
+      maxLength = maxLength,
+      onValueChange = onValueChange,
+      keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+      textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+      tooltip = tooltip)
+}
+
+@Composable
+fun NumberTextField(
+    modifier: Modifier = Modifier,
     value: TextFieldValue,
     readOnly: Boolean = false,
     singleLine: Boolean = true,
@@ -63,14 +85,37 @@ fun NumberTextField(
 }
 
 @Composable
-fun SingleChatTextField(
+fun SingleCharTextField(
     modifier: Modifier = Modifier,
     value: String,
     readOnly: Boolean = false,
     onValueChange: (String) -> Unit,
     tooltip: @Composable () -> Unit,
 ) {
+  FixedLengthTextField(
+      modifier = modifier,
+      value = value,
+      readOnly = readOnly,
+      singleLine = true,
+      maxLength = 1,
+      onValueChange = onValueChange,
+      keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+      textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+      tooltip = tooltip)
+}
 
+@Composable
+fun FixedLengthTextField(
+    modifier: Modifier = Modifier,
+    value: String,
+    readOnly: Boolean = false,
+    singleLine: Boolean = true,
+    maxLength: Int = Int.MAX_VALUE,
+    onValueChange: (String) -> Unit,
+    textStyle: TextStyle = LocalTextStyle.current,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    tooltip: @Composable () -> Unit,
+) {
   // Holds the latest internal TextFieldValue state. We need to keep it to have the correct value
   // of the composition.
   var textFieldValueState by remember { mutableStateOf(TextFieldValue(text = value)) }
@@ -92,8 +137,8 @@ fun SingleChatTextField(
       modifier = modifier,
       value = textFieldValue,
       readOnly = readOnly,
-      singleLine = true,
-      maxLength = 1,
+      singleLine = singleLine,
+      maxLength = maxLength,
       onValueChange = { newTextFieldValueState ->
         textFieldValueState = newTextFieldValueState
 
@@ -104,8 +149,8 @@ fun SingleChatTextField(
           onValueChange(newTextFieldValueState.text)
         }
       },
-      keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-      textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+      textStyle = textStyle,
+      keyboardOptions = keyboardOptions,
       tooltip = tooltip)
 }
 
@@ -142,7 +187,7 @@ fun FixedLengthTextField(
         modifier = modifier,
         value = if (isOverLength) lastTextValue else value,
         onValueChange = onValueChange,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        keyboardOptions = keyboardOptions,
         readOnly = readOnly,
         singleLine = singleLine,
         textStyle = textStyle,

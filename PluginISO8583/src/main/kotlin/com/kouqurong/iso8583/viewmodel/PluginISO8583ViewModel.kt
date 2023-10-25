@@ -16,6 +16,10 @@
 
 package com.kouqurong.iso8583.viewmodel
 
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.SwipeableState
+import androidx.compose.runtime.mutableStateListOf
+import com.kouqurong.iso8583.componet.SwipeCrossFadeState
 import com.kouqurong.plugin.view.ViewModel
 
 sealed class IAttr(val value: String) {
@@ -45,9 +49,32 @@ data class FieldItem(
     val attr: IAttr = IAttr.ASCII,
     val format: IFormat = IFormat.FIX,
     val align: IAlign = IAlign.LEFT,
-    val length: Int = 0,
+    val length: String = "0",
     val padding: String = "0",
     val value: String = "",
 )
 
-class PluginISO8583ViewModel : ViewModel() {}
+data class FieldMenuItem(val text: String, val onClick: () -> Unit)
+
+class PluginISO8583ViewModel : ViewModel() {
+  private val _fieldItems = mutableStateListOf<FieldItem>()
+
+  val fieldItems: List<FieldItem>
+    get() = _fieldItems
+
+  val fieldMenuItems =
+      listOf(
+          FieldMenuItem("添加") { addNewFieldItem() },
+          FieldMenuItem("导出") {},
+          FieldMenuItem("导入") {},
+          FieldMenuItem("清空") {},
+          FieldMenuItem("模版") {},
+      )
+
+  @OptIn(ExperimentalMaterialApi::class)
+  val swipeCrossFadeState = SwipeableState(SwipeCrossFadeState.FORE)
+
+  private fun addNewFieldItem() {
+    _fieldItems.add(FieldItem(field = _fieldItems.size + 1))
+  }
+}

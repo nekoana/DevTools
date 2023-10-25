@@ -18,21 +18,32 @@ package com.kouqurong.iso8583
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.rememberSwipeableState
+import androidx.compose.material.SwipeableState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.kouqurong.iso8583.componet.*
+import com.kouqurong.iso8583.viewmodel.FieldItem
+import com.kouqurong.iso8583.viewmodel.FieldMenuItem
+import com.kouqurong.iso8583.viewmodel.PluginISO8583ViewModel
+import com.kouqurong.plugin.view.defaultDashedBorder
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun App() {
+fun App(viewModel: PluginISO8583ViewModel) {
   Surface(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-    ISO8583HexInput(modifier = Modifier.fillMaxSize(), text = TextFieldValue("")) {}
+    ISO8583HexInput(
+        modifier = Modifier.fillMaxSize(),
+        viewModel.fieldItems,
+        viewModel.fieldMenuItems,
+        viewModel.swipeCrossFadeState,
+    )
   }
 }
 
@@ -40,23 +51,14 @@ fun App() {
 @Composable
 fun ISO8583HexInput(
     modifier: Modifier = Modifier,
-    text: TextFieldValue,
-    onValueChanged: (TextFieldValue) -> Unit
+    fieldItems: List<FieldItem>,
+    fieldMenuItems: List<FieldMenuItem>,
+    swipeCrossFadeState: SwipeableState<SwipeCrossFadeState>
 ) {
-  val state = rememberSwipeableState(SwipeCrossFadeState.FORE)
 
-  val fieldMenuItems =
-      listOf(
-          FieldMenuItem("添加") {},
-          FieldMenuItem("导出") {},
-          FieldMenuItem("导入") {},
-          FieldMenuItem("清空") {},
-          FieldMenuItem("模版") {},
-      )
-
-  Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+  Box(modifier = modifier, contentAlignment = Alignment.Center) {
     SwipeCrossFadeLayout(
-        swipeState = state,
+        swipeState = swipeCrossFadeState,
         modifier = Modifier.fillMaxSize(),
         background = { Surface(modifier = Modifier.fillMaxSize()) { Text("BACK") } },
         foreground = {
@@ -65,27 +67,32 @@ fun ISO8583HexInput(
                 modifier = Modifier.fillMaxSize().padding(12.dp),
                 horizontalArrangement = Arrangement.SpaceAround) {
                   FieldDetailContent(
-                      modifier = Modifier.width(500.dp).fillMaxHeight().padding(8.dp))
+                      modifier = Modifier.width(500.dp).fillMaxHeight().padding(8.dp),
+                      fieldItems = fieldItems)
                   FieldMenuContent(
                       modifier = Modifier.width(200.dp).fillMaxSize(),
                       fieldMenuItems = fieldMenuItems)
                 }
           }
         },
-        indicate = { SwipeRefreshContent(state.currentValue) })
+        indicate = { SwipeRefreshContent(swipeCrossFadeState.currentValue) })
   }
 }
 
-data class FieldMenuItem(val text: String, val onClick: () -> Unit)
-
 @Composable
-fun FieldDetailContent(modifier: Modifier = Modifier) {
+fun FieldDetailContent(
+    modifier: Modifier = Modifier,
+    fieldItems: List<FieldItem>,
+    scrollState: LazyListState = rememberLazyListState()
+) {
   LazyColumn(
-      modifier = modifier,
+      modifier = modifier.defaultDashedBorder(),
+      state = scrollState,
       verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
-    for (i in 0..10) {
-      item { AnimationSizeFieldItem(modifier = Modifier.fillMaxWidth().height(52.dp), field = i) }
+    items(fieldItems.size, key = { it }) { i ->
+      AnimationSizeFieldItem(
+          modifier = Modifier.fillMaxWidth().padding(1.dp).height(52.dp), fieldItem = fieldItems[i])
     }
   }
 }
@@ -97,7 +104,7 @@ fun FieldMenuContent(modifier: Modifier = Modifier, fieldMenuItems: List<FieldMe
       horizontalAlignment = Alignment.End,
       verticalArrangement = Arrangement.SpaceAround) {
         fieldMenuItems.forEach {
-          AnimationSizeButton(modifier = Modifier.size(160.dp, 52.dp), onClick = {}) {
+          AnimationSizeButton(modifier = Modifier.size(160.dp, 52.dp), onClick = it.onClick) {
             Text(it.text)
           }
         }
