@@ -54,34 +54,46 @@ fun AnimationSizeFieldItem(
               .onPointerEvent(PointerEventType.Exit) { isHover = false },
       contentAlignment = Alignment.Center) {
         Card(modifier = Modifier.fillMaxSize(fraction = fractionAnim)) {
-          Row(
-              modifier = Modifier.padding(8.dp).fillMaxSize(),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.SpaceBetween,
-          ) {
-            FieldInputItem(field = fieldItem.field) {
-              onFieldItemChange(fieldItem.copy(field = it))
-            }
-            AttrSelectItem(attr = fieldItem.attr) { onFieldItemChange(fieldItem.copy(attr = it)) }
-            LengthAndFormatItem(
-                length = fieldItem.length,
-                format = fieldItem.format,
-                onLengthChange = { onFieldItemChange(fieldItem.copy(length = it)) },
-                onFormatChange = { onFieldItemChange(fieldItem.copy(format = it)) })
-            PaddingAndAlignItem(
-                padding = fieldItem.padding,
-                align = fieldItem.align,
-                onPaddingChange = { onFieldItemChange(fieldItem.copy(padding = it)) },
-                onAlignChange = { onFieldItemChange(fieldItem.copy(align = it)) })
-
-            if (isHover) {
-              IconButton(onClick = onFieldItemDelete) {
-                Icon(imageVector = Icons.Default.Delete, "Delete")
-              }
-            }
-          }
+          FieldItemRow(
+              modifier = Modifier.fillMaxSize().padding(8.dp),
+              fieldItem = fieldItem,
+              isHover = isHover,
+              onFieldItemChange = onFieldItemChange,
+              onFieldItemDelete = onFieldItemDelete)
         }
       }
+}
+
+@Composable
+fun FieldItemRow(
+    modifier: Modifier = Modifier,
+    fieldItem: FieldItem,
+    isHover: Boolean,
+    onFieldItemChange: (FieldItem) -> Unit,
+    onFieldItemDelete: () -> Unit
+) {
+  Row(
+      modifier = modifier,
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceBetween,
+  ) {
+    FieldInputItem(field = fieldItem.field) { onFieldItemChange(fieldItem.copy(field = it)) }
+    AttrSelectItem(attr = fieldItem.attr) { onFieldItemChange(fieldItem.copy(attr = it)) }
+    LengthAndFormatItem(
+        length = fieldItem.length,
+        format = fieldItem.format,
+        onLengthChange = { onFieldItemChange(fieldItem.copy(length = it)) },
+        onFormatChange = { onFieldItemChange(fieldItem.copy(format = it)) })
+    PaddingAndAlignItem(
+        padding = fieldItem.padding,
+        align = fieldItem.align,
+        onPaddingChange = { onFieldItemChange(fieldItem.copy(padding = it)) },
+        onAlignChange = { onFieldItemChange(fieldItem.copy(align = it)) })
+
+    if (isHover) {
+      IconButton(onClick = onFieldItemDelete) { Icon(imageVector = Icons.Default.Delete, "Delete") }
+    }
+  }
 }
 
 @Composable
@@ -89,6 +101,7 @@ fun FieldInputItem(modifier: Modifier = Modifier, field: String, onFieldChange: 
   NumberTextField(
       modifier = modifier.width(48.dp).height(IntrinsicSize.Min),
       value = field,
+      isError = field.isBlank(),
       maxLength = 3,
       onValueChange = onFieldChange,
       tooltip = { Text("Field") })
@@ -133,6 +146,7 @@ fun LengthAndFormatItem(
     NumberTextField(
         modifier = Modifier.width(64.dp),
         value = length,
+        isError = length.isBlank(),
         maxLength = 4,
         onValueChange = onLengthChange,
         tooltip = { Text(text = "Length") })
@@ -172,6 +186,7 @@ fun PaddingAndAlignItem(
     SingleCharTextField(
         modifier = Modifier.width(24.dp),
         value = padding,
+        isError = padding.isBlank(),
         onValueChange = { onPaddingChange(it) },
         tooltip = { Text(text = "Padding") })
     TooltipArea(tooltip = { Text(text = "Align") }) {

@@ -53,7 +53,6 @@ data class FieldItem(
     val align: IAlign = IAlign.LEFT,
     val length: String = "0",
     val padding: String = "0",
-    val value: String = "",
 )
 
 data class FieldMenuItem(val text: String, val onClick: () -> Unit)

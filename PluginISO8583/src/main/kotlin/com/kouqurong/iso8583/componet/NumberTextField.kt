@@ -46,6 +46,7 @@ fun NumberTextField(
     value: String,
     readOnly: Boolean = false,
     singleLine: Boolean = true,
+    isError: Boolean = false,
     maxLength: Int = Int.MAX_VALUE,
     onValueChange: (String) -> Unit,
     tooltip: @Composable () -> Unit,
@@ -55,6 +56,7 @@ fun NumberTextField(
       value = value,
       readOnly = readOnly,
       singleLine = singleLine,
+      isError = isError,
       maxLength = maxLength,
       onValueChange = onValueChange,
       keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -68,6 +70,7 @@ fun NumberTextField(
     value: TextFieldValue,
     readOnly: Boolean = false,
     singleLine: Boolean = true,
+    isError: Boolean = false,
     maxLength: Int = Int.MAX_VALUE,
     onValueChange: (TextFieldValue) -> Unit,
     tooltip: @Composable () -> Unit,
@@ -77,6 +80,7 @@ fun NumberTextField(
       value = value,
       readOnly = readOnly,
       singleLine = singleLine,
+      isError = isError,
       maxLength = maxLength,
       onValueChange = onValueChange,
       keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -89,6 +93,7 @@ fun SingleCharTextField(
     modifier: Modifier = Modifier,
     value: String,
     readOnly: Boolean = false,
+    isError: Boolean = false,
     onValueChange: (String) -> Unit,
     tooltip: @Composable () -> Unit,
 ) {
@@ -97,6 +102,7 @@ fun SingleCharTextField(
       value = value,
       readOnly = readOnly,
       singleLine = true,
+      isError = isError,
       maxLength = 1,
       onValueChange = onValueChange,
       keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -109,6 +115,7 @@ fun FixedLengthTextField(
     modifier: Modifier = Modifier,
     value: String,
     readOnly: Boolean = false,
+    isError: Boolean = false,
     singleLine: Boolean = true,
     maxLength: Int = Int.MAX_VALUE,
     onValueChange: (String) -> Unit,
@@ -138,6 +145,7 @@ fun FixedLengthTextField(
       value = textFieldValue,
       readOnly = readOnly,
       singleLine = singleLine,
+      isError = isError,
       maxLength = maxLength,
       onValueChange = { newTextFieldValueState ->
         textFieldValueState = newTextFieldValueState
@@ -161,6 +169,7 @@ fun FixedLengthTextField(
     value: TextFieldValue,
     readOnly: Boolean = false,
     singleLine: Boolean = true,
+    isError: Boolean = false,
     maxLength: Int = Int.MAX_VALUE,
     onValueChange: (TextFieldValue) -> Unit,
     textStyle: TextStyle = LocalTextStyle.current,
@@ -175,12 +184,17 @@ fun FixedLengthTextField(
   val errorColor = MaterialTheme.colorScheme.error
   val normalColor = MaterialTheme.colorScheme.onBackground
 
-  val underlineColor = remember { Animatable(if (isOverLength) errorColor else normalColor) }
+  val underlineColor =
+      remember(isOverLength, isError) {
+        Animatable(if (isOverLength || isError) errorColor else normalColor)
+      }
 
-  LaunchedEffect(isOverLength, value) {
+  LaunchedEffect(isOverLength, isError, value) {
     if (isOverLength) underlineColor.animateTo(errorColor)
-    delay(1000)
-    underlineColor.animateTo(normalColor)
+    if (!isError) {
+      delay(1000)
+      underlineColor.animateTo(normalColor)
+    }
   }
   TooltipArea(tooltip = tooltip) {
     BasicTextField(
