@@ -47,7 +47,7 @@ sealed class IAlign(val value: String) {
 val AlignList = listOf(IAlign.LEFT, IAlign.RIGHT)
 
 data class FieldItem(
-    val field: Int,
+    val field: String = "",
     val attr: IAttr = IAttr.ASCII,
     val format: IFormat = IFormat.FIX,
     val align: IAlign = IAlign.LEFT,
@@ -79,12 +79,20 @@ class PluginISO8583ViewModel : ViewModel() {
   val scrollFieldDetailState = LazyListState()
 
   private fun addNewFieldItem() {
-    _fieldItems.add(FieldItem(field = _fieldItems.size + 1))
+    _fieldItems.add(FieldItem(field = (_fieldItems.size + 1).toString()))
 
     viewModelScope.launch { scrollFieldDetailState.scrollToItem(_fieldItems.size - 1) }
   }
 
   private fun clearFieldItems() {
     _fieldItems.clear()
+  }
+
+  fun fieldItemChange(index: Int, fieldItem: FieldItem) {
+    _fieldItems[index] = fieldItem
+  }
+
+  fun fieldItemDelete(index: Int) {
+    _fieldItems.removeAt(index)
   }
 }

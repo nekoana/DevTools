@@ -40,10 +40,12 @@ fun App(viewModel: PluginISO8583ViewModel) {
   Surface(modifier = Modifier.fillMaxSize().padding(16.dp)) {
     ISO8583HexInput(
         modifier = Modifier.fillMaxSize(),
-        viewModel.fieldItems,
-        viewModel.fieldMenuItems,
-        viewModel.scrollFieldDetailState,
-        viewModel.swipeCrossFadeState,
+        fieldItems = viewModel.fieldItems,
+        fieldMenuItems = viewModel.fieldMenuItems,
+        scrollFieldDetailState = viewModel.scrollFieldDetailState,
+        swipeCrossFadeState = viewModel.swipeCrossFadeState,
+        onFieldItemChange = viewModel::fieldItemChange,
+        onFieldItemDelete = viewModel::fieldItemDelete,
     )
   }
 }
@@ -55,7 +57,9 @@ fun ISO8583HexInput(
     fieldItems: List<FieldItem>,
     fieldMenuItems: List<FieldMenuItem>,
     scrollFieldDetailState: LazyListState = rememberLazyListState(),
-    swipeCrossFadeState: SwipeableState<SwipeCrossFadeState>
+    swipeCrossFadeState: SwipeableState<SwipeCrossFadeState>,
+    onFieldItemChange: (Int, FieldItem) -> Unit,
+    onFieldItemDelete: (Int) -> Unit,
 ) {
 
   Box(modifier = modifier, contentAlignment = Alignment.Center) {
@@ -72,6 +76,8 @@ fun ISO8583HexInput(
                       modifier = Modifier.width(500.dp).fillMaxHeight().padding(8.dp),
                       fieldItems = fieldItems,
                       scrollState = scrollFieldDetailState,
+                      onFieldItemChange = onFieldItemChange,
+                      onFieldItemDelete = onFieldItemDelete,
                   )
                   FieldMenuContent(
                       modifier = Modifier.width(200.dp).fillMaxSize(),
@@ -87,7 +93,9 @@ fun ISO8583HexInput(
 fun FieldDetailContent(
     modifier: Modifier = Modifier,
     fieldItems: List<FieldItem>,
-    scrollState: LazyListState = rememberLazyListState()
+    scrollState: LazyListState = rememberLazyListState(),
+    onFieldItemChange: (Int, FieldItem) -> Unit,
+    onFieldItemDelete: (Int) -> Unit,
 ) {
   LazyColumn(
       modifier = modifier.defaultDashedBorder(),
@@ -96,7 +104,10 @@ fun FieldDetailContent(
   ) {
     items(fieldItems.size, key = { it }) { i ->
       AnimationSizeFieldItem(
-          modifier = Modifier.fillMaxWidth().padding(1.dp).height(52.dp), fieldItem = fieldItems[i])
+          modifier = Modifier.fillMaxWidth().padding(1.dp).height(52.dp),
+          fieldItem = fieldItems[i],
+          onFieldItemChange = { onFieldItemChange(i, it) },
+          onFieldItemDelete = { onFieldItemDelete(i) })
     }
   }
 }

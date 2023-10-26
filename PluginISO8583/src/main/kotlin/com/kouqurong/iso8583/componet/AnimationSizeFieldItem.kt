@@ -31,13 +31,17 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.kouqurong.iso8583.viewmodel.*
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun AnimationSizeFieldItem(modifier: Modifier = Modifier, fieldItem: FieldItem) {
+fun AnimationSizeFieldItem(
+    modifier: Modifier = Modifier,
+    fieldItem: FieldItem,
+    onFieldItemChange: (FieldItem) -> Unit,
+    onFieldItemDelete: () -> Unit
+) {
 
   var isHover by remember { mutableStateOf(false) }
 
@@ -55,21 +59,25 @@ fun AnimationSizeFieldItem(modifier: Modifier = Modifier, fieldItem: FieldItem) 
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.SpaceBetween,
           ) {
-            FieldInputItem(field = fieldItem.field) {}
-            AttrSelectItem(attr = fieldItem.attr) {}
+            FieldInputItem(field = fieldItem.field) {
+              onFieldItemChange(fieldItem.copy(field = it))
+            }
+            AttrSelectItem(attr = fieldItem.attr) { onFieldItemChange(fieldItem.copy(attr = it)) }
             LengthAndFormatItem(
                 length = fieldItem.length,
                 format = fieldItem.format,
-                onLengthChange = {},
-                onFormatChange = {})
+                onLengthChange = { onFieldItemChange(fieldItem.copy(length = it)) },
+                onFormatChange = { onFieldItemChange(fieldItem.copy(format = it)) })
             PaddingAndAlignItem(
                 padding = fieldItem.padding,
                 align = fieldItem.align,
-                onPaddingChange = {},
-                onAlignChange = {})
+                onPaddingChange = { onFieldItemChange(fieldItem.copy(padding = it)) },
+                onAlignChange = { onFieldItemChange(fieldItem.copy(align = it)) })
 
             if (isHover) {
-              IconButton(onClick = {}) { Icon(imageVector = Icons.Default.Delete, "Delete") }
+              IconButton(onClick = onFieldItemDelete) {
+                Icon(imageVector = Icons.Default.Delete, "Delete")
+              }
             }
           }
         }
@@ -77,38 +85,12 @@ fun AnimationSizeFieldItem(modifier: Modifier = Modifier, fieldItem: FieldItem) 
 }
 
 @Composable
-fun FieldInputItem(modifier: Modifier = Modifier, field: Int, onFieldChange: (Int) -> Unit) {
-  // Holds the latest internal TextFieldValue state. We need to keep it to have the correct value
-  // of the composition.
-  var textFieldValueState by remember { mutableStateOf(TextFieldValue(text = field.toString())) }
-  // Holds the latest TextFieldValue that BasicTextField was recomposed with. We couldn't simply
-  // pass `TextFieldValue(text = value)` to the CoreTextField because we need to preserve the
-  // composition.
-  val textFieldValue = textFieldValueState.copy(text = field.toString())
-
-  SideEffect {
-    if (textFieldValue.selection != textFieldValueState.selection ||
-        textFieldValue.composition != textFieldValueState.composition) {
-      textFieldValueState = textFieldValue
-    }
-  }
-
-  var lastTextValue by remember(field) { mutableStateOf(field.toString()) }
-
+fun FieldInputItem(modifier: Modifier = Modifier, field: String, onFieldChange: (String) -> Unit) {
   NumberTextField(
       modifier = modifier.width(48.dp).height(IntrinsicSize.Min),
-      value = textFieldValue,
+      value = field,
       maxLength = 3,
-      onValueChange = { newTextFieldValueState ->
-        textFieldValueState = newTextFieldValueState
-
-        val stringChangedSinceLastInvocation = lastTextValue != newTextFieldValueState.text
-        lastTextValue = newTextFieldValueState.text
-
-        if (stringChangedSinceLastInvocation) {
-          onFieldChange(newTextFieldValueState.text.toIntOrNull() ?: 0)
-        }
-      },
+      onValueChange = onFieldChange,
       tooltip = { Text("Field") })
 }
 
@@ -126,7 +108,12 @@ fun AttrSelectItem(modifier: Modifier = Modifier, attr: IAttr, onAttrChange: (IA
 
       DropdownMenu(isShowAttrMenu, onDismissRequest = { isShowAttrMenu = false }) {
         AttrList.forEach { attr ->
-          DropdownMenuItem(text = { Text(attr.value) }, onClick = { onAttrChange(attr) })
+          DropdownMenuItem(
+              text = { Text(attr.value) },
+              onClick = {
+                isShowAttrMenu = false
+                onAttrChange(attr)
+              })
         }
       }
     }
@@ -158,7 +145,12 @@ fun LengthAndFormatItem(
 
       DropdownMenu(isShowFormatMenu, onDismissRequest = { isShowFormatMenu = false }) {
         FormatList.forEach { format ->
-          DropdownMenuItem(text = { Text(format.value) }, onClick = { onFormatChange(format) })
+          DropdownMenuItem(
+              text = { Text(format.value) },
+              onClick = {
+                isShowFormatMenu = false
+                onFormatChange(format)
+              })
         }
       }
     }
@@ -191,7 +183,12 @@ fun PaddingAndAlignItem(
 
         DropdownMenu(isShowAlignMenu, onDismissRequest = { isShowAlignMenu = false }) {
           AlignList.forEach { align ->
-            DropdownMenuItem(text = { Text(align.value) }, onClick = { onAlignChange(align) })
+            DropdownMenuItem(
+                text = { Text(align.value) },
+                onClick = {
+                  isShowAlignMenu = false
+                  onAlignChange(align)
+                })
           }
         }
       }
