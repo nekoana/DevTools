@@ -110,13 +110,15 @@ class PluginISO8583ViewModel : ViewModel() {
         _fieldItems[intent.index] = _fieldItems[intent.index].copy(attr = intent.attr)
       }
       is IFieldItemIntent.FieldChange -> {
-        _fieldItems[intent.index] = _fieldItems[intent.index].copy(field = intent.field)
+        _fieldItems[intent.index] =
+            _fieldItems[intent.index].copy(field = intent.field.toIntOrNull()?.toString() ?: "")
       }
       is IFieldItemIntent.FormatChange -> {
         _fieldItems[intent.index] = _fieldItems[intent.index].copy(format = intent.format)
       }
       is IFieldItemIntent.LengthChange -> {
-        _fieldItems[intent.index] = _fieldItems[intent.index].copy(length = intent.length)
+        _fieldItems[intent.index] =
+            _fieldItems[intent.index].copy(length = intent.length.toIntOrNull()?.toString() ?: "")
       }
       is IFieldItemIntent.PaddingChange -> {
         _fieldItems[intent.index] = _fieldItems[intent.index].copy(padding = intent.padding)

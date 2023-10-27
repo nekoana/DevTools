@@ -17,6 +17,7 @@
 package com.kouqurong.iso8583.componet
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -24,9 +25,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -35,7 +39,7 @@ import androidx.compose.ui.unit.dp
 fun SwipeRefreshContent(state: SwipeCrossFadeState) {
   @Composable
   fun RowContent(text: String, icon: ImageVector) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+    Row(horizontalArrangement = Arrangement.Center) {
       Text(
           text = text,
           style = MaterialTheme.typography.body1,
@@ -48,13 +52,20 @@ fun SwipeRefreshContent(state: SwipeCrossFadeState) {
     }
   }
 
-  AnimatedContent(targetState = state) {
-    if (it == SwipeCrossFadeState.FORE) {
-      RowContent("上拉解析报文", Icons.Default.KeyboardArrowUp)
-    } else {
-      RowContent("下拉配置属性", Icons.Default.KeyboardArrowDown)
-    }
-  }
+  Box(
+      modifier =
+          Modifier.fillMaxWidth()
+              .pointerHoverIcon(icon = PointerIcon.Hand)
+              .background(androidx.compose.material3.MaterialTheme.colorScheme.surface),
+      contentAlignment = Alignment.Center) {
+        AnimatedContent(targetState = state) {
+          if (it == SwipeCrossFadeState.FORE) {
+            RowContent("上拉解析报文", Icons.Default.KeyboardArrowUp)
+          } else {
+            RowContent("下拉配置属性", Icons.Default.KeyboardArrowDown)
+          }
+        }
+      }
 }
 
 enum class SwipeCrossFadeState {

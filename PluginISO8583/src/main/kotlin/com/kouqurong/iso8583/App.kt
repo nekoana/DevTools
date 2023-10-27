@@ -20,8 +20,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.SwipeableState
+import androidx.compose.material.*
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,7 +38,7 @@ import com.kouqurong.plugin.view.defaultDashedBorder
 @Composable
 fun App(viewModel: PluginISO8583ViewModel) {
   Surface(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-    ISO8583HexInput(
+    ISO8583Content(
         modifier = Modifier.fillMaxSize(),
         fieldItems = viewModel.fieldItems,
         fieldMenuItems = viewModel.fieldMenuItems,
@@ -52,7 +51,7 @@ fun App(viewModel: PluginISO8583ViewModel) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ISO8583HexInput(
+fun ISO8583Content(
     modifier: Modifier = Modifier,
     fieldItems: List<FieldItem>,
     fieldMenuItems: List<FieldMenuItem>,
@@ -65,7 +64,11 @@ fun ISO8583HexInput(
     SwipeCrossFadeLayout(
         swipeState = swipeCrossFadeState,
         modifier = Modifier.fillMaxSize(),
-        background = { Surface(modifier = Modifier.fillMaxSize()) { Text("BACK") } },
+        background = {
+          Surface(modifier = Modifier.fillMaxSize()) {
+            ISO8583HexInput(modifier = Modifier.fillMaxSize(), hex = "", onHexInputChange = {})
+          }
+        },
         foreground = {
           Surface(modifier = Modifier.fillMaxSize()) {
             Row(
@@ -131,4 +134,27 @@ fun FieldMenuContent(modifier: Modifier = Modifier, fieldMenuItems: List<FieldMe
           }
         }
       }
+}
+
+@Composable
+fun ISO8583HexInput(
+    modifier: Modifier = Modifier,
+    hex: String,
+    onHexInputChange: (String) -> Unit,
+) {
+  Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+    OutlinedTextField(
+        modifier = Modifier.weight(1F).fillMaxWidth(),
+        value = hex,
+        onValueChange = onHexInputChange,
+        placeholder = {
+          if (hex.isBlank()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+              Text(text = "Paste Here")
+            }
+          }
+        })
+
+    androidx.compose.material3.Button(onClick = {}) { Text("Parse") }
+  }
 }
