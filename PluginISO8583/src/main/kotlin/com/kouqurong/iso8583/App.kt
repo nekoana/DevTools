@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.kouqurong.iso8583.componet.*
 import com.kouqurong.iso8583.viewmodel.FieldItem
 import com.kouqurong.iso8583.viewmodel.FieldMenuItem
+import com.kouqurong.iso8583.viewmodel.IFieldItemIntent
 import com.kouqurong.iso8583.viewmodel.PluginISO8583ViewModel
 import com.kouqurong.plugin.view.defaultDashedBorder
 
@@ -44,8 +45,7 @@ fun App(viewModel: PluginISO8583ViewModel) {
         fieldMenuItems = viewModel.fieldMenuItems,
         scrollFieldDetailState = viewModel.scrollFieldDetailState,
         swipeCrossFadeState = viewModel.swipeCrossFadeState,
-        onFieldItemChange = viewModel::fieldItemChange,
-        onFieldItemDelete = viewModel::fieldItemDelete,
+        onFieldItemIntent = viewModel::makeFieldItemIntent,
     )
   }
 }
@@ -58,8 +58,7 @@ fun ISO8583HexInput(
     fieldMenuItems: List<FieldMenuItem>,
     scrollFieldDetailState: LazyListState = rememberLazyListState(),
     swipeCrossFadeState: SwipeableState<SwipeCrossFadeState>,
-    onFieldItemChange: (Int, FieldItem) -> Unit,
-    onFieldItemDelete: (Int) -> Unit,
+    onFieldItemIntent: (IFieldItemIntent) -> Unit,
 ) {
 
   Box(modifier = modifier, contentAlignment = Alignment.Center) {
@@ -76,8 +75,7 @@ fun ISO8583HexInput(
                       modifier = Modifier.width(500.dp).fillMaxHeight().padding(8.dp),
                       fieldItems = fieldItems,
                       scrollState = scrollFieldDetailState,
-                      onFieldItemChange = onFieldItemChange,
-                      onFieldItemDelete = onFieldItemDelete,
+                      onFieldItemIntent = onFieldItemIntent,
                   )
                   FieldMenuContent(
                       modifier = Modifier.width(200.dp).fillMaxSize(),
@@ -94,8 +92,7 @@ fun FieldDetailContent(
     modifier: Modifier = Modifier,
     fieldItems: List<FieldItem>,
     scrollState: LazyListState = rememberLazyListState(),
-    onFieldItemChange: (Int, FieldItem) -> Unit,
-    onFieldItemDelete: (Int) -> Unit,
+    onFieldItemIntent: (IFieldItemIntent) -> Unit,
 ) {
   LazyColumn(
       modifier = modifier.defaultDashedBorder(),
@@ -106,8 +103,18 @@ fun FieldDetailContent(
       AnimationSizeFieldItem(
           modifier = Modifier.fillMaxWidth().padding(1.dp).height(52.dp),
           fieldItem = fieldItems[i],
-          onFieldItemChange = { onFieldItemChange(i, it) },
-          onFieldItemDelete = { onFieldItemDelete(i) })
+          onFieldItemIntent = {
+              //todo 优化该方式
+            when (it) {
+              is IFieldItemIntent.AlignChange -> onFieldItemIntent(it.copy(index = i))
+              is IFieldItemIntent.AttrChange -> onFieldItemIntent(it.copy(index = i))
+              is IFieldItemIntent.Delete -> onFieldItemIntent(it.copy(index = i))
+              is IFieldItemIntent.FieldChange -> onFieldItemIntent(it.copy(index = i))
+              is IFieldItemIntent.FormatChange -> onFieldItemIntent(it.copy(index = i))
+              is IFieldItemIntent.LengthChange -> onFieldItemIntent(it.copy(index = i))
+              is IFieldItemIntent.PaddingChange -> onFieldItemIntent(it.copy(index = i))
+            }
+          })
     }
   }
 }

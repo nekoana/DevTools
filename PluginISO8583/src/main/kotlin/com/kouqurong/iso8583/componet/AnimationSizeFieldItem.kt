@@ -39,8 +39,7 @@ import com.kouqurong.iso8583.viewmodel.*
 fun AnimationSizeFieldItem(
     modifier: Modifier = Modifier,
     fieldItem: FieldItem,
-    onFieldItemChange: (FieldItem) -> Unit,
-    onFieldItemDelete: () -> Unit
+    onFieldItemIntent: (IFieldItemIntent) -> Unit,
 ) {
 
   var isHover by remember { mutableStateOf(false) }
@@ -58,8 +57,7 @@ fun AnimationSizeFieldItem(
               modifier = Modifier.fillMaxSize().padding(8.dp),
               fieldItem = fieldItem,
               isHover = isHover,
-              onFieldItemChange = onFieldItemChange,
-              onFieldItemDelete = onFieldItemDelete)
+              onFieldItemIntent = onFieldItemIntent)
         }
       }
 }
@@ -69,39 +67,48 @@ fun FieldItemRow(
     modifier: Modifier = Modifier,
     fieldItem: FieldItem,
     isHover: Boolean,
-    onFieldItemChange: (FieldItem) -> Unit,
-    onFieldItemDelete: () -> Unit
+    onFieldItemIntent: (IFieldItemIntent) -> Unit,
 ) {
   Row(
       modifier = modifier,
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.SpaceBetween,
   ) {
-    FieldInputItem(field = fieldItem.field) { onFieldItemChange(fieldItem.copy(field = it)) }
-    AttrSelectItem(attr = fieldItem.attr) { onFieldItemChange(fieldItem.copy(attr = it)) }
+    FieldInputItem(field = { fieldItem.field }) {
+      onFieldItemIntent(IFieldItemIntent.FieldChange(-1, it))
+    }
+    AttrSelectItem(attr = { fieldItem.attr }) {
+      onFieldItemIntent(IFieldItemIntent.AttrChange(-1, it))
+    }
     LengthAndFormatItem(
-        length = fieldItem.length,
-        format = fieldItem.format,
-        onLengthChange = { onFieldItemChange(fieldItem.copy(length = it)) },
-        onFormatChange = { onFieldItemChange(fieldItem.copy(format = it)) })
+        length = { fieldItem.length },
+        format = { fieldItem.format },
+        onLengthChange = { onFieldItemIntent(IFieldItemIntent.LengthChange(-1, it)) },
+        onFormatChange = { onFieldItemIntent(IFieldItemIntent.FormatChange(-1, it)) })
     PaddingAndAlignItem(
-        padding = fieldItem.padding,
-        align = fieldItem.align,
-        onPaddingChange = { onFieldItemChange(fieldItem.copy(padding = it)) },
-        onAlignChange = { onFieldItemChange(fieldItem.copy(align = it)) })
+        padding = { fieldItem.padding },
+        align = { fieldItem.align },
+        onPaddingChange = { onFieldItemIntent(IFieldItemIntent.PaddingChange(-1, it)) },
+        onAlignChange = { onFieldItemIntent(IFieldItemIntent.AlignChange(-1, it)) })
 
     if (isHover) {
-      IconButton(onClick = onFieldItemDelete) { Icon(imageVector = Icons.Default.Delete, "Delete") }
+      IconButton(onClick = { onFieldItemIntent(IFieldItemIntent.Delete(-1)) }) {
+        Icon(imageVector = Icons.Default.Delete, "Delete")
+      }
     }
   }
 }
 
 @Composable
-fun FieldInputItem(modifier: Modifier = Modifier, field: String, onFieldChange: (String) -> Unit) {
+fun FieldInputItem(
+    modifier: Modifier = Modifier,
+    field: () -> String,
+    onFieldChange: (String) -> Unit
+) {
   NumberTextField(
       modifier = modifier.width(48.dp).height(IntrinsicSize.Min),
-      value = field,
-      isError = field.isBlank(),
+      value = field(),
+      isError = field().isBlank(),
       maxLength = 3,
       onValueChange = onFieldChange,
       tooltip = { Text("Field") })
@@ -109,14 +116,18 @@ fun FieldInputItem(modifier: Modifier = Modifier, field: String, onFieldChange: 
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AttrSelectItem(modifier: Modifier = Modifier, attr: IAttr, onAttrChange: (IAttr) -> Unit) {
+fun AttrSelectItem(
+    modifier: Modifier = Modifier,
+    attr: () -> IAttr,
+    onAttrChange: (IAttr) -> Unit
+) {
   var isShowAttrMenu by remember { mutableStateOf(false) }
 
   TooltipArea(tooltip = { Text(text = "Attr") }) {
     Row(
         modifier = modifier.clickable { isShowAttrMenu = !isShowAttrMenu },
     ) {
-      Text(text = attr.value)
+      Text(text = attr().value)
       Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
 
       DropdownMenu(isShowAttrMenu, onDismissRequest = { isShowAttrMenu = false }) {
@@ -136,8 +147,8 @@ fun AttrSelectItem(modifier: Modifier = Modifier, attr: IAttr, onAttrChange: (IA
 @Composable
 fun LengthAndFormatItem(
     modifier: Modifier = Modifier,
-    length: String,
-    format: IFormat,
+    length: () -> String,
+    format: () -> IFormat,
     onLengthChange: (String) -> Unit,
     onFormatChange: (IFormat) -> Unit,
 ) {
@@ -145,8 +156,8 @@ fun LengthAndFormatItem(
   Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween) {
     NumberTextField(
         modifier = Modifier.width(64.dp),
-        value = length,
-        isError = length.isBlank(),
+        value = length(),
+        isError = length().isBlank(),
         maxLength = 4,
         onValueChange = onLengthChange,
         tooltip = { Text(text = "Length") })
@@ -154,19 +165,19 @@ fun LengthAndFormatItem(
     Row(
         modifier = Modifier.clickable { isShowFormatMenu = !isShowFormatMenu },
     ) {
-      Text(text = format.value)
-      Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
-
-      DropdownMenu(isShowFormatMenu, onDismissRequest = { isShowFormatMenu = false }) {
-        FormatList.forEach { format ->
-          DropdownMenuItem(
-              text = { Text(format.value) },
-              onClick = {
-                isShowFormatMenu = false
-                onFormatChange(format)
-              })
-        }
-      }
+      Text(text = format().value)
+      //      Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
+      //
+      //      DropdownMenu(isShowFormatMenu, onDismissRequest = { isShowFormatMenu = false }) {
+      //        FormatList.forEach { format ->
+      //          DropdownMenuItem(
+      //              text = { Text(format.value) },
+      //              onClick = {
+      //                isShowFormatMenu = false
+      //                onFormatChange(format)
+      //              })
+      //        }
+      //      }
     }
   }
 }
@@ -175,8 +186,8 @@ fun LengthAndFormatItem(
 @Composable
 fun PaddingAndAlignItem(
     modifier: Modifier = Modifier,
-    padding: String,
-    align: IAlign,
+    padding: () -> String,
+    align: () -> IAlign,
     onPaddingChange: (String) -> Unit,
     onAlignChange: (IAlign) -> Unit
 ) {
@@ -185,28 +196,28 @@ fun PaddingAndAlignItem(
   Row(modifier = modifier) {
     SingleCharTextField(
         modifier = Modifier.width(24.dp),
-        value = padding,
-        isError = padding.isBlank(),
+        value = padding(),
+        isError = padding().isBlank(),
         onValueChange = { onPaddingChange(it) },
         tooltip = { Text(text = "Padding") })
-    TooltipArea(tooltip = { Text(text = "Align") }) {
-      Row(
-          modifier = Modifier.clickable { isShowAlignMenu = !isShowAlignMenu },
-      ) {
-        Text(text = align.value)
-        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
-
-        DropdownMenu(isShowAlignMenu, onDismissRequest = { isShowAlignMenu = false }) {
-          AlignList.forEach { align ->
-            DropdownMenuItem(
-                text = { Text(align.value) },
-                onClick = {
-                  isShowAlignMenu = false
-                  onAlignChange(align)
-                })
-          }
-        }
-      }
-    }
+    //    TooltipArea(tooltip = { Text(text = "Align") }) {
+    //      Row(
+    //          modifier = Modifier.clickable { isShowAlignMenu = !isShowAlignMenu },
+    //      ) {
+    //        Text(text = align().value)
+    //        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
+    //
+    //        DropdownMenu(isShowAlignMenu, onDismissRequest = { isShowAlignMenu = false }) {
+    //          AlignList.forEach { align ->
+    //            DropdownMenuItem(
+    //                text = { Text(align.value) },
+    //                onClick = {
+    //                  isShowAlignMenu = false
+    //                  onAlignChange(align)
+    //                })
+    //          }
+    //        }
+    //      }
+    //    }
   }
 }

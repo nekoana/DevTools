@@ -55,6 +55,17 @@ data class FieldItem(
     val padding: String = "0",
 )
 
+sealed interface IFieldItemIntent {
+  data class Delete(val index: Int) : IFieldItemIntent
+
+  data class AttrChange(val index: Int, val attr: IAttr) : IFieldItemIntent
+  data class FormatChange(val index: Int, val format: IFormat) : IFieldItemIntent
+  data class AlignChange(val index: Int, val align: IAlign) : IFieldItemIntent
+  data class LengthChange(val index: Int, val length: String) : IFieldItemIntent
+  data class PaddingChange(val index: Int, val padding: String) : IFieldItemIntent
+  data class FieldChange(val index: Int, val field: String) : IFieldItemIntent
+}
+
 data class FieldMenuItem(val text: String, val onClick: () -> Unit)
 
 class PluginISO8583ViewModel : ViewModel() {
@@ -87,11 +98,29 @@ class PluginISO8583ViewModel : ViewModel() {
     _fieldItems.clear()
   }
 
-  fun fieldItemChange(index: Int, fieldItem: FieldItem) {
-    _fieldItems[index] = fieldItem
-  }
-
-  fun fieldItemDelete(index: Int) {
-    _fieldItems.removeAt(index)
+  fun makeFieldItemIntent(intent: IFieldItemIntent) {
+    when (intent) {
+      is IFieldItemIntent.Delete -> {
+        _fieldItems.removeAt(intent.index)
+      }
+      is IFieldItemIntent.AlignChange -> {
+        _fieldItems[intent.index] = _fieldItems[intent.index].copy(align = intent.align)
+      }
+      is IFieldItemIntent.AttrChange -> {
+        _fieldItems[intent.index] = _fieldItems[intent.index].copy(attr = intent.attr)
+      }
+      is IFieldItemIntent.FieldChange -> {
+        _fieldItems[intent.index] = _fieldItems[intent.index].copy(field = intent.field)
+      }
+      is IFieldItemIntent.FormatChange -> {
+        _fieldItems[intent.index] = _fieldItems[intent.index].copy(format = intent.format)
+      }
+      is IFieldItemIntent.LengthChange -> {
+        _fieldItems[intent.index] = _fieldItems[intent.index].copy(length = intent.length)
+      }
+      is IFieldItemIntent.PaddingChange -> {
+        _fieldItems[intent.index] = _fieldItems[intent.index].copy(padding = intent.padding)
+      }
+    }
   }
 }

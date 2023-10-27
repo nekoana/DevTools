@@ -37,6 +37,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.kouqurong.plugin.view.recomposeHighlighter
 import com.kouqurong.plugin.view.underline
 import kotlinx.coroutines.delay
 
@@ -198,7 +199,7 @@ fun FixedLengthTextField(
   }
   TooltipArea(tooltip = tooltip) {
     BasicTextField(
-        modifier = modifier,
+        modifier = modifier.recomposeHighlighter(),
         value = if (isOverLength) lastTextValue else value,
         onValueChange = onValueChange,
         keyboardOptions = keyboardOptions,
