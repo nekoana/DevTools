@@ -18,7 +18,6 @@ package com.kouqurong.iso8583.componet
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -111,7 +110,7 @@ fun FieldInputItem(
       isError = field().isBlank(),
       maxLength = 3,
       onValueChange = onFieldChange,
-      tooltip = { Text("Field") })
+      tooltip = "Field")
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -123,7 +122,7 @@ fun AttrSelectItem(
 ) {
   var isShowAttrMenu by remember { mutableStateOf(false) }
 
-  TooltipArea(tooltip = { Text(text = "Attr") }) {
+  ISO8583TooltipArea(tooltip = "Attr") {
     Row(
         modifier = modifier.clickable { isShowAttrMenu = !isShowAttrMenu },
     ) {
@@ -144,6 +143,7 @@ fun AttrSelectItem(
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LengthAndFormatItem(
     modifier: Modifier = Modifier,
@@ -160,29 +160,30 @@ fun LengthAndFormatItem(
         isError = length().isBlank(),
         maxLength = 4,
         onValueChange = onLengthChange,
-        tooltip = { Text(text = "Length") })
+        tooltip = "Length")
 
-    Row(
-        modifier = Modifier.clickable { isShowFormatMenu = !isShowFormatMenu },
-    ) {
-      Text(text = format().value)
-      //      Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
-      //
-      //      DropdownMenu(isShowFormatMenu, onDismissRequest = { isShowFormatMenu = false }) {
-      //        FormatList.forEach { format ->
-      //          DropdownMenuItem(
-      //              text = { Text(format.value) },
-      //              onClick = {
-      //                isShowFormatMenu = false
-      //                onFormatChange(format)
-      //              })
-      //        }
-      //      }
+    ISO8583TooltipArea(tooltip = "Format") {
+      Row(
+          modifier = Modifier.clickable { isShowFormatMenu = !isShowFormatMenu },
+      ) {
+        Text(text = format().value)
+        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
+
+        DropdownMenu(isShowFormatMenu, onDismissRequest = { isShowFormatMenu = false }) {
+          FormatList.forEach { format ->
+            DropdownMenuItem(
+                text = { Text(format.value) },
+                onClick = {
+                  isShowFormatMenu = false
+                  onFormatChange(format)
+                })
+          }
+        }
+      }
     }
   }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PaddingAndAlignItem(
     modifier: Modifier = Modifier,
@@ -199,25 +200,25 @@ fun PaddingAndAlignItem(
         value = padding(),
         isError = padding().isBlank(),
         onValueChange = { onPaddingChange(it) },
-        tooltip = { Text(text = "Padding") })
-    //    TooltipArea(tooltip = { Text(text = "Align") }) {
-    //      Row(
-    //          modifier = Modifier.clickable { isShowAlignMenu = !isShowAlignMenu },
-    //      ) {
-    //        Text(text = align().value)
-    //        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
-    //
-    //        DropdownMenu(isShowAlignMenu, onDismissRequest = { isShowAlignMenu = false }) {
-    //          AlignList.forEach { align ->
-    //            DropdownMenuItem(
-    //                text = { Text(align.value) },
-    //                onClick = {
-    //                  isShowAlignMenu = false
-    //                  onAlignChange(align)
-    //                })
-    //          }
-    //        }
-    //      }
-    //    }
+        tooltip = "Padding")
+    ISO8583TooltipArea(tooltip = "Align") {
+      Row(
+          modifier = Modifier.clickable { isShowAlignMenu = !isShowAlignMenu },
+      ) {
+        Text(text = align().value)
+        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
+
+        DropdownMenu(isShowAlignMenu, onDismissRequest = { isShowAlignMenu = false }) {
+          AlignList.forEach { align ->
+            DropdownMenuItem(
+                text = { Text(align.value) },
+                onClick = {
+                  isShowAlignMenu = false
+                  onAlignChange(align)
+                })
+          }
+        }
+      }
+    }
   }
 }

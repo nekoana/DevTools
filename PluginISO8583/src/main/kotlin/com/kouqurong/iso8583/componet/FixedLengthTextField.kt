@@ -17,26 +17,17 @@
 package com.kouqurong.iso8583.componet
 
 import androidx.compose.animation.Animatable
-import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.kouqurong.plugin.view.recomposeHighlighter
 import com.kouqurong.plugin.view.underline
 import kotlinx.coroutines.delay
@@ -50,7 +41,7 @@ fun NumberTextField(
     isError: Boolean = false,
     maxLength: Int = Int.MAX_VALUE,
     onValueChange: (String) -> Unit,
-    tooltip: @Composable () -> Unit,
+    tooltip: String,
 ) {
   FixedLengthTextField(
       modifier = modifier,
@@ -74,7 +65,7 @@ fun NumberTextField(
     isError: Boolean = false,
     maxLength: Int = Int.MAX_VALUE,
     onValueChange: (TextFieldValue) -> Unit,
-    tooltip: @Composable () -> Unit,
+    tooltip: String,
 ) {
   FixedLengthTextField(
       modifier = modifier,
@@ -96,7 +87,7 @@ fun SingleCharTextField(
     readOnly: Boolean = false,
     isError: Boolean = false,
     onValueChange: (String) -> Unit,
-    tooltip: @Composable () -> Unit,
+    tooltip: String,
 ) {
   FixedLengthTextField(
       modifier = modifier,
@@ -122,7 +113,7 @@ fun FixedLengthTextField(
     onValueChange: (String) -> Unit,
     textStyle: TextStyle = LocalTextStyle.current,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    tooltip: @Composable () -> Unit,
+    tooltip: String,
 ) {
   // Holds the latest internal TextFieldValue state. We need to keep it to have the correct value
   // of the composition.
@@ -163,7 +154,6 @@ fun FixedLengthTextField(
       tooltip = tooltip)
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FixedLengthTextField(
     modifier: Modifier = Modifier,
@@ -175,7 +165,7 @@ fun FixedLengthTextField(
     onValueChange: (TextFieldValue) -> Unit,
     textStyle: TextStyle = LocalTextStyle.current,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    tooltip: @Composable () -> Unit,
+    tooltip: String,
 ) {
   val isOverLength by remember(value) { derivedStateOf { value.text.length > maxLength } }
 
@@ -197,7 +187,7 @@ fun FixedLengthTextField(
       underlineColor.animateTo(normalColor)
     }
   }
-  TooltipArea(tooltip = tooltip) {
+  ISO8583TooltipArea(tooltip = tooltip) {
     BasicTextField(
         modifier = modifier.recomposeHighlighter(),
         value = if (isOverLength) lastTextValue else value,
@@ -214,15 +204,4 @@ fun FixedLengthTextField(
           }
         })
   }
-}
-
-@Composable
-@Preview
-fun PreviewNumberTextField() {
-  NumberTextField(
-      modifier = Modifier.width(72.dp).height(IntrinsicSize.Min).background(Color.Red),
-      value = TextFieldValue("123"),
-      onValueChange = {},
-      tooltip = {},
-  )
 }

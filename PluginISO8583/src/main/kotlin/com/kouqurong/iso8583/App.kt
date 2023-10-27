@@ -104,7 +104,7 @@ fun FieldDetailContent(
           modifier = Modifier.fillMaxWidth().padding(1.dp).height(52.dp),
           fieldItem = fieldItems[i],
           onFieldItemIntent = {
-              //todo 优化该方式
+            // todo 优化该方式
             when (it) {
               is IFieldItemIntent.AlignChange -> onFieldItemIntent(it.copy(index = i))
               is IFieldItemIntent.AttrChange -> onFieldItemIntent(it.copy(index = i))

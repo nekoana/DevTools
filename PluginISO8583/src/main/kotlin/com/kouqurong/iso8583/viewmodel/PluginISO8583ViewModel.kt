@@ -47,7 +47,7 @@ sealed class IAlign(val value: String) {
 val AlignList = listOf(IAlign.LEFT, IAlign.RIGHT)
 
 data class FieldItem(
-    val field: String = "",
+    val field: String,
     val attr: IAttr = IAttr.ASCII,
     val format: IFormat = IFormat.FIX,
     val align: IAlign = IAlign.LEFT,
