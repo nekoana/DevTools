@@ -31,7 +31,9 @@ import com.kouqurong.iso8583.viewmodel.PluginISO8583ViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun App(viewModel: PluginISO8583ViewModel) {
+fun App() {
+  val viewModel = remember { PluginISO8583ViewModel() }
+
   Surface(modifier = Modifier.fillMaxSize().padding(16.dp)) {
     ISO8583Content(
         modifier = Modifier.fillMaxSize(),

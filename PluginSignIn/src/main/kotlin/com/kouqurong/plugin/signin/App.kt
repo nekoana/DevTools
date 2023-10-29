@@ -47,7 +47,10 @@ import kotlinx.coroutines.isActive
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun App(viewModel: SignInViewModel) {
+fun App() {
+
+  val viewModel = remember { SignInViewModel() }
+
   val libraryVersion = viewModel.libraryVersion.collectAsState()
   val bmp = viewModel.bmp.collectAsState()
 

@@ -26,10 +26,8 @@ import com.kouqurong.plugin.view.IPluginView
 
 @AutoService(IPluginView::class)
 class PluginSignIn : IPluginView {
-  private val viewModel = SignInViewModel()
-
   override val view: @Composable () -> Unit
-    get() = { App(viewModel) }
+    get() = { App() }
   override val icon: @Composable () -> Painter
     get() = { rememberVectorPainter(Icons.Default.Face) }
   override val label: String

@@ -23,6 +23,7 @@ import androidx.compose.material.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
@@ -34,7 +35,8 @@ import com.kouqurong.plugin.tcpclient.viewmodel.TcpClientViewModel
 import com.kouqurong.plugin.view.recomposeHighlighter
 
 @Composable
-fun App(viewModel: TcpClientViewModel) {
+fun App() {
+  val viewModel = remember { TcpClientViewModel() }
 
   val isAvailableAddress = viewModel.uiState.isAvailableAddress.collectAsState()
 

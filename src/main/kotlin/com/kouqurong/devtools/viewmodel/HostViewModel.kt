@@ -38,22 +38,15 @@ class HostViewModel : ViewModel() {
 
   fun loadThirdPluginView(paths: Array<String>) {
     val classLoader = PathClassLoader(*paths)
-    ServiceLoader.load(IPluginView::class.java, classLoader).toCollection(pluginViews)
+    loadPluginView(classLoader)
   }
 
   fun loadSelfPluginView() {
-    ServiceLoader.load(IPluginView::class.java).toCollection(pluginViews)
+    loadPluginView(javaClass.classLoader)
   }
 
-  fun loadTestPluginView() {
-    val paths =
-        arrayOf(
-            "/Users/codin/MyCode/DevTools/PluginHello/build/libs/PluginHello.jar",
-            "/Users/codin/MyCode/DevTools/PluginHex/build/libs/PluginHex.jar",
-            "/Users/codin/MyCode/DevTools/PluginTcpClient/build/libs/PluginTcpClient.jar",
-            "/Users/codin/MyCode/DevTools/PluginTcpServer/build/libs/PluginTcpServer.jar")
-
-    loadThirdPluginView(paths)
+  private fun loadPluginView(classLoader: ClassLoader) {
+    ServiceLoader.load(IPluginView::class.java, classLoader).toCollection(pluginViews)
   }
 
   fun exit() {
