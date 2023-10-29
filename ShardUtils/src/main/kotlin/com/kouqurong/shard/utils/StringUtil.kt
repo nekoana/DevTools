@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
-package com.kouqurong.plugin.tcpserver.utils
+package com.kouqurong.shard.utils
 
-fun Byte.toHex() = "%02X".format(this)
+val String.hexBytes
+  get() = ByteArray(this.length / 2) { this.substring(it * 2, it * 2 + 2).toInt(16).toByte() }
+
+fun String.toHexByteArray() = hexBytes

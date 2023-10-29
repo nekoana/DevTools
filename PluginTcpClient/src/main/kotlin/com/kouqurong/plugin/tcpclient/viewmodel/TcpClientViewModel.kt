@@ -20,8 +20,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.kouqurong.plugin.tcpclient.model.ISendType
 import com.kouqurong.plugin.tcpclient.model.Message
-import com.kouqurong.plugin.tcpclient.utils.toHexByteArray
 import com.kouqurong.plugin.view.ViewModel
+import com.kouqurong.shard.utils.toHexByteArray
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.SelectionKey

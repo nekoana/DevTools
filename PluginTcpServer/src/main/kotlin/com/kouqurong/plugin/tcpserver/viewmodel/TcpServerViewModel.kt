@@ -21,7 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.kouqurong.plugin.tcpserver.model.ISendType
 import com.kouqurong.plugin.tcpserver.model.Message
-import com.kouqurong.plugin.tcpserver.utils.toHexByteArray
+import com.kouqurong.shard.utils.toHexByteArray
 import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.net.SocketException

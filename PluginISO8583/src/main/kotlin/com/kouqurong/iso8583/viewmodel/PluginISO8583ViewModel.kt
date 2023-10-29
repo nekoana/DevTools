@@ -195,7 +195,7 @@ class PluginISO8583ViewModel : ViewModel() {
     viewModelScope.launch { _dialogMessage.removeAt(0) }
   }
 
-  fun addDialogMessage(msg: String) {
+  private fun addDialogMessage(msg: String) {
     _dialogMessage.add(msg)
   }
 }
