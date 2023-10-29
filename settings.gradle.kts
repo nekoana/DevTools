@@ -35,3 +35,5 @@ include("PluginBitSet")
 include("PluginSignIn")
 
 include("PluginISO8583")
+
+include("ShardBitSet")
