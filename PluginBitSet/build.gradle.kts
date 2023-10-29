@@ -11,6 +11,7 @@ dependencies {
   // With compose.desktop.common you will also lose @Preview functionality
   implementation(compose.desktop.common)
   implementation(project(":PluginView"))
+  implementation(project(":ShardBitSet"))
   implementation(libs.material3.desktop)
   implementation(libs.auto.service.annotations)
   kapt(libs.auto.service.processor)

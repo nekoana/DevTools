@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.kouqurong.bitset
+package com.kouqurong.shard.bitset
 
 import java.nio.ByteBuffer
 
