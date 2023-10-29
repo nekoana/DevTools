@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SwipeableState
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import com.kouqurong.iso8583.componet.SwipeCrossFadeState
 import com.kouqurong.plugin.view.ViewModel
 import kotlinx.coroutines.launch
@@ -66,20 +67,38 @@ sealed interface IFieldItemIntent {
   data class FieldChange(val index: Int, val field: String) : IFieldItemIntent
 }
 
+sealed interface IISO8583HexIntent {
+  data class HexChange(val hex: String) : IISO8583HexIntent
+  object Parsing : IISO8583HexIntent
+  object Generate : IISO8583HexIntent
+}
+
+sealed interface IFieldMenuIntent {
+  object Add : IFieldMenuIntent
+  object Export : IFieldMenuIntent
+  object Import : IFieldMenuIntent
+  object Clear : IFieldMenuIntent
+  object Template : IFieldMenuIntent
+}
+
 data class FieldMenuItem(val text: String, val onClick: () -> Unit)
 
 class PluginISO8583ViewModel : ViewModel() {
   private val _fieldItems = mutableStateListOf<FieldItem>()
+  private val _iso8583Hex = mutableStateOf("")
+
+  val iso8583Hex: String
+    get() = _iso8583Hex.value
 
   val fieldItems: List<FieldItem>
     get() = _fieldItems
 
   val fieldMenuItems =
       listOf(
-          FieldMenuItem("添加") { addNewFieldItem() },
+          FieldMenuItem("添加") { fieldMenuIntent(IFieldMenuIntent.Add) },
           FieldMenuItem("导出") {},
           FieldMenuItem("导入") {},
-          FieldMenuItem("清空") { clearFieldItems() },
+          FieldMenuItem("清空") { fieldMenuIntent(IFieldMenuIntent.Clear) },
           FieldMenuItem("模版") {},
       )
 
@@ -98,7 +117,7 @@ class PluginISO8583ViewModel : ViewModel() {
     _fieldItems.clear()
   }
 
-  fun makeFieldItemIntent(intent: IFieldItemIntent) {
+  fun fieldItemIntent(intent: IFieldItemIntent) {
     when (intent) {
       is IFieldItemIntent.Delete -> {
         _fieldItems.removeAt(intent.index)
@@ -123,6 +142,34 @@ class PluginISO8583ViewModel : ViewModel() {
       is IFieldItemIntent.PaddingChange -> {
         _fieldItems[intent.index] = _fieldItems[intent.index].copy(padding = intent.padding)
       }
+    }
+  }
+
+  fun iso8583HexIntent(intent: IISO8583HexIntent) {
+    when (intent) {
+      is IISO8583HexIntent.HexChange -> {
+        _iso8583Hex.value = intent.hex
+      }
+      is IISO8583HexIntent.Parsing -> {
+        // todo
+      }
+      is IISO8583HexIntent.Generate -> {
+        // todo
+      }
+    }
+  }
+
+  fun fieldMenuIntent(intent: IFieldMenuIntent) {
+    when (intent) {
+      IFieldMenuIntent.Add -> {
+        addNewFieldItem()
+      }
+      IFieldMenuIntent.Clear -> {
+        clearFieldItems()
+      }
+      IFieldMenuIntent.Export -> TODO()
+      IFieldMenuIntent.Import -> TODO()
+      IFieldMenuIntent.Template -> TODO()
     }
   }
 }
