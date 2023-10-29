@@ -16,13 +16,17 @@
 
 package com.kouqurong.iso8583
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.kouqurong.iso8583.componet.*
+import com.kouqurong.iso8583.componet.ISO8583Content
 import com.kouqurong.iso8583.viewmodel.PluginISO8583ViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -39,5 +43,28 @@ fun App(viewModel: PluginISO8583ViewModel) {
         onFieldItemIntent = viewModel::fieldItemIntent,
         onISO8583HexIntent = viewModel::iso8583HexIntent,
     )
+  }
+
+  MessageDialog(
+      message = { viewModel.dialogMessage.value }, onConfirm = viewModel::removeDialogMessage)
+}
+
+@Composable
+fun MessageDialog(
+    modifier: Modifier = Modifier,
+    message: () -> String?,
+    onConfirm: () -> Unit,
+) {
+  val text = message()
+
+  var isShowDialog by remember(text) { mutableStateOf(text != null) }
+
+  if (isShowDialog) {
+    AlertDialog(
+        modifier = modifier,
+        onDismissRequest = { isShowDialog = false },
+        confirmButton = { Button(onClick = onConfirm) { Text(text = "OK") } },
+        title = { Text(text = "Message") },
+        text = { Text(text = text ?: "") })
   }
 }

@@ -19,6 +19,8 @@ package com.kouqurong.iso8583.viewmodel
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SwipeableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import com.kouqurong.iso8583.componet.SwipeCrossFadeState
@@ -69,16 +71,16 @@ sealed interface IFieldItemIntent {
 
 sealed interface IISO8583HexIntent {
   data class HexChange(val hex: String) : IISO8583HexIntent
-  object Parsing : IISO8583HexIntent
+  data object Parsing : IISO8583HexIntent
   object Generate : IISO8583HexIntent
 }
 
 sealed interface IFieldMenuIntent {
-  object Add : IFieldMenuIntent
-  object Export : IFieldMenuIntent
-  object Import : IFieldMenuIntent
-  object Clear : IFieldMenuIntent
-  object Template : IFieldMenuIntent
+  data object Add : IFieldMenuIntent
+  data object Export : IFieldMenuIntent
+  data object Import : IFieldMenuIntent
+  data object Clear : IFieldMenuIntent
+  data object Template : IFieldMenuIntent
 }
 
 data class FieldMenuItem(val text: String, val onClick: () -> Unit)
@@ -86,7 +88,9 @@ data class FieldMenuItem(val text: String, val onClick: () -> Unit)
 class PluginISO8583ViewModel : ViewModel() {
   private val _fieldItems = mutableStateListOf<FieldItem>()
   private val _iso8583Hex = mutableStateOf("")
+  private val _dialogMessage = mutableStateListOf<String?>()
 
+  val dialogMessage: State<String?> = derivedStateOf { _dialogMessage.firstOrNull() }
   val iso8583Hex: String
     get() = _iso8583Hex.value
 
@@ -96,10 +100,10 @@ class PluginISO8583ViewModel : ViewModel() {
   val fieldMenuItems =
       listOf(
           FieldMenuItem("添加") { fieldMenuIntent(IFieldMenuIntent.Add) },
-          FieldMenuItem("导出") {},
-          FieldMenuItem("导入") {},
+          FieldMenuItem("导出") { fieldMenuIntent(IFieldMenuIntent.Export) },
+          FieldMenuItem("导入") { fieldMenuIntent(IFieldMenuIntent.Import) },
           FieldMenuItem("清空") { fieldMenuIntent(IFieldMenuIntent.Clear) },
-          FieldMenuItem("模版") {},
+          FieldMenuItem("模版") { fieldMenuIntent(IFieldMenuIntent.Template) },
       )
 
   @OptIn(ExperimentalMaterialApi::class)
@@ -151,15 +155,23 @@ class PluginISO8583ViewModel : ViewModel() {
         _iso8583Hex.value = intent.hex
       }
       is IISO8583HexIntent.Parsing -> {
-        // todo
+        if (iso8583Hex.isBlank()) {
+          addDialogMessage("Error, empty input")
+        } else {
+          TODO()
+        }
       }
       is IISO8583HexIntent.Generate -> {
-        // todo
+        if (fieldItems.isEmpty()) {
+          addDialogMessage("Error,empty field")
+        } else {
+          TODO()
+        }
       }
     }
   }
 
-  fun fieldMenuIntent(intent: IFieldMenuIntent) {
+  private fun fieldMenuIntent(intent: IFieldMenuIntent) {
     when (intent) {
       IFieldMenuIntent.Add -> {
         addNewFieldItem()
@@ -167,9 +179,23 @@ class PluginISO8583ViewModel : ViewModel() {
       IFieldMenuIntent.Clear -> {
         clearFieldItems()
       }
-      IFieldMenuIntent.Export -> TODO()
-      IFieldMenuIntent.Import -> TODO()
-      IFieldMenuIntent.Template -> TODO()
+      IFieldMenuIntent.Export -> {
+        _dialogMessage.add("Error,Not Impl")
+      }
+      IFieldMenuIntent.Import -> {
+        _dialogMessage.add("Error,Not Impl")
+      }
+      IFieldMenuIntent.Template -> {
+        _dialogMessage.add("Error,Not Impl")
+      }
     }
+  }
+
+  fun removeDialogMessage() {
+    viewModelScope.launch { _dialogMessage.removeAt(0) }
+  }
+
+  fun addDialogMessage(msg: String) {
+    _dialogMessage.add(msg)
   }
 }
