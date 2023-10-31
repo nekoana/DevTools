@@ -35,8 +35,11 @@ sealed class BitSet private constructor(protected val buffer: ByteBuffer) {
     return buffer.capacity() * 8
   }
 
-  companion object {
+  fun bytesCount(): Int {
+    return buffer.capacity()
+  }
 
+  companion object {
     fun binaryOf(bitset: String): BitSet {
       // bitset 末尾补0，每8个字符转换为一个字节
       val newBitset = bitset.padEnd((8 - bitset.length % 8), '0')
@@ -52,6 +55,10 @@ sealed class BitSet private constructor(protected val buffer: ByteBuffer) {
       val bytes = newBitset.chunked(2).map { it.toUByte(16).toByte() }.toByteArray()
 
       return HexBitSet(ByteBuffer.wrap(bytes))
+    }
+
+    fun bufferOf(buffer: ByteBuffer): BitSet {
+      return HexBitSet(buffer)
     }
   }
 }

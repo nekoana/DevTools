@@ -28,11 +28,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.kouqurong.iso8583.componet.ISO8583Content
 import com.kouqurong.iso8583.viewmodel.PluginISO8583ViewModel
+import com.kouqurong.plugin.view.BackDispatcher
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun App() {
+fun App(backDispatcher: BackDispatcher) {
   val viewModel = remember { PluginISO8583ViewModel() }
+
+  DisposableEffect(backDispatcher) {
+    val onBack = {
+      viewModel.displayFieldItems.isNotEmpty().also {
+        if (it) {
+          viewModel.clearDisplayFieldItems()
+        }
+      }
+    }
+
+    backDispatcher.register(onBack)
+
+    onDispose { backDispatcher.unregister(onBack) }
+  }
 
   Surface(modifier = Modifier.fillMaxSize().padding(16.dp)) {
     ISO8583Content(
@@ -40,7 +55,9 @@ fun App() {
         iso8583Hex = viewModel.iso8583Hex,
         fieldItems = viewModel.fieldItems,
         fieldMenuItems = viewModel.fieldMenuItems,
+        displayFieldItems = viewModel.displayFieldItems,
         scrollFieldDetailState = viewModel.scrollFieldDetailState,
+        swipeEnabled = viewModel.displayFieldItems.isEmpty(),
         swipeCrossFadeState = viewModel.swipeCrossFadeState,
         onFieldItemIntent = viewModel::fieldItemIntent,
         onISO8583HexIntent = viewModel::iso8583HexIntent,

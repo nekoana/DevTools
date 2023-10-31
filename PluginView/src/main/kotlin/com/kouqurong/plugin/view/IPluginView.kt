@@ -23,4 +23,36 @@ interface IPluginView {
   val view: @Composable () -> Unit
   val icon: @Composable () -> Painter
   val label: String
+
+  /** @return true if the back event is consumed by the plugin view. */
+  fun onBack(): Boolean = false
+}
+
+abstract class PluginView : IPluginView {
+  val backDispatcher by lazy { BackDispatcher() }
+
+  override fun onBack(): Boolean {
+    return backDispatcher.dispatch()
+  }
+}
+
+class BackDispatcher {
+  private val backListeners = mutableListOf<() -> Boolean>()
+
+  fun register(listener: () -> Boolean) {
+    backListeners.add(listener)
+  }
+
+  fun unregister(listener: () -> Boolean) {
+    backListeners.remove(listener)
+  }
+
+  fun dispatch(): Boolean {
+    backListeners.forEach {
+      if (it()) {
+        return true
+      }
+    }
+    return false
+  }
 }

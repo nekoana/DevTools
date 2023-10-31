@@ -23,11 +23,12 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import com.google.auto.service.AutoService
 import com.kouqurong.plugin.view.IPluginView
+import com.kouqurong.plugin.view.PluginView
 
 @AutoService(IPluginView::class)
-class PluginISO8583 : IPluginView {
+class PluginISO8583 : PluginView() {
   override val view: @Composable () -> Unit
-    get() = { App() }
+    get() = { App(backDispatcher) }
   override val icon: @Composable () -> Painter
     get() = { rememberVectorPainter(Icons.Default.Add) }
   override val label: String

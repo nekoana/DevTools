@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -41,6 +42,7 @@ fun ISO8583TooltipArea(
         Box(
             modifier =
                 modifier
+                    .shadow(4.dp, MaterialTheme.shapes.medium, true)
                     .clip(MaterialTheme.shapes.medium)
                     .background(MaterialTheme.colorScheme.surface),
             contentAlignment = Alignment.Center) {

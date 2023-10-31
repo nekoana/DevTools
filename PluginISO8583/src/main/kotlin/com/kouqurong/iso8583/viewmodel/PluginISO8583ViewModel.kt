@@ -24,6 +24,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import com.kouqurong.iso8583.componet.SwipeCrossFadeState
+import com.kouqurong.iso8583.util.parseISO8583HexString
 import com.kouqurong.plugin.view.ViewModel
 import kotlinx.coroutines.launch
 
@@ -58,6 +59,11 @@ data class FieldItem(
     val padding: String = "0",
 )
 
+data class DisplayFieldItem(
+    val field: String,
+    val value: String,
+)
+
 sealed interface IFieldItemIntent {
   data class Delete(val index: Int) : IFieldItemIntent
 
@@ -89,8 +95,13 @@ class PluginISO8583ViewModel : ViewModel() {
   private val _fieldItems = mutableStateListOf<FieldItem>()
   private val _iso8583Hex = mutableStateOf("")
   private val _dialogMessage = mutableStateListOf<String?>()
+  private val _displayFieldItems = mutableStateListOf<DisplayFieldItem>()
 
   val dialogMessage: State<String?> = derivedStateOf { _dialogMessage.firstOrNull() }
+
+  val displayFieldItems: List<DisplayFieldItem>
+    get() = _displayFieldItems
+
   val iso8583Hex: String
     get() = _iso8583Hex.value
 
@@ -158,7 +169,10 @@ class PluginISO8583ViewModel : ViewModel() {
         if (iso8583Hex.isBlank()) {
           addDialogMessage("Error, empty input")
         } else {
-          TODO()
+          val displayFieldItems = parseISO8583HexString(iso8583Hex)
+          _displayFieldItems.clear()
+          _displayFieldItems.addAll(
+              displayFieldItems.map { DisplayFieldItem(it.toString(), "HHH") })
         }
       }
       is IISO8583HexIntent.Generate -> {
@@ -197,5 +211,9 @@ class PluginISO8583ViewModel : ViewModel() {
 
   private fun addDialogMessage(msg: String) {
     _dialogMessage.add(msg)
+  }
+
+  fun clearDisplayFieldItems() {
+    _displayFieldItems.clear()
   }
 }

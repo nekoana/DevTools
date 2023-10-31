@@ -16,9 +16,12 @@
 
 package com.kouqurong.iso8583.componet
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SwipeableState
@@ -30,10 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.kouqurong.iso8583.viewmodel.FieldItem
-import com.kouqurong.iso8583.viewmodel.FieldMenuItem
-import com.kouqurong.iso8583.viewmodel.IFieldItemIntent
-import com.kouqurong.iso8583.viewmodel.IISO8583HexIntent
+import com.kouqurong.iso8583.viewmodel.*
 import com.kouqurong.plugin.view.defaultDashedBorder
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -43,7 +43,9 @@ fun ISO8583Content(
     iso8583Hex: String,
     fieldItems: List<FieldItem>,
     fieldMenuItems: List<FieldMenuItem>,
+    displayFieldItems: List<DisplayFieldItem>,
     scrollFieldDetailState: LazyListState = rememberLazyListState(),
+    swipeEnabled: Boolean = true,
     swipeCrossFadeState: SwipeableState<SwipeCrossFadeState>,
     onFieldItemIntent: (IFieldItemIntent) -> Unit,
     onISO8583HexIntent: (IISO8583HexIntent) -> Unit,
@@ -51,15 +53,29 @@ fun ISO8583Content(
 
   Box(modifier = modifier, contentAlignment = Alignment.Center) {
     SwipeCrossFadeLayout(
+        swipeEnabled = swipeEnabled,
         swipeState = swipeCrossFadeState,
         modifier = Modifier.fillMaxSize(),
         background = {
           Surface(modifier = Modifier.fillMaxSize()) {
-            ISO8583HexInput(
-                modifier = Modifier.fillMaxSize(),
-                iso8583Hex = iso8583Hex,
-                onISO8583HexIntent = onISO8583HexIntent,
-            )
+            Crossfade(targetState = displayFieldItems.isNotEmpty()) {
+              if (it) {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                  items(displayFieldItems.size) {
+                    DisplayFieldItemEditor(
+                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        display = displayFieldItems[it],
+                        onDisplayValueChange = {})
+                  }
+                }
+              } else {
+                ISO8583HexInput(
+                    modifier = Modifier.fillMaxSize(),
+                    iso8583Hex = iso8583Hex,
+                    onISO8583HexIntent = onISO8583HexIntent,
+                )
+              }
+            }
           }
         },
         foreground = {

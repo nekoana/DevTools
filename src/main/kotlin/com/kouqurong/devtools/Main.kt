@@ -164,7 +164,11 @@ fun ApplicationScope.HostWindow(
               window,
               onClose = { onCloseRequest() },
               onMinimize = { windowState.isMinimized = true },
-              onBack = { displayPluginView = null },
+              onBack = {
+                if (displayPluginView?.onBack()?.not() == true) {
+                  displayPluginView = null
+                }
+              },
               onDisplay = { displayPluginView = it },
               onMoveUp = {
                 if (displayPluginView != null) {

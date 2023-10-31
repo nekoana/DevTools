@@ -15,3 +15,34 @@
  */
 
 package com.kouqurong.iso8583.util
+
+import com.kouqurong.shard.bitset.BitSet
+import com.kouqurong.shard.utils.toHexByteArray
+import java.nio.ByteBuffer
+
+// todo
+fun parseISO8583HexString(hexString: String): List<Int> {
+  val bs = hexString.toHexByteArray()
+
+  val bitset = bitset(bs)
+  val buffer = ByteBuffer.wrap(bs).apply { position(bitset.bytesCount()) }
+
+  val list = mutableListOf<Int>()
+
+  for (i in 1..bitset.length()) {
+    if (bitset[i - 1]) {
+      list.add(i)
+    }
+  }
+
+  return list
+}
+
+private fun bitset(bs: ByteArray): BitSet {
+  // todo 暂时认为前8字节为位图
+  val buffer = ByteBuffer.allocate(8)
+
+  buffer.put(bs, 0, 8)
+
+  return BitSet.bufferOf(buffer)
+}
