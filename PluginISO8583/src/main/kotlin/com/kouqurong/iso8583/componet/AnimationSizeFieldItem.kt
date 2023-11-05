@@ -31,7 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.unit.dp
-import com.kouqurong.iso8583.viewmodel.*
+import com.kouqurong.iso8583.data.*
+import com.kouqurong.iso8583.viewmodel.IFieldItemIntent
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable

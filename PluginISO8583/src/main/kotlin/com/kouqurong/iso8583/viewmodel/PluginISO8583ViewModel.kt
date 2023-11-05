@@ -24,45 +24,10 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import com.kouqurong.iso8583.componet.SwipeCrossFadeState
+import com.kouqurong.iso8583.data.*
 import com.kouqurong.iso8583.util.parseISO8583HexString
 import com.kouqurong.plugin.view.ViewModel
 import kotlinx.coroutines.launch
-
-sealed class IAttr(val value: String) {
-  data object ASCII : IAttr("ASCII")
-  data object BCD : IAttr("BCD")
-  data object BINARY : IAttr("BINARY")
-}
-
-val AttrList = listOf(IAttr.ASCII, IAttr.BCD, IAttr.BINARY)
-
-sealed class IFormat(val value: String) {
-  data object VAR : IFormat("VAR")
-  data object FIX : IFormat("FIX")
-}
-
-val FormatList = listOf(IFormat.VAR, IFormat.FIX)
-
-sealed class IAlign(val value: String) {
-  data object LEFT : IAlign("LEFT")
-  data object RIGHT : IAlign("RIGHT")
-}
-
-val AlignList = listOf(IAlign.LEFT, IAlign.RIGHT)
-
-data class FieldItem(
-    val field: String,
-    val attr: IAttr = IAttr.ASCII,
-    val format: IFormat = IFormat.FIX,
-    val align: IAlign = IAlign.LEFT,
-    val length: String = "0",
-    val padding: String = "0",
-)
-
-data class DisplayFieldItem(
-    val field: String,
-    val value: String,
-)
 
 sealed interface IFieldItemIntent {
   data class Delete(val index: Int) : IFieldItemIntent
@@ -169,10 +134,14 @@ class PluginISO8583ViewModel : ViewModel() {
         if (iso8583Hex.isBlank()) {
           addDialogMessage("Error, empty input")
         } else {
-          val displayFieldItems = parseISO8583HexString(iso8583Hex)
-          _displayFieldItems.clear()
-          _displayFieldItems.addAll(
-              displayFieldItems.map { DisplayFieldItem(it.toString(), "HHH") })
+          try {
+            val displayFieldItems = parseISO8583HexString(iso8583Hex, emptyList())
+            _displayFieldItems.clear()
+            _displayFieldItems.addAll(
+                displayFieldItems.map { DisplayFieldItem(it.toString(), "HHH") })
+          } catch (e: Exception) {
+            addDialogMessage("Error, ${e.message}")
+          }
         }
       }
       is IISO8583HexIntent.Generate -> {

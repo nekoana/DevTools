@@ -17,26 +17,30 @@
 package com.kouqurong.iso8583.componet
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.SwipeableState
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.kouqurong.iso8583.data.DisplayFieldItem
+import com.kouqurong.iso8583.data.FieldItem
 import com.kouqurong.iso8583.viewmodel.*
 import com.kouqurong.plugin.view.defaultDashedBorder
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ISO8583Content(
     modifier: Modifier = Modifier,
@@ -58,22 +62,37 @@ fun ISO8583Content(
         modifier = Modifier.fillMaxSize(),
         background = {
           Surface(modifier = Modifier.fillMaxSize()) {
-            Crossfade(targetState = displayFieldItems.isNotEmpty()) {
-              if (it) {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                  items(displayFieldItems.size) {
-                    DisplayFieldItemEditor(
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
-                        display = displayFieldItems[it],
-                        onDisplayValueChange = {})
+            Box(modifier = Modifier.fillMaxSize()) {
+              Crossfade(targetState = displayFieldItems.isNotEmpty()) {
+                if (it) {
+                  LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(displayFieldItems.size) {
+                      DisplayFieldItemEditor(
+                          modifier = Modifier.fillMaxWidth().padding(8.dp),
+                          display = displayFieldItems[it],
+                          onDisplayValueChange = {})
+                    }
                   }
+                } else {
+
+                  ISO8583HexInput(
+                      modifier = Modifier.fillMaxSize(),
+                      iso8583Hex = iso8583Hex,
+                      onISO8583HexIntent = onISO8583HexIntent,
+                  )
+
+                  FloatingActionButton(
+                      modifier = Modifier.padding(8.dp).align(Alignment.BottomEnd),
+                      onClick = {
+                        if (iso8583Hex.isNotBlank()) {
+                          onISO8583HexIntent(IISO8583HexIntent.Parsing)
+                        } else {
+                          onISO8583HexIntent(IISO8583HexIntent.Generate)
+                        }
+                      }) {
+                        Icon(Icons.Default.ArrowForward, contentDescription = "Forward")
+                      }
                 }
-              } else {
-                ISO8583HexInput(
-                    modifier = Modifier.fillMaxSize(),
-                    iso8583Hex = iso8583Hex,
-                    onISO8583HexIntent = onISO8583HexIntent,
-                )
               }
             }
           }
@@ -164,17 +183,17 @@ fun ISO8583HexInput(
           }
         })
 
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      Button(
-          modifier = Modifier.width(120.dp),
-          onClick = { onISO8583HexIntent(IISO8583HexIntent.Parsing) }) {
-            Text("Parsing")
-          }
-      Button(
-          modifier = Modifier.width(120.dp),
-          onClick = { onISO8583HexIntent(IISO8583HexIntent.Generate) }) {
-            Text("Generate")
-          }
-    }
+    //    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    //      Button(
+    //          modifier = Modifier.width(120.dp),
+    //          onClick = { onISO8583HexIntent(IISO8583HexIntent.Parsing) }) {
+    //            Text("Parsing")
+    //          }
+    //      Button(
+    //          modifier = Modifier.width(120.dp),
+    //          onClick = { onISO8583HexIntent(IISO8583HexIntent.Generate) }) {
+    //            Text("Generate")
+    //          }
+    //    }
   }
 }

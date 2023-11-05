@@ -16,12 +16,20 @@
 
 package com.kouqurong.iso8583.util
 
+import com.kouqurong.iso8583.data.FieldItem
 import com.kouqurong.shard.bitset.BitSet
 import com.kouqurong.shard.utils.toHexByteArray
 import java.nio.ByteBuffer
 
 // todo
-fun parseISO8583HexString(hexString: String): List<Int> {
+fun parseISO8583HexString(hexString: String, fieldItems: List<FieldItem>): List<Int> {
+  //将fieldItems去除重复的field 保证field唯一 并转换为map
+  if (hexString.isEmpty()) return emptyList()
+  if (hexString.length < 8) return emptyList()
+
+  val fields = fieldItems.associateBy { it.field }
+  if (fields.isEmpty()) return emptyList()
+
   val bs = hexString.toHexByteArray()
 
   val bitset = bitset(bs)
@@ -29,6 +37,7 @@ fun parseISO8583HexString(hexString: String): List<Int> {
 
   val list = mutableListOf<Int>()
 
+  //field 1..64
   for (i in 1..bitset.length()) {
     if (bitset[i - 1]) {
       list.add(i)

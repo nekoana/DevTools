@@ -118,11 +118,11 @@ fun App(
                 }
               },
               actions = {
-                IconButton(
-                    onClick = {},
-                ) {
-                  Icon(imageVector = Icons.Default.Settings, contentDescription = "Setting")
-                }
+//                IconButton(
+//                    onClick = {},
+//                ) {
+//                  Icon(imageVector = Icons.Default.Settings, contentDescription = "Setting")
+//                }
                 IconButton(onClick = { onMoveUp() }) {
                   Icon(imageVector = Icons.Default.MoveUp, contentDescription = "Float")
                 }

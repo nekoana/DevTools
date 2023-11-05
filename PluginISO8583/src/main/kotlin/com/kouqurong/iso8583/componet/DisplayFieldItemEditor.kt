@@ -21,18 +21,18 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.kouqurong.iso8583.viewmodel.DisplayFieldItem
+import com.kouqurong.iso8583.data.DisplayFieldItem
 
 @Composable
 fun DisplayFieldItemEditor(
     modifier: Modifier = Modifier,
     display: DisplayFieldItem,
-    enabled: Boolean = false,
+    readOnly: Boolean = true,
     onDisplayValueChange: (String) -> Unit,
 ) {
   OutlinedTextField(
       modifier = modifier,
-      enabled = enabled,
+      readOnly = readOnly,
       value = display.value,
       onValueChange = onDisplayValueChange,
       label = { Text(text = display.field) },
