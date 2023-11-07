@@ -15,5 +15,6 @@ dependencies {
   implementation(project(":ShardUtils"))
   implementation(libs.material3.desktop)
   implementation(libs.auto.service.annotations)
+  testImplementation(libs.junit)
   kapt(libs.auto.service.processor)
 }

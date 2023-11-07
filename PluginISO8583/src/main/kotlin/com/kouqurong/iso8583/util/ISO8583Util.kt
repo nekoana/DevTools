@@ -23,7 +23,7 @@ import java.nio.ByteBuffer
 
 // todo
 fun parseISO8583HexString(hexString: String, fieldItems: List<FieldItem>): List<Int> {
-  //将fieldItems去除重复的field 保证field唯一 并转换为map
+  // 将fieldItems去除重复的field 保证field唯一 并转换为map
   if (hexString.isEmpty()) return emptyList()
   if (hexString.length < 8) return emptyList()
 
@@ -37,7 +37,7 @@ fun parseISO8583HexString(hexString: String, fieldItems: List<FieldItem>): List<
 
   val list = mutableListOf<Int>()
 
-  //field 1..64
+  // field 1..64
   for (i in 1..bitset.length()) {
     if (bitset[i - 1]) {
       list.add(i)

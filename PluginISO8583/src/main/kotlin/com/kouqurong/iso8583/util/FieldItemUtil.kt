@@ -15,3 +15,64 @@
  */
 
 package com.kouqurong.iso8583.util
+
+import com.kouqurong.iso8583.data.FieldItem
+import com.kouqurong.iso8583.data.IAlign
+import com.kouqurong.iso8583.data.IAttr
+import com.kouqurong.iso8583.data.IFormat
+import java.nio.ByteBuffer
+
+fun FieldItem.parse(buffer: ByteBuffer): String {
+  var dataLen = length.toInt()
+
+  if (format == IFormat.VAR) {
+    val dataLenBsCount =
+        when (dataLen) {
+          // 0..99 一个字节
+          in 0..99 -> {
+            1
+          }
+          // 100...9999 两个字节
+          in 100..9999 -> {
+            2
+          }
+          else -> throw Throwable("var length must in 0..9999")
+        }
+
+    val dataLenBs = ByteArray(dataLenBsCount)
+
+    buffer.get(dataLenBs)
+
+    dataLen = dataLenBs.bcdToInt()
+  }
+  return readData(dataLen, buffer)
+}
+
+private fun FieldItem.readData(dataLen: Int, buffer: ByteBuffer): String {
+  var readLen = dataLen
+  if (attr == IAttr.BCD) {
+    readLen = (dataLen + 1) / 2
+  } else if (attr == IAttr.BINARY) {
+    readLen = (dataLen + 7) / 8
+  }
+
+  val dataBs = ByteArray(readLen)
+
+  buffer.get(dataBs)
+
+  return when (attr) {
+    IAttr.ASCII -> String(dataBs)
+    IAttr.BCD -> {
+      val ret = dataBs.bcdToStr()
+      if (readLen != dataLen) {
+        when (align) {
+          IAlign.LEFT -> ret.substring(0, dataLen)
+          IAlign.RIGHT -> ret.substring(ret.length - dataLen)
+        }
+      } else {
+        ret
+      }
+    }
+    IAttr.BINARY -> dataBs.toHexStr()
+  }
+}
