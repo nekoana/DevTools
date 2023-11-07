@@ -135,11 +135,11 @@ class PluginISO8583ViewModel : ViewModel() {
           addDialogMessage("Error, empty input")
         } else {
           try {
-            val displayFieldItems = parseISO8583HexString(iso8583Hex, emptyList())
+            val displayFieldItems = parseISO8583HexString(iso8583Hex, fieldItems)
             _displayFieldItems.clear()
             _displayFieldItems.addAll(
-                displayFieldItems.map { DisplayFieldItem(it.toString(), "HHH") })
-          } catch (e: Exception) {
+                displayFieldItems.map { DisplayFieldItem(it.key.toString(), it.value) })
+          } catch (e: Throwable) {
             addDialogMessage("Error, ${e.message}")
           }
         }

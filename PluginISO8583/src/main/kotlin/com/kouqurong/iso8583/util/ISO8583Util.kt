@@ -21,30 +21,31 @@ import com.kouqurong.shard.bitset.BitSet
 import com.kouqurong.shard.utils.toHexByteArray
 import java.nio.ByteBuffer
 
-// todo
-fun parseISO8583HexString(hexString: String, fieldItems: List<FieldItem>): List<Int> {
+fun parseISO8583HexString(hexString: String, fieldItems: List<FieldItem>): Map<Int, String> {
   // 将fieldItems去除重复的field 保证field唯一 并转换为map
-  if (hexString.isEmpty()) return emptyList()
-  if (hexString.length < 8) return emptyList()
+  if (hexString.isEmpty()) return emptyMap()
+  if (hexString.length < 8) return emptyMap()
 
-  val fields = fieldItems.associateBy { it.field }
-  if (fields.isEmpty()) return emptyList()
+  val fieldsMap = fieldItems.associateBy { it.field }
+  if (fieldsMap.isEmpty()) return emptyMap()
 
   val bs = hexString.toHexByteArray()
 
   val bitset = bitset(bs)
   val buffer = ByteBuffer.wrap(bs).apply { position(bitset.bytesCount()) }
 
-  val list = mutableListOf<Int>()
+  val retMap = mutableMapOf<Int, String>()
 
   // field 1..64
   for (i in 1..bitset.length()) {
     if (bitset[i - 1]) {
-      list.add(i)
+      val fieldItem = fieldsMap[i.toString()] ?: throw Throwable("field $i not found")
+
+      retMap[i] = fieldItem.parse(buffer)
     }
   }
 
-  return list
+  return retMap
 }
 
 private fun bitset(bs: ByteArray): BitSet {
