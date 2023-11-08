@@ -2,6 +2,7 @@ plugins {
   kotlin("jvm")
   kotlin("kapt")
   id("org.jetbrains.compose")
+  alias(libs.plugins.kotlin.serilization)
 }
 
 dependencies {

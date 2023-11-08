@@ -27,12 +27,13 @@ androidx-datastore-core-okio = { module = "androidx.datastore:datastore-core-oki
 androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "preference" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "preference" }
 junit = { module = "junit:junit", version.ref = "junit" }
+kotlin-plugin-serilization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
 
 [plugins]
 jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 soptless = { id ="com.diffplug.spotless:spotless-plugin-gradle",version.ref = "spotless"}
-
+kotlin-serilization = {id = "kotlin.serialization.plugin",version = "unspecified" }
 
 [bundles]
 androix-datastore = [ "androidx-datastore-core-okio", "androidx-datastore", "androidx-datastore-core", "androidx-datastore-preferences", "androidx-datastore-preferences-core"]
