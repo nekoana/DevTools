@@ -7,41 +7,6 @@ buildscript {
     maven("https://maven.aliyun.com/repository/central")
     gradlePluginPortal()
   }
-
-  dependencies { classpath(libs.spotless.gradle) }
-}
-
-allprojects {
-  apply<com.diffplug.gradle.spotless.SpotlessPlugin>()
-
-  configure<com.diffplug.gradle.spotless.SpotlessExtension> {
-    kotlin {
-      // by default the target is every '.kt' and '.kts` file in the java sourcesets
-      target("**/src/main/**/*.kt")
-      targetExclude("**/build/**/*.kt")
-      targetExclude("**/spotless/**")
-      licenseHeaderFile(rootProject.file("spotless/copyright.kt"), "(package|import|open|module) ")
-      ktfmt("0.46")
-    }
-    kotlinGradle {
-      target("**/*.kts") // default target for kotlinGradle
-      targetExclude("**/build/**/*.kts")
-      //            licenseHeaderFile(rootProject.file("spotless/copyright.kts"), "(^(?![\\/
-      // ]\\*).*$)")
-      ktfmt()
-    }
-    //        format("xml") {
-    //            target("**/*.xml")
-    //            targetExclude("**/build/**/*.xml")
-    //            // Look for the first XML tag that isn't a comment (<!--) or the xml declaration
-    // (<?xml)
-    //            licenseHeaderFile(rootProject.file("spotless/copyright.xml"), "(<[^!?])")
-    //        }
-  }
-
-  tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).configureEach {
-    dependsOn("spotlessApply")
-  }
 }
 
 plugins {

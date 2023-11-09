@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins { `kotlin-dsl` }
 
 // Configure the build-logic plugins to target JDK 17
