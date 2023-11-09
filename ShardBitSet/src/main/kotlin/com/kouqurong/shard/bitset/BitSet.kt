@@ -18,7 +18,12 @@ package com.kouqurong.shard.bitset
 
 import java.nio.ByteBuffer
 
-sealed class BitSet private constructor(protected val buffer: ByteBuffer) {
+sealed class BitSet private constructor(protected var buffer: ByteBuffer) {
+  //buffer is read only
+  init {
+    require(buffer.isReadOnly)
+  }
+
   class BinaryBitSet(buffer: ByteBuffer) : BitSet(buffer)
 
   class HexBitSet(buffer: ByteBuffer) : BitSet(buffer) {
@@ -31,11 +36,17 @@ sealed class BitSet private constructor(protected val buffer: ByteBuffer) {
     return buffer.get(index / 8).toInt() and (1 shl (index % 8)) != 0
   }
 
+  /**
+   * 返回总位长度
+   */
   fun length(): Int {
     return buffer.capacity() * 8
   }
 
-  fun bytesCount(): Int {
+  /**
+   * 返回总字节长度
+   */
+  fun size(): Int {
     return buffer.capacity()
   }
 
@@ -46,7 +57,7 @@ sealed class BitSet private constructor(protected val buffer: ByteBuffer) {
 
       val bytes = newBitset.chunked(8).map { it.reversed().toUByte(2).toByte() }.toByteArray()
 
-      return BinaryBitSet(ByteBuffer.wrap(bytes))
+      return BinaryBitSet(ByteBuffer.wrap(bytes).asReadOnlyBuffer())
     }
 
     fun hexOf(bitset: String): BitSet {
@@ -54,11 +65,16 @@ sealed class BitSet private constructor(protected val buffer: ByteBuffer) {
       val newBitset = bitset.padEnd((2 - bitset.length % 2), '0')
       val bytes = newBitset.chunked(2).map { it.toUByte(16).toByte() }.toByteArray()
 
-      return HexBitSet(ByteBuffer.wrap(bytes))
+      return HexBitSet(ByteBuffer.wrap(bytes).asReadOnlyBuffer())
     }
 
-    fun bufferOf(buffer: ByteBuffer): BitSet {
+    fun bytesOf(bytes: ByteArray, offset: Int = 0, length: Int = bytes.size): BitSet {
+      val newBytes = bytes.copyOfRange(offset, offset + length)
+
+      val buffer = ByteBuffer.allocate(newBytes.size).asReadOnlyBuffer()
+
       return HexBitSet(buffer)
     }
+
   }
 }

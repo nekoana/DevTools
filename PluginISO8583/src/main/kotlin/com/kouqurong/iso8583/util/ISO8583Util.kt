@@ -32,7 +32,7 @@ fun parseISO8583HexString(hexString: String, fieldItems: List<FieldItem>): Map<I
   val bs = hexString.toHexByteArray()
 
   val bitset = bitset(bs)
-  val buffer = ByteBuffer.wrap(bs).apply { position(bitset.bytesCount()) }
+  val buffer = ByteBuffer.wrap(bs).apply { position(bitset.size()) }
 
   val retMap = mutableMapOf<Int, String>()
 
@@ -49,10 +49,12 @@ fun parseISO8583HexString(hexString: String, fieldItems: List<FieldItem>): Map<I
 }
 
 private fun bitset(bs: ByteArray): BitSet {
-  // todo 暂时认为前8字节为位图
-  val buffer = ByteBuffer.allocate(8)
 
-  buffer.put(bs, 0, 8)
+  val bitset = BitSet.bytesOf(bs, 0, 8)
 
-  return BitSet.bufferOf(buffer)
+  if (bitset[0]) {
+    return BitSet.bytesOf(bs, 0, 16)
+  }
+
+  return bitset
 }
