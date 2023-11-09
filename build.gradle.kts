@@ -21,7 +21,7 @@ allprojects {
       targetExclude("**/build/**/*.kt")
       targetExclude("**/spotless/**")
       licenseHeaderFile(rootProject.file("spotless/copyright.kt"), "(package|import|open|module) ")
-      ktfmt()
+      ktfmt("0.46")
     }
     kotlinGradle {
       target("**/*.kts") // default target for kotlinGradle

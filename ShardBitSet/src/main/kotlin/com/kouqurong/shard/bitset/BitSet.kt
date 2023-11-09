@@ -19,7 +19,7 @@ package com.kouqurong.shard.bitset
 import java.nio.ByteBuffer
 
 sealed class BitSet private constructor(protected var buffer: ByteBuffer) {
-  //buffer is read only
+  // buffer is read only
   init {
     require(buffer.isReadOnly)
   }
@@ -36,16 +36,12 @@ sealed class BitSet private constructor(protected var buffer: ByteBuffer) {
     return buffer.get(index / 8).toInt() and (1 shl (index % 8)) != 0
   }
 
-  /**
-   * 返回总位长度
-   */
+  /** 返回总位长度 */
   fun length(): Int {
     return buffer.capacity() * 8
   }
 
-  /**
-   * 返回总字节长度
-   */
+  /** 返回总字节长度 */
   fun size(): Int {
     return buffer.capacity()
   }
@@ -75,6 +71,5 @@ sealed class BitSet private constructor(protected var buffer: ByteBuffer) {
 
       return HexBitSet(buffer)
     }
-
   }
 }

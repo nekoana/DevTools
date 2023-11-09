@@ -133,7 +133,7 @@ fun BitSetIndicator(bitset: String, type: IBitSetType, modifier: Modifier = Modi
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-          for (i in 0 until bitsets.length()) {
+          for (i in 0 ..< bitsets.length()) {
             item(key = i) {
               // 大端在前
               Text(
@@ -178,7 +178,7 @@ sealed interface IBitSetType {
   }
 
   // 16进制
-  object Hex : IBitSetType {
+  data object Hex : IBitSetType {
     override fun toBitSet(bitset: String): BitSet {
       return BitSet.hexOf(bitset)
     }
@@ -189,7 +189,7 @@ sealed interface IBitSetType {
     }
   }
 
-  object Binary : IBitSetType {
+  data object Binary : IBitSetType {
     override fun toBitSet(bitset: String): BitSet {
       return BitSet.binaryOf(bitset)
     }
