@@ -33,24 +33,35 @@ sealed interface IFieldItemIntent {
   data class Delete(val index: Int) : IFieldItemIntent
 
   data class AttrChange(val index: Int, val attr: IAttr) : IFieldItemIntent
+
   data class FormatChange(val index: Int, val format: IFormat) : IFieldItemIntent
+
   data class AlignChange(val index: Int, val align: IAlign) : IFieldItemIntent
+
   data class LengthChange(val index: Int, val length: String) : IFieldItemIntent
+
   data class PaddingChange(val index: Int, val padding: String) : IFieldItemIntent
+
   data class FieldChange(val index: Int, val field: String) : IFieldItemIntent
 }
 
 sealed interface IISO8583HexIntent {
   data class HexChange(val hex: String) : IISO8583HexIntent
+
   data object Parsing : IISO8583HexIntent
+
   object Generate : IISO8583HexIntent
 }
 
 sealed interface IFieldMenuIntent {
   data object Add : IFieldMenuIntent
+
   data object Export : IFieldMenuIntent
+
   data object Import : IFieldMenuIntent
+
   data object Clear : IFieldMenuIntent
+
   data object Template : IFieldMenuIntent
 }
 

@@ -47,7 +47,9 @@ private val scope =
 
 sealed interface IListenState {
   object Closed : IListenState
+
   object Listening : IListenState
+
   class Error(val throwable: Throwable) : IListenState
 }
 
@@ -148,6 +150,7 @@ data class UiState(
 
   val selectedClient: Client?
     get() = _selectedClient.value
+
   internal val port: String
     get() = _port.value
 

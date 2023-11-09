@@ -17,7 +17,7 @@ allprojects {
   configure<com.diffplug.gradle.spotless.SpotlessExtension> {
     kotlin {
       // by default the target is every '.kt' and '.kts` file in the java sourcesets
-      target("**/*.kt")
+      target("**/src/main/**/*.kt")
       targetExclude("**/build/**/*.kt")
       targetExclude("**/spotless/**")
       licenseHeaderFile(rootProject.file("spotless/copyright.kt"), "(package|import|open|module) ")

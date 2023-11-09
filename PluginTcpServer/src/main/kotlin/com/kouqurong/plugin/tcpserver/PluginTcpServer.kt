@@ -29,8 +29,10 @@ class PluginTcpServer : IPluginView {
 
   override val view: @Composable () -> Unit
     get() = { App() }
+
   override val icon: @Composable () -> Painter
     get() = { rememberVectorPainter(Icons.Filled.Edit) }
+
   override val label: String
     get() = "Tcp Server"
 }

@@ -28,8 +28,10 @@ import com.kouqurong.plugin.view.IPluginView
 class PluginBitSet : IPluginView {
   override val view: @Composable () -> Unit
     get() = { App() }
+
   override val icon: @Composable () -> Painter
     get() = { rememberVectorPainter(Icons.Default.Close) }
+
   override val label: String
     get() = "BitSet"
 }

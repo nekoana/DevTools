@@ -29,8 +29,10 @@ import com.kouqurong.plugin.view.PluginView
 class PluginISO8583 : PluginView() {
   override val view: @Composable () -> Unit
     get() = { App(backDispatcher) }
+
   override val icon: @Composable () -> Painter
     get() = { rememberVectorPainter(Icons.Default.Add) }
+
   override val label: String
     get() = "ISO8583"
 }

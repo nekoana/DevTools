@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.stateIn
 
 sealed interface Option<in T> {
   object None : Option<Any>
+
   data class Some<T>(val value: T) : Option<T>
 }
 
@@ -103,5 +104,6 @@ class SignInViewModel : ViewModel() {
   }
 
   private external fun version(): String
+
   private external fun signin(number: Int, token: String, bmpPath: String): String
 }

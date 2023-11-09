@@ -28,8 +28,10 @@ import com.kouqurong.plugin.view.IPluginView
 class PluginSignIn : IPluginView {
   override val view: @Composable () -> Unit
     get() = { App() }
+
   override val icon: @Composable () -> Painter
     get() = { rememberVectorPainter(Icons.Default.Face) }
+
   override val label: String
     get() = "SignIn"
 }

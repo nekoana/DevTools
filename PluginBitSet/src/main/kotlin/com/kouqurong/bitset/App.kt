@@ -167,7 +167,9 @@ val types = listOf(IBitSetType.Hex, IBitSetType.Binary)
 
 sealed interface IBitSetType {
   fun toBitSet(bitset: String): BitSet
+
   fun isAvailable(bitset: String): Boolean
+
   fun label(): String {
     return when (this) {
       Hex -> "Hex"

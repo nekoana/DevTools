@@ -27,7 +27,9 @@ data class FieldItem(
 
 sealed class IAttr(val value: String) {
   data object ASCII : IAttr("ASCII")
+
   data object BCD : IAttr("BCD")
+
   data object BINARY : IAttr("BINARY")
 }
 
@@ -35,6 +37,7 @@ val AttrList = listOf(IAttr.ASCII, IAttr.BCD, IAttr.BINARY)
 
 sealed class IFormat(val value: String) {
   data object VAR : IFormat("VAR")
+
   data object FIX : IFormat("FIX")
 }
 
@@ -42,6 +45,7 @@ val FormatList = listOf(IFormat.VAR, IFormat.FIX)
 
 sealed class IAlign(val value: String) {
   data object LEFT : IAlign("LEFT")
+
   data object RIGHT : IAlign("RIGHT")
 }
 
