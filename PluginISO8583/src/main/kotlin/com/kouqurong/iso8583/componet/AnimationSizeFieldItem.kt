@@ -74,20 +74,18 @@ fun FieldItemRow(
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.SpaceBetween,
   ) {
-    FieldInputItem(field = { fieldItem.field }) {
+    FieldInputItem(field = fieldItem.field) {
       onFieldItemIntent(IFieldItemIntent.FieldChange(-1, it))
     }
-    AttrSelectItem(attr = { fieldItem.attr }) {
-      onFieldItemIntent(IFieldItemIntent.AttrChange(-1, it))
-    }
+    AttrSelectItem(attr = fieldItem.attr) { onFieldItemIntent(IFieldItemIntent.AttrChange(-1, it)) }
     LengthAndFormatItem(
-        length = { fieldItem.length },
-        format = { fieldItem.format },
+        length = fieldItem.length,
+        format = fieldItem.format,
         onLengthChange = { onFieldItemIntent(IFieldItemIntent.LengthChange(-1, it)) },
         onFormatChange = { onFieldItemIntent(IFieldItemIntent.FormatChange(-1, it)) })
     PaddingAndAlignItem(
-        padding = { fieldItem.padding },
-        align = { fieldItem.align },
+        padding = fieldItem.padding,
+        align = fieldItem.align,
         onPaddingChange = { onFieldItemIntent(IFieldItemIntent.PaddingChange(-1, it)) },
         onAlignChange = { onFieldItemIntent(IFieldItemIntent.AlignChange(-1, it)) })
 
@@ -100,15 +98,11 @@ fun FieldItemRow(
 }
 
 @Composable
-fun FieldInputItem(
-    modifier: Modifier = Modifier,
-    field: () -> String,
-    onFieldChange: (String) -> Unit
-) {
+fun FieldInputItem(modifier: Modifier = Modifier, field: String, onFieldChange: (String) -> Unit) {
   NumberTextField(
       modifier = modifier.width(48.dp).height(IntrinsicSize.Min),
-      value = field(),
-      isError = field().isBlank(),
+      value = field,
+      isError = field.isBlank(),
       maxLength = 3,
       onValueChange = onFieldChange,
       tooltip = "Field")
@@ -116,24 +110,20 @@ fun FieldInputItem(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AttrSelectItem(
-    modifier: Modifier = Modifier,
-    attr: () -> IAttr,
-    onAttrChange: (IAttr) -> Unit
-) {
+fun AttrSelectItem(modifier: Modifier = Modifier, attr: Attr, onAttrChange: (Attr) -> Unit) {
   var isShowAttrMenu by remember { mutableStateOf(false) }
 
   ISO8583TooltipArea(tooltip = "Attr") {
     Row(
         modifier = modifier.clickable { isShowAttrMenu = !isShowAttrMenu },
     ) {
-      Text(text = attr().value)
+      Text(text = attr.name)
       Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
 
       DropdownMenu(isShowAttrMenu, onDismissRequest = { isShowAttrMenu = false }) {
-        AttrList.forEach { attr ->
+        Attr.entries.forEach { attr ->
           DropdownMenuItem(
-              text = { Text(attr.value) },
+              text = { Text(attr.name) },
               onClick = {
                 isShowAttrMenu = false
                 onAttrChange(attr)
@@ -148,17 +138,17 @@ fun AttrSelectItem(
 @Composable
 fun LengthAndFormatItem(
     modifier: Modifier = Modifier,
-    length: () -> String,
-    format: () -> IFormat,
+    length: String,
+    format: Format,
     onLengthChange: (String) -> Unit,
-    onFormatChange: (IFormat) -> Unit,
+    onFormatChange: (Format) -> Unit,
 ) {
   var isShowFormatMenu by remember { mutableStateOf(false) }
   Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween) {
     NumberTextField(
         modifier = Modifier.width(64.dp),
-        value = length(),
-        isError = length().isBlank(),
+        value = length,
+        isError = length.isBlank(),
         maxLength = 4,
         onValueChange = onLengthChange,
         tooltip = "Length")
@@ -167,13 +157,13 @@ fun LengthAndFormatItem(
       Row(
           modifier = Modifier.clickable { isShowFormatMenu = !isShowFormatMenu },
       ) {
-        Text(text = format().value)
+        Text(text = format.name)
         Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
 
         DropdownMenu(isShowFormatMenu, onDismissRequest = { isShowFormatMenu = false }) {
-          FormatList.forEach { format ->
+          Format.entries.forEach { format ->
             DropdownMenuItem(
-                text = { Text(format.value) },
+                text = { Text(format.name) },
                 onClick = {
                   isShowFormatMenu = false
                   onFormatChange(format)
@@ -188,31 +178,31 @@ fun LengthAndFormatItem(
 @Composable
 fun PaddingAndAlignItem(
     modifier: Modifier = Modifier,
-    padding: () -> String,
-    align: () -> IAlign,
+    padding: String,
+    align: Align,
     onPaddingChange: (String) -> Unit,
-    onAlignChange: (IAlign) -> Unit
+    onAlignChange: (Align) -> Unit
 ) {
   var isShowAlignMenu by remember { mutableStateOf(false) }
 
   Row(modifier = modifier) {
     SingleCharTextField(
         modifier = Modifier.width(24.dp),
-        value = padding(),
-        isError = padding().isBlank(),
+        value = padding,
+        isError = padding.isBlank(),
         onValueChange = { onPaddingChange(it) },
         tooltip = "Padding")
     ISO8583TooltipArea(tooltip = "Align") {
       Row(
           modifier = Modifier.clickable { isShowAlignMenu = !isShowAlignMenu },
       ) {
-        Text(text = align().value)
+        Text(text = align.name)
         Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop Down")
 
         DropdownMenu(isShowAlignMenu, onDismissRequest = { isShowAlignMenu = false }) {
-          AlignList.forEach { align ->
+          Align.entries.forEach { align ->
             DropdownMenuItem(
-                text = { Text(align.value) },
+                text = { Text(align.name) },
                 onClick = {
                   isShowAlignMenu = false
                   onAlignChange(align)

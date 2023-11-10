@@ -32,11 +32,11 @@ import kotlinx.coroutines.launch
 sealed interface IFieldItemIntent {
   data class Delete(val index: Int) : IFieldItemIntent
 
-  data class AttrChange(val index: Int, val attr: IAttr) : IFieldItemIntent
+  data class AttrChange(val index: Int, val attr: Attr) : IFieldItemIntent
 
-  data class FormatChange(val index: Int, val format: IFormat) : IFieldItemIntent
+  data class FormatChange(val index: Int, val format: Format) : IFieldItemIntent
 
-  data class AlignChange(val index: Int, val align: IAlign) : IFieldItemIntent
+  data class AlignChange(val index: Int, val align: Align) : IFieldItemIntent
 
   data class LengthChange(val index: Int, val length: String) : IFieldItemIntent
 

@@ -16,16 +16,16 @@
 
 package com.kouqurong.iso8583.util
 
+import com.kouqurong.iso8583.data.Align
+import com.kouqurong.iso8583.data.Attr
 import com.kouqurong.iso8583.data.FieldItem
-import com.kouqurong.iso8583.data.IAlign
-import com.kouqurong.iso8583.data.IAttr
-import com.kouqurong.iso8583.data.IFormat
+import com.kouqurong.iso8583.data.Format
 import java.nio.ByteBuffer
 
 fun FieldItem.parse(buffer: ByteBuffer): String {
   var dataLen = length.toInt()
 
-  if (format == IFormat.VAR) {
+  if (format == Format.VAR) {
     val dataLenBsCount =
         when (dataLen) {
           // 0..99 一个字节
@@ -50,9 +50,9 @@ fun FieldItem.parse(buffer: ByteBuffer): String {
 
 private fun FieldItem.readData(dataLen: Int, buffer: ByteBuffer): String {
   var readLen = dataLen
-  if (attr == IAttr.BCD) {
+  if (attr == Attr.BCD) {
     readLen = (dataLen + 1) / 2
-  } else if (attr == IAttr.BINARY) {
+  } else if (attr == Attr.BINARY) {
     readLen = (dataLen + 7) / 8
   }
 
@@ -61,18 +61,18 @@ private fun FieldItem.readData(dataLen: Int, buffer: ByteBuffer): String {
   buffer.get(dataBs)
 
   return when (attr) {
-    IAttr.ASCII -> String(dataBs)
-    IAttr.BCD -> {
+    Attr.ASCII -> String(dataBs)
+    Attr.BCD -> {
       val ret = dataBs.bcdToStr()
       if (readLen * 2 != dataLen) {
         when (align) {
-          IAlign.LEFT -> ret.substring(0, dataLen)
-          IAlign.RIGHT -> ret.substring(ret.length - dataLen)
+          Align.RIGHT -> ret.substring(0, dataLen)
+          Align.LEFT -> ret.substring(ret.length - dataLen)
         }
       } else {
         ret
       }
     }
-    IAttr.BINARY -> dataBs.toHexStr()
+    Attr.BINARY -> dataBs.toHexStr()
   }
 }

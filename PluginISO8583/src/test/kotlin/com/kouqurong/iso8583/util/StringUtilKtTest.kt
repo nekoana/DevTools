@@ -16,7 +16,7 @@
 
 package com.kouqurong.iso8583.util
 
-import com.kouqurong.iso8583.data.IAlign
+import com.kouqurong.iso8583.data.Align
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -28,11 +28,11 @@ class StringUtilKtTest {
 
     assertArrayEquals(byteArrayOf(0x12, 0x34, 0x56, 0x78, 0x90.toByte()), bcdStr)
 
-    val bcdStr3 = "123456789".toBcd(IAlign.RIGHT)
+    val bcdStr3 = "123456789".toBcd(Align.RIGHT)
 
     assertArrayEquals(byteArrayOf(0x01, 0x23, 0x45, 0x67, 0x89.toByte()), bcdStr3)
 
-    val bcdStr4 = "123456789".toBcd(IAlign.LEFT)
+    val bcdStr4 = "123456789".toBcd(Align.LEFT)
 
     assertArrayEquals(byteArrayOf(0x12, 0x34, 0x56, 0x78, 0x90.toByte()), bcdStr4)
   }

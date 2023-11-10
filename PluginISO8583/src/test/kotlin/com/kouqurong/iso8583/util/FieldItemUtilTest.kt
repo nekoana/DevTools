@@ -17,9 +17,9 @@
 package com.kouqurong.iso8583.util
 
 import com.kouqurong.iso8583.data.FieldItem
-import com.kouqurong.iso8583.data.IAlign
-import com.kouqurong.iso8583.data.IAttr
-import com.kouqurong.iso8583.data.IFormat
+import com.kouqurong.iso8583.data.Align
+import com.kouqurong.iso8583.data.Attr
+import com.kouqurong.iso8583.data.Format
 import java.nio.ByteBuffer
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -31,9 +31,9 @@ class FieldItemUtilTest {
     val fieldItem =
         FieldItem(
             field = "1",
-            attr = IAttr.ASCII,
-            format = IFormat.FIX,
-            align = IAlign.LEFT,
+            attr = Attr.ASCII,
+            format = Format.FIX,
+            align = Align.LEFT,
             length = "8",
             padding = "0")
     val readable = "00000001"
@@ -52,9 +52,9 @@ class FieldItemUtilTest {
     val fieldItem =
         FieldItem(
             field = "1",
-            attr = IAttr.ASCII,
-            format = IFormat.FIX,
-            align = IAlign.RIGHT,
+            attr = Attr.ASCII,
+            format = Format.FIX,
+            align = Align.RIGHT,
             length = "8",
             padding = "0")
     val readable = "00000001"
@@ -73,9 +73,9 @@ class FieldItemUtilTest {
     val fieldItem =
         FieldItem(
             field = "1",
-            attr = IAttr.ASCII,
-            format = IFormat.VAR,
-            align = IAlign.LEFT,
+            attr = Attr.ASCII,
+            format = Format.VAR,
+            align = Align.RIGHT,
             length = "9",
             padding = "0")
     val readable = "1234567890"
@@ -98,9 +98,9 @@ class FieldItemUtilTest {
     val fieldItem =
         FieldItem(
             field = "1",
-            attr = IAttr.BCD,
-            format = IFormat.VAR,
-            align = IAlign.LEFT,
+            attr = Attr.BCD,
+            format = Format.VAR,
+            align = Align.RIGHT,
             length = "9",
             padding = "0")
     val readable = "1234567890"
@@ -123,9 +123,9 @@ class FieldItemUtilTest {
     val fieldItem =
         FieldItem(
             field = "1",
-            attr = IAttr.BCD,
-            format = IFormat.VAR,
-            align = IAlign.RIGHT,
+            attr = Attr.BCD,
+            format = Format.VAR,
+            align = Align.LEFT,
             length = "9",
             padding = "0")
     val readable = "1234567890"
@@ -148,9 +148,9 @@ class FieldItemUtilTest {
     val fieldItem =
         FieldItem(
             field = "1",
-            attr = IAttr.BCD,
-            format = IFormat.FIX,
-            align = IAlign.RIGHT,
+            attr = Attr.BCD,
+            format = Format.FIX,
+            align = Align.LEFT,
             length = "9",
             padding = "0")
     val readable = "1234567890"
@@ -172,9 +172,9 @@ class FieldItemUtilTest {
     val fieldItem =
         FieldItem(
             field = "1",
-            attr = IAttr.BCD,
-            format = IFormat.FIX,
-            align = IAlign.LEFT,
+            attr = Attr.BCD,
+            format = Format.FIX,
+            align = Align.RIGHT,
             length = "9",
             padding = "0")
     val readable = "1234567890"
@@ -196,9 +196,9 @@ class FieldItemUtilTest {
     val fieldItem =
         FieldItem(
             field = "1",
-            attr = IAttr.BINARY,
-            format = IFormat.FIX,
-            align = IAlign.LEFT,
+            attr = Attr.BINARY,
+            format = Format.FIX,
+            align = Align.LEFT,
             length = "80",
             padding = "0")
     val readable = "1234567890"
@@ -220,9 +220,9 @@ class FieldItemUtilTest {
     val fieldItem =
         FieldItem(
             field = "1",
-            attr = IAttr.BINARY,
-            format = IFormat.VAR,
-            align = IAlign.LEFT,
+            attr = Attr.BINARY,
+            format = Format.VAR,
+            align = Align.LEFT,
             length = "72",
             padding = "0")
     val readable = "1234567890"

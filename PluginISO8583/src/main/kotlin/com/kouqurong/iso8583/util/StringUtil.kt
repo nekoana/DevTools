@@ -16,7 +16,7 @@
 
 package com.kouqurong.iso8583.util
 
-import com.kouqurong.iso8583.data.IAlign
+import com.kouqurong.iso8583.data.Align
 
 private fun String.toBcd(): ByteArray {
   val ret = ByteArray(length / 2)
@@ -34,14 +34,14 @@ private fun String.toBcd(): ByteArray {
   return ret
 }
 
-fun String.toBcd(align: IAlign = IAlign.RIGHT, padding: Char = '0'): ByteArray {
+fun String.toBcd(align: Align = Align.LEFT, padding: Char = '0'): ByteArray {
   if (length % 2 != 0) {
     val sb = StringBuilder()
-    if (align == IAlign.RIGHT) {
+    if (align == Align.LEFT) {
       sb.append(padding)
     }
     sb.append(this)
-    if (align == IAlign.LEFT) {
+    if (align == Align.RIGHT) {
       sb.append(padding)
     }
     return sb.toString().toBcd()

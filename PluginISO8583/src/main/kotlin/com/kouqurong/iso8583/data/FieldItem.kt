@@ -16,37 +16,32 @@
 
 package com.kouqurong.iso8583.data
 
+import kotlinx.serialization.Serializable
+
 data class FieldItem(
     val field: String,
-    val attr: IAttr = IAttr.ASCII,
-    val format: IFormat = IFormat.FIX,
-    val align: IAlign = IAlign.LEFT,
+    val attr: Attr = Attr.ASCII,
+    val format: Format = Format.FIX,
+    val align: Align = Align.LEFT,
     val length: String = "0",
     val padding: String = "0",
 )
 
-sealed class IAttr(val value: String) {
-  data object ASCII : IAttr("ASCII")
-
-  data object BCD : IAttr("BCD")
-
-  data object BINARY : IAttr("BINARY")
+@Serializable
+enum class Attr {
+  ASCII,
+  BCD,
+  BINARY
 }
 
-val AttrList = listOf(IAttr.ASCII, IAttr.BCD, IAttr.BINARY)
-
-sealed class IFormat(val value: String) {
-  data object VAR : IFormat("VAR")
-
-  data object FIX : IFormat("FIX")
+@Serializable
+enum class Format {
+  VAR,
+  FIX
 }
 
-val FormatList = listOf(IFormat.VAR, IFormat.FIX)
-
-sealed class IAlign(val value: String) {
-  data object LEFT : IAlign("LEFT")
-
-  data object RIGHT : IAlign("RIGHT")
+@Serializable
+enum class Align {
+  LEFT,
+  RIGHT
 }
-
-val AlignList = listOf(IAlign.LEFT, IAlign.RIGHT)
