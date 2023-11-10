@@ -31,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
@@ -59,13 +60,9 @@ fun Home(views: List<IPluginView>, onDisplay: (IPluginView) -> Unit) {
       horizontalArrangement = Arrangement.SpaceAround,
       contentPadding = PaddingValues(16.dp)) {
         items(views) {
-          ElevatedCard(
-              modifier =
-                  Modifier.size(120.dp, 80.dp).clip(RoundedCornerShape(8.dp)).clickable {
-                    onDisplay(it)
-                  },
-              elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
-                Column(modifier = Modifier.padding(8.dp)) {
+            Column(modifier = Modifier.size(120.dp, 80.dp).clip(MaterialTheme.shapes.medium).clickable {
+              onDisplay(it)
+            }.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                   Image(
                       modifier = Modifier.size(40.dp, 40.dp),
                       painter = it.icon(),
@@ -77,7 +74,6 @@ fun Home(views: List<IPluginView>, onDisplay: (IPluginView) -> Unit) {
                   )
                 }
               }
-        }
       }
 }
 
