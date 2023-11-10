@@ -26,6 +26,9 @@ interface IPluginView {
 
   /** @return true if the back event is consumed by the plugin view. */
   fun onBack(): Boolean = false
+
+  /** @return if return null, will not display search bar */
+  fun onSearch(): ((String) -> Unit)? = null
 }
 
 abstract class PluginView : IPluginView {

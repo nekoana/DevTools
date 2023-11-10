@@ -54,27 +54,29 @@ import java.awt.event.MouseMotionAdapter
 
 @Composable
 fun Home(views: List<IPluginView>, onDisplay: (IPluginView) -> Unit) {
-  LazyVerticalGrid(
-      columns = GridCells.FixedSize(120.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp),
-      horizontalArrangement = Arrangement.SpaceAround,
-      contentPadding = PaddingValues(16.dp)) {
+    LazyVerticalGrid(
+        columns = GridCells.FixedSize(120.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.SpaceAround,
+        contentPadding = PaddingValues(16.dp)
+    ) {
         items(views) {
             Column(modifier = Modifier.size(120.dp, 80.dp).clip(MaterialTheme.shapes.medium).clickable {
-              onDisplay(it)
+                onDisplay(it)
             }.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                  Image(
-                      modifier = Modifier.size(40.dp, 40.dp),
-                      painter = it.icon(),
-                      contentDescription = it.label)
-                  Text(
-                      it.label,
-                      maxLines = 1,
-                      overflow = TextOverflow.Ellipsis,
-                  )
-                }
-              }
-      }
+                Image(
+                    modifier = Modifier.size(40.dp, 40.dp),
+                    painter = it.icon(),
+                    contentDescription = it.label
+                )
+                Text(
+                    it.label,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,6 +84,7 @@ fun Home(views: List<IPluginView>, onDisplay: (IPluginView) -> Unit) {
 @Preview
 fun App(
     window: Window,
+    onSearch: ((String) -> Unit)?,
     onClose: () -> Unit,
     onMinimize: () -> Unit,
     onBack: () -> Unit,
@@ -89,54 +92,88 @@ fun App(
     onMoveUp: () -> Unit,
     content: @Composable () -> Unit
 ) {
-  MaterialTheme {
-    Scaffold(
-        modifier = Modifier.clip(RoundedCornerShape(16.dp)),
-        topBar = {
-          TopAppBar(
-              modifier = Modifier.draggableArea(window),
-              title = { Text(text = "DevTools") },
-              navigationIcon = {
-                Row {
-                  IconButton(onClick = { onClose() }) {
-                    Icon(imageVector = Icons.Default.Close, contentDescription = "Close")
-                  }
+    MaterialTheme {
+        Scaffold(
+            modifier = Modifier.clip(RoundedCornerShape(16.dp)),
+            topBar = {
+                TopAppBar(
+                    modifier = Modifier.draggableArea(window),
+                    title = { Text(text = "DevTools") },
+                    navigationIcon = {
+                        Row {
+                            IconButton(onClick = { onClose() }) {
+                                Icon(imageVector = Icons.Default.Close, contentDescription = "Close")
+                            }
 
-                  IconButton(onClick = { onMinimize() }) {
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Minimize")
-                  }
+                            IconButton(onClick = { onMinimize() }) {
+                                Icon(
+                                    imageVector = Icons.Default.KeyboardArrowDown,
+                                    contentDescription = "Minimize"
+                                )
+                            }
 
-                  IconButton(onClick = { onBack() }) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
-                  }
-                }
-              },
-              actions = {
-                //                IconButton(
-                //                    onClick = {},
-                //                ) {
-                //                  Icon(imageVector = Icons.Default.Settings, contentDescription =
-                // "Setting")
-                //                }
-                IconButton(onClick = { onMoveUp() }) {
-                  Icon(imageVector = Icons.Default.MoveUp, contentDescription = "Float")
-                }
-              })
-        },
-    ) {
-      Surface(modifier = Modifier.padding(top = it.calculateTopPadding()).fillMaxSize()) {
-        content()
-      }
+                            IconButton(onClick = { onBack() }) {
+                                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                            }
+                        }
+                    },
+                    actions = {
+                        //                IconButton(
+                        //                    onClick = {},
+                        //                ) {
+                        //                  Icon(imageVector = Icons.Default.Settings, contentDescription =
+                        // "Setting")
+                        //                }
+
+                        onSearch?.let {
+                            var isInSearch by remember {
+                                mutableStateOf(false)
+                            }
+
+                            AnimatedContent(targetState = isInSearch) {
+                                if (it) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        OutlinedTextField(
+                                            modifier = Modifier,
+                                            value = "",
+                                            onValueChange = {},
+                                            singleLine = true
+                                        )
+
+                                        IconButton(onClick = { isInSearch = !isInSearch }) {
+                                            Icon(imageVector = Icons.Default.SearchOff, contentDescription = "Search")
+                                        }
+                                    }
+                                } else {
+                                    IconButton(onClick = {
+                                        isInSearch = !isInSearch
+                                    }) {
+                                        Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+                                    }
+                                }
+                            }
+                        }
+
+                        IconButton(onClick = { onMoveUp() }) {
+                            Icon(imageVector = Icons.Default.MoveUp, contentDescription = "Float")
+                        }
+                    })
+            },
+        ) {
+            Surface(modifier = Modifier.padding(top = it.calculateTopPadding()).fillMaxSize()) {
+                content()
+            }
+        }
     }
-  }
 }
 
 @Composable
 fun ApplicationScope.PluginViewWindow(state: PluginViewWindowState) =
     Window(onCloseRequest = state::close, title = state.pluginView.label, resizable = false) {
-      MaterialTheme { Surface { state.pluginView.view() } }
+        MaterialTheme { Surface { state.pluginView.view() } }
     }
 
 @Composable
@@ -154,108 +191,120 @@ fun ApplicationScope.HostWindow(
         undecorated = true,
         transparent = true,
         resizable = false,
-        icon = icon) {
-          var displayPluginView by remember { mutableStateOf<IPluginView?>(null) }
+        icon = icon
+    ) {
+        var displayPluginView by remember { mutableStateOf<IPluginView?>(null) }
 
-          App(
-              window,
-              onClose = { onCloseRequest() },
-              onMinimize = { windowState.isMinimized = true },
-              onBack = {
-                if (displayPluginView?.onBack()?.not() == true) {
-                  displayPluginView = null
-                }
-              },
-              onDisplay = { displayPluginView = it },
-              onMoveUp = {
+        val onSearch by remember {
+            derivedStateOf<((String) -> Unit)?> {
                 if (displayPluginView != null) {
-                  viewModel.openNewPluginViewWindow(displayPluginView!!)
-                  displayPluginView = null
+                    displayPluginView!!.onSearch()
+                } else {
+                    {}
                 }
-              }) {
-                AnimatedContent(
-                    targetState = displayPluginView,
-                ) {
-                  if (it != null) {
-                    it.view()
-                  } else {
-                    Home(views = viewModel.pluginViews, onDisplay = { displayPluginView = it })
-                  }
-                }
-              }
+            }
         }
+
+        App(
+            window,
+            onSearch = onSearch,
+            onClose = { onCloseRequest() },
+            onMinimize = { windowState.isMinimized = true },
+            onBack = {
+                if (displayPluginView?.onBack()?.not() == true) {
+                    displayPluginView = null
+                }
+            },
+            onDisplay = { displayPluginView = it },
+            onMoveUp = {
+                if (displayPluginView != null) {
+                    viewModel.openNewPluginViewWindow(displayPluginView!!)
+                    displayPluginView = null
+                }
+            }) {
+            AnimatedContent(
+                targetState = displayPluginView,
+            ) {
+                if (it != null) {
+                    it.view()
+                } else {
+                    Home(views = viewModel.pluginViews, onDisplay = { displayPluginView = it })
+                }
+            }
+        }
+    }
 
 fun Modifier.draggableArea(window: Window) =
     then(
         Modifier.composed {
-          class DragHandler(private val window: Window) {
-            private var location = window.location.toComposeOffset()
-            private var pointStart = MouseInfo.getPointerInfo().location.toComposeOffset()
+            class DragHandler(private val window: Window) {
+                private var location = window.location.toComposeOffset()
+                private var pointStart = MouseInfo.getPointerInfo().location.toComposeOffset()
 
-            private val dragListener =
-                object : MouseMotionAdapter() {
-                  override fun mouseDragged(event: MouseEvent) = drag()
+                private val dragListener =
+                    object : MouseMotionAdapter() {
+                        override fun mouseDragged(event: MouseEvent) = drag()
+                    }
+                private val removeListener =
+                    object : MouseAdapter() {
+                        override fun mouseReleased(event: MouseEvent) {
+                            window.removeMouseMotionListener(dragListener)
+                            window.removeMouseListener(this)
+                        }
+                    }
+
+                fun register() {
+                    location = window.location.toComposeOffset()
+                    pointStart = MouseInfo.getPointerInfo().location.toComposeOffset()
+                    window.addMouseListener(removeListener)
+                    window.addMouseMotionListener(dragListener)
                 }
-            private val removeListener =
-                object : MouseAdapter() {
-                  override fun mouseReleased(event: MouseEvent) {
-                    window.removeMouseMotionListener(dragListener)
-                    window.removeMouseListener(this)
-                  }
+
+                private fun drag() {
+                    val point = MouseInfo.getPointerInfo().location.toComposeOffset()
+                    val location = location + (point - pointStart)
+                    window.setLocation(location.x, location.y)
                 }
 
-            fun register() {
-              location = window.location.toComposeOffset()
-              pointStart = MouseInfo.getPointerInfo().location.toComposeOffset()
-              window.addMouseListener(removeListener)
-              window.addMouseMotionListener(dragListener)
+                private fun Point.toComposeOffset() = IntOffset(x, y)
             }
 
-            private fun drag() {
-              val point = MouseInfo.getPointerInfo().location.toComposeOffset()
-              val location = location + (point - pointStart)
-              window.setLocation(location.x, location.y)
+            val handler = remember { DragHandler(window) }
+
+            Modifier.pointerInput(Unit) {
+                awaitEachGesture {
+                    awaitFirstDown()
+                    handler.register()
+                }
             }
-
-            private fun Point.toComposeOffset() = IntOffset(x, y)
-          }
-
-          val handler = remember { DragHandler(window) }
-
-          Modifier.pointerInput(Unit) {
-            awaitEachGesture {
-              awaitFirstDown()
-              handler.register()
-            }
-          }
         })
 
 fun main() = application {
-  val viewModel = remember { HostViewModel() }
+    val viewModel = remember { HostViewModel() }
 
-  LaunchedEffect(viewModel) { viewModel.loadSelfPluginView() }
+    LaunchedEffect(viewModel) { viewModel.loadSelfPluginView() }
 
-  val pluginViewWindowState = remember { viewModel.pluginViewWindowState }
-  val windowState = rememberWindowState()
+    val pluginViewWindowState = remember { viewModel.pluginViewWindowState }
+    val windowState = rememberWindowState()
 
-  var isOnTray by remember { mutableStateOf(false) }
+    var isOnTray by remember { mutableStateOf(false) }
 
-  if (isOnTray) {
-    Tray(
-        icon = painterResource("icon.svg"),
-        menu = {
-          Item(text = "Quit", onClick = { exitApplication() })
+    if (isOnTray) {
+        Tray(
+            icon = painterResource("icon.svg"),
+            menu = {
+                Item(text = "Quit", onClick = { exitApplication() })
 
-          Separator()
+                Separator()
 
-          Item(text = "Open", onClick = { isOnTray = false })
-        })
-  } else {
-    HostWindow(
-        viewModel = viewModel, windowState = windowState, onCloseRequest = { isOnTray = true })
+                Item(text = "Open", onClick = { isOnTray = false })
+            })
+    } else {
+        HostWindow(
+            viewModel = viewModel, windowState = windowState, onCloseRequest = { isOnTray = true })
 
-    for (state in pluginViewWindowState) {
-      key(state) { PluginViewWindow(state = state) }
+        for (state in pluginViewWindowState) {
+            key(state) { PluginViewWindow(state = state) }
+        }
     }
-  }
 }
