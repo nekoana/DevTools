@@ -22,6 +22,7 @@ import java.time.LocalDateTime
 
 sealed class Whoami(val name: String) {
   object Me : Whoami("Me")
+
   object Other : Whoami("Other")
 }
 

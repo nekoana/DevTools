@@ -21,7 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.kouqurong.plugin.tcpserver.model.ISendType
 import com.kouqurong.plugin.tcpserver.model.Message
-import com.kouqurong.plugin.tcpserver.utils.toHexByteArray
+import com.kouqurong.shard.utils.toHexByteArray
 import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.net.SocketException
@@ -47,7 +47,9 @@ private val scope =
 
 sealed interface IListenState {
   object Closed : IListenState
+
   object Listening : IListenState
+
   class Error(val throwable: Throwable) : IListenState
 }
 
@@ -148,6 +150,7 @@ data class UiState(
 
   val selectedClient: Client?
     get() = _selectedClient.value
+
   internal val port: String
     get() = _port.value
 

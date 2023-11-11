@@ -18,15 +18,30 @@ package com.kouqurong.devtools.viewmodel
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshotFlow
 import com.kouqurong.devtools.utils.PathClassLoader
 import com.kouqurong.plugin.view.IPluginView
 import com.kouqurong.plugin.view.ViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.stateIn
 import java.util.*
 
 class HostViewModel : ViewModel() {
+  private val _pluginViews = mutableStateOf(emptyList<IPluginView>())
+  private val _searchKeyword = mutableStateOf("")
+
   val pluginViewWindowState = mutableStateListOf<PluginViewWindowState>()
 
-  val pluginViews = mutableStateListOf<IPluginView>()
+  val pluginViews = snapshotFlow { _pluginViews.value }
+    .distinctUntilChanged()
+    .combine(snapshotFlow { _searchKeyword.value }.distinctUntilChanged()) { pluginViews, searchKeyword ->
+      if (searchKeyword.isEmpty()) return@combine pluginViews
+      pluginViews.filter { it.label.contains(searchKeyword, true) }
+    }
+    .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
   fun openNewPluginViewWindow(pluginView: IPluginView) {
     pluginViewWindowState.add(PluginViewWindowState(pluginView) { closePluginViewWindow(it) })
@@ -38,22 +53,20 @@ class HostViewModel : ViewModel() {
 
   fun loadThirdPluginView(paths: Array<String>) {
     val classLoader = PathClassLoader(*paths)
-    ServiceLoader.load(IPluginView::class.java, classLoader).toCollection(pluginViews)
+    loadPluginView(classLoader)
   }
 
   fun loadSelfPluginView() {
-    ServiceLoader.load(IPluginView::class.java).toCollection(pluginViews)
+    loadPluginView(javaClass.classLoader)
   }
 
-  fun loadTestPluginView() {
-    val paths =
-        arrayOf(
-            "/Users/codin/MyCode/DevTools/PluginHello/build/libs/PluginHello.jar",
-            "/Users/codin/MyCode/DevTools/PluginHex/build/libs/PluginHex.jar",
-            "/Users/codin/MyCode/DevTools/PluginTcpClient/build/libs/PluginTcpClient.jar",
-            "/Users/codin/MyCode/DevTools/PluginTcpServer/build/libs/PluginTcpServer.jar")
+  private fun loadPluginView(classLoader: ClassLoader) {
+    val pluginViews = ServiceLoader.load(IPluginView::class.java, classLoader).toList()
+    _pluginViews.value = pluginViews
+  }
 
-    loadThirdPluginView(paths)
+  fun search(keyword: String) {
+    _searchKeyword.value = keyword
   }
 
   fun exit() {

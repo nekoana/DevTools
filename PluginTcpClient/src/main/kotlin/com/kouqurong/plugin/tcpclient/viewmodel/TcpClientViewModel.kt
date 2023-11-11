@@ -20,8 +20,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.kouqurong.plugin.tcpclient.model.ISendType
 import com.kouqurong.plugin.tcpclient.model.Message
-import com.kouqurong.plugin.tcpclient.utils.toHexByteArray
 import com.kouqurong.plugin.view.ViewModel
+import com.kouqurong.shard.utils.toHexByteArray
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.SelectionKey
@@ -34,14 +34,18 @@ import kotlinx.coroutines.flow.*
 
 sealed interface IConnectionState {
   object Disconnected : IConnectionState
+
   object Connecting : IConnectionState
+
   object Connected : IConnectionState
+
   class Error(val throwable: Throwable) : IConnectionState
 }
 
 // 判断是否是合法的IP 端口
 val regex =
-    """^((\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.){3}(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5]):\d{1,5}$""".toRegex()
+    """^((\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.){3}(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5]):\d{1,5}$"""
+        .toRegex()
 
 data class UiState(
     private val viewModelScope: CoroutineScope,
