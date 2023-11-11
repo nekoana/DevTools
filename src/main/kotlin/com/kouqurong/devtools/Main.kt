@@ -18,7 +18,9 @@ package com.kouqurong.devtools
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -53,6 +55,7 @@ import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionAdapter
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Home(views: () -> List<IPluginView>, onDisplay: (IPluginView) -> Unit) {
     val itm = views()
@@ -73,7 +76,8 @@ fun Home(views: () -> List<IPluginView>, onDisplay: (IPluginView) -> Unit) {
                     contentDescription = itm[it].label
                 )
                 Text(
-                    itm[it].label,
+                    text = itm[it].label,
+                    modifier = Modifier.basicMarquee(),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
