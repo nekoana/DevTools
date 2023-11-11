@@ -16,6 +16,7 @@
 
 package com.kouqurong.plugin.http.file.server
 
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.mutableStateOf
 import com.example.plugins.configFiles
 import com.example.plugins.configureRouting
@@ -24,6 +25,13 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+enum class ServerStatus {
+  STARTED,
+  STOPPED
+}
 
 class HttpFileServerViewModel : ViewModel() {
 
@@ -32,6 +40,13 @@ class HttpFileServerViewModel : ViewModel() {
   private val _port = mutableStateOf(DEFAULT_PORT.toString())
 
   private val _shardPath = mutableStateOf("")
+
+  val snackbarHostState = SnackbarHostState()
+
+  private val _serverStatus = mutableStateOf(ServerStatus.STOPPED)
+
+  val serverStatus: ServerStatus
+    get() = _serverStatus.value
 
   val shardPath: String
     get() = _shardPath.value
@@ -47,22 +62,42 @@ class HttpFileServerViewModel : ViewModel() {
     _shardPath.value = path
   }
 
-  fun startServer() {
-    val listen = port.toIntOrNull() ?: return
+  fun startServer() =
+      viewModelScope.launch(Dispatchers.IO) {
+        val listen = port.toIntOrNull()
+        if (listen == null) {
+          snackbarHostState.showSnackbar("Port is invalid")
+          return@launch
+        }
 
-    if (shardPath.isBlank()) return
+        if (shardPath.isBlank()) {
+          snackbarHostState.showSnackbar("Path is invalid")
+          return@launch
+        }
 
-    val file = File(shardPath)
-    if (!file.isDirectory) return
+        val file = File(shardPath)
+        if (!file.isDirectory) {
+          snackbarHostState.showSnackbar("Path is invalid")
+          return@launch
+        }
 
-    server =
-        embeddedServer(Netty, port = listen, host = HOST) { configFiles("/", file) }
-            .start(wait = false)
-  }
+        runCatching {
+              server =
+                  embeddedServer(Netty, port = listen, host = HOST) { configFiles("/", file) }
+                      .start(wait = false)
+            }
+            .onFailure { snackbarHostState.showSnackbar("Start server failed: ${it.message}") }
+            .onSuccess { _serverStatus.value = ServerStatus.STARTED }
+      }
 
-  fun stopServer() {
-    server.stop(1000, 1000)
-  }
+  fun stopServer() =
+      viewModelScope.launch(Dispatchers.IO) {
+        if (::server.isInitialized) {
+          runCatching { server.stop(1000, 1000) }
+              .onFailure { snackbarHostState.showSnackbar("Stop server failed: ${it.message}") }
+              .onSuccess { _serverStatus.value = ServerStatus.STOPPED }
+        }
+      }
 
   companion object {
     const val HOST = "0.0.0.0"

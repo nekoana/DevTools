@@ -29,6 +29,7 @@ dependencies {
     implementation(project(":PluginView"))
     implementation(libs.material3.desktop)
     implementation(libs.auto.service.annotations)
+    implementation(libs.material.icons.extended.desktop)
     kapt(libs.auto.service.processor)
     // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-swing
     implementation(libs.kotlinx.coroutines.swing)
