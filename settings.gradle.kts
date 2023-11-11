@@ -42,3 +42,5 @@ include("PluginISO8583")
 include("ShardBitSet")
 
 include("ShardUtils")
+
+include("PluginHttpFileServer")

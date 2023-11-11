@@ -31,6 +31,7 @@ dependencies {
   implementation(project(":PluginBitSet"))
   implementation(project(":PluginSignIn"))
   implementation(project(":PluginISO8583"))
+  implementation(project(":PluginHttpFileServer"))
   // https://mvnrepository.com/artifact/org.jetbrains.compose.material3/material3-desktop
   implementation(libs.material3.desktop)
   // https://mvnrepository.com/artifact/org.jetbrains.compose.material/material-icons-extended-desktop
