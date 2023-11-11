@@ -25,7 +25,6 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -45,6 +44,8 @@ import androidx.compose.ui.window.*
 import com.kouqurong.devtools.viewmodel.HostViewModel
 import com.kouqurong.devtools.viewmodel.PluginViewWindowState
 import com.kouqurong.plugin.view.IPluginView
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import java.awt.MouseInfo
 import java.awt.Point
 import java.awt.Window
@@ -53,24 +54,26 @@ import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionAdapter
 
 @Composable
-fun Home(views: List<IPluginView>, onDisplay: (IPluginView) -> Unit) {
+fun Home(views: () -> List<IPluginView>, onDisplay: (IPluginView) -> Unit) {
+    val itm = views()
+
     LazyVerticalGrid(
         columns = GridCells.FixedSize(120.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.SpaceAround,
         contentPadding = PaddingValues(16.dp)
     ) {
-        items(views) {
+        items(itm.size) {
             Column(modifier = Modifier.size(120.dp, 80.dp).clip(MaterialTheme.shapes.medium).clickable {
-                onDisplay(it)
+                onDisplay(itm[it])
             }.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
                     modifier = Modifier.size(40.dp, 40.dp),
-                    painter = it.icon(),
-                    contentDescription = it.label
+                    painter = itm[it].icon(),
+                    contentDescription = itm[it].label
                 )
                 Text(
-                    it.label,
+                    itm[it].label,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -130,6 +133,18 @@ fun App(
                                 mutableStateOf(false)
                             }
 
+                            var searchKeyword by remember {
+                                mutableStateOf("")
+                            }
+
+                            LaunchedEffect(Unit) {
+                                snapshotFlow { searchKeyword }
+                                    .distinctUntilChanged()
+                                    .collectLatest {
+                                        onSearch(searchKeyword)
+                                    }
+                            }
+
                             AnimatedContent(targetState = isInSearch) {
                                 if (it) {
                                     Row(
@@ -138,12 +153,17 @@ fun App(
                                     ) {
                                         OutlinedTextField(
                                             modifier = Modifier,
-                                            value = "",
-                                            onValueChange = {},
+                                            value = searchKeyword,
+                                            onValueChange = {
+                                                searchKeyword = it
+                                            },
                                             singleLine = true
                                         )
 
-                                        IconButton(onClick = { isInSearch = !isInSearch }) {
+                                        IconButton(onClick = {
+                                            isInSearch = !isInSearch
+                                            searchKeyword = ""
+                                        }) {
                                             Icon(imageVector = Icons.Default.SearchOff, contentDescription = "Search")
                                         }
                                     }
@@ -181,6 +201,7 @@ fun ApplicationScope.HostWindow(
     viewModel: HostViewModel,
     windowState: WindowState = rememberWindowState(),
     onCloseRequest: () -> Unit = ::exitApplication,
+    onSearch: ((String) -> Unit)?,
     title: String = "DevTools",
     icon: Painter = painterResource("icon.svg")
 ) =
@@ -195,12 +216,14 @@ fun ApplicationScope.HostWindow(
     ) {
         var displayPluginView by remember { mutableStateOf<IPluginView?>(null) }
 
+        val pluginViews = viewModel.pluginViews.collectAsState()
+
         val onSearch by remember {
-            derivedStateOf<((String) -> Unit)?> {
+            derivedStateOf {
                 if (displayPluginView != null) {
                     displayPluginView!!.onSearch()
                 } else {
-                    {}
+                    onSearch
                 }
             }
         }
@@ -228,7 +251,7 @@ fun ApplicationScope.HostWindow(
                 if (it != null) {
                     it.view()
                 } else {
-                    Home(views = viewModel.pluginViews, onDisplay = { displayPluginView = it })
+                    Home(views = { pluginViews.value }, onDisplay = { displayPluginView = it })
                 }
             }
         }
@@ -301,7 +324,11 @@ fun main() = application {
             })
     } else {
         HostWindow(
-            viewModel = viewModel, windowState = windowState, onCloseRequest = { isOnTray = true })
+            viewModel = viewModel,
+            windowState = windowState,
+            onCloseRequest = { isOnTray = true },
+            onSearch = viewModel::search
+        )
 
         for (state in pluginViewWindowState) {
             key(state) { PluginViewWindow(state = state) }
