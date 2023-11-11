@@ -34,14 +34,14 @@ private fun String.toBcd(): ByteArray {
   return ret
 }
 
-fun String.toBcd(align: Align = Align.LEFT, padding: Char = '0'): ByteArray {
+fun String.toBcd(align: Align = Align.L, padding: Char = '0'): ByteArray {
   if (length % 2 != 0) {
     val sb = StringBuilder()
-    if (align == Align.LEFT) {
+    if (align == Align.L) {
       sb.append(padding)
     }
     sb.append(this)
-    if (align == Align.RIGHT) {
+    if (align == Align.R) {
       sb.append(padding)
     }
     return sb.toString().toBcd()

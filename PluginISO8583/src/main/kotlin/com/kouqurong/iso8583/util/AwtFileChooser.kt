@@ -16,24 +16,21 @@
 
 package com.kouqurong.iso8583.util
 
-import com.kouqurong.iso8583.data.Align
-import org.junit.Assert.*
-import org.junit.Test
+import androidx.compose.ui.awt.ComposeWindow
 
-class StringUtilKtTest {
+fun awtFileChooser(filter: String = "*"): String? {
+  val dialog =
+      java.awt.FileDialog(ComposeWindow()).apply {
+        // file 过滤
+        setFilenameFilter { _, name ->
+          if (filter == "*") return@setFilenameFilter true
+          name.endsWith(filter)
+        }
+        isVisible = true
+      }
 
-  @Test
-  fun toBcd() {
-    val bcdStr = "1234567890".toBcd()
+  if (dialog.file == null) return null
+  if (dialog.directory == null) return null
 
-    assertArrayEquals(byteArrayOf(0x12, 0x34, 0x56, 0x78, 0x90.toByte()), bcdStr)
-
-    val bcdStr3 = "123456789".toBcd(Align.R)
-
-    assertArrayEquals(byteArrayOf(0x01, 0x23, 0x45, 0x67, 0x89.toByte()), bcdStr3)
-
-    val bcdStr4 = "123456789".toBcd(Align.L)
-
-    assertArrayEquals(byteArrayOf(0x12, 0x34, 0x56, 0x78, 0x90.toByte()), bcdStr4)
-  }
+  return dialog.directory + dialog.file
 }

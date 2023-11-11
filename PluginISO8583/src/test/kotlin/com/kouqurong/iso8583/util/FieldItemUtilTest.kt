@@ -33,7 +33,7 @@ class FieldItemUtilTest {
             field = "1",
             attr = Attr.ASCII,
             format = Format.FIX,
-            align = Align.LEFT,
+            align = Align.L,
             length = "8",
             padding = "0")
     val readable = "00000001"
@@ -54,7 +54,7 @@ class FieldItemUtilTest {
             field = "1",
             attr = Attr.ASCII,
             format = Format.FIX,
-            align = Align.RIGHT,
+            align = Align.R,
             length = "8",
             padding = "0")
     val readable = "00000001"
@@ -75,7 +75,7 @@ class FieldItemUtilTest {
             field = "1",
             attr = Attr.ASCII,
             format = Format.VAR,
-            align = Align.RIGHT,
+            align = Align.R,
             length = "9",
             padding = "0")
     val readable = "1234567890"
@@ -100,7 +100,7 @@ class FieldItemUtilTest {
             field = "1",
             attr = Attr.BCD,
             format = Format.VAR,
-            align = Align.RIGHT,
+            align = Align.R,
             length = "9",
             padding = "0")
     val readable = "1234567890"
@@ -125,7 +125,7 @@ class FieldItemUtilTest {
             field = "1",
             attr = Attr.BCD,
             format = Format.VAR,
-            align = Align.LEFT,
+            align = Align.L,
             length = "9",
             padding = "0")
     val readable = "1234567890"
@@ -150,7 +150,7 @@ class FieldItemUtilTest {
             field = "1",
             attr = Attr.BCD,
             format = Format.FIX,
-            align = Align.LEFT,
+            align = Align.L,
             length = "9",
             padding = "0")
     val readable = "1234567890"
@@ -174,7 +174,7 @@ class FieldItemUtilTest {
             field = "1",
             attr = Attr.BCD,
             format = Format.FIX,
-            align = Align.RIGHT,
+            align = Align.R,
             length = "9",
             padding = "0")
     val readable = "1234567890"
@@ -198,7 +198,7 @@ class FieldItemUtilTest {
             field = "1",
             attr = Attr.BINARY,
             format = Format.FIX,
-            align = Align.LEFT,
+            align = Align.L,
             length = "80",
             padding = "0")
     val readable = "1234567890"
@@ -222,7 +222,7 @@ class FieldItemUtilTest {
             field = "1",
             attr = Attr.BINARY,
             format = Format.VAR,
-            align = Align.LEFT,
+            align = Align.L,
             length = "72",
             padding = "0")
     val readable = "1234567890"

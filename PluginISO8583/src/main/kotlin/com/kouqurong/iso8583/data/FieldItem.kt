@@ -22,9 +22,18 @@ data class FieldItem(
     val field: String,
     val attr: Attr = Attr.ASCII,
     val format: Format = Format.FIX,
-    val align: Align = Align.LEFT,
+    val align: Align = Align.L,
     val length: String = "0",
     val padding: String = "0",
+)
+
+@Serializable
+data class SerializeFieldItem(
+    val attr: Attr,
+    val format: Format,
+    val length: String,
+    val align: Align,
+    val padding: String
 )
 
 @Serializable
@@ -42,6 +51,6 @@ enum class Format {
 
 @Serializable
 enum class Align {
-  LEFT,
-  RIGHT
+  L,
+  R
 }

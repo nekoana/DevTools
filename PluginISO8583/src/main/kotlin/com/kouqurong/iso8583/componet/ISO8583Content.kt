@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.kouqurong.iso8583.data.DisplayFieldItem
 import com.kouqurong.iso8583.data.FieldItem
+import com.kouqurong.iso8583.data.FieldMenuItem
 import com.kouqurong.iso8583.viewmodel.*
 import com.kouqurong.plugin.view.defaultDashedBorder
 
@@ -47,6 +48,7 @@ fun ISO8583Content(
     iso8583Hex: String,
     fieldItems: List<FieldItem>,
     fieldMenuItems: List<FieldMenuItem>,
+    onMenuClick: (FieldMenuItem) -> Unit,
     displayFieldItems: List<DisplayFieldItem>,
     scrollFieldDetailState: LazyListState = rememberLazyListState(),
     swipeEnabled: Boolean = true,
@@ -110,7 +112,9 @@ fun ISO8583Content(
                   )
                   FieldMenuContent(
                       modifier = Modifier.width(200.dp).fillMaxSize(),
-                      fieldMenuItems = fieldMenuItems)
+                      fieldMenuItems = fieldMenuItems,
+                      onMenuClick = onMenuClick,
+                  )
                 }
           }
         },
@@ -151,15 +155,20 @@ fun FieldDetailContent(
 }
 
 @Composable
-fun FieldMenuContent(modifier: Modifier = Modifier, fieldMenuItems: List<FieldMenuItem>) {
+fun FieldMenuContent(
+    modifier: Modifier = Modifier,
+    fieldMenuItems: List<FieldMenuItem>,
+    onMenuClick: (FieldMenuItem) -> Unit
+) {
   Column(
       modifier = modifier,
       horizontalAlignment = Alignment.End,
       verticalArrangement = Arrangement.SpaceAround) {
         fieldMenuItems.forEach {
-          AnimationSizeButton(modifier = Modifier.size(160.dp, 52.dp), onClick = it.onClick) {
-            Text(it.text)
-          }
+          AnimationSizeButton(
+              modifier = Modifier.size(160.dp, 52.dp), onClick = { onMenuClick(it) }) {
+                Text(it.name)
+              }
         }
       }
 }

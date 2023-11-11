@@ -66,8 +66,8 @@ private fun FieldItem.readData(dataLen: Int, buffer: ByteBuffer): String {
       val ret = dataBs.bcdToStr()
       if (readLen * 2 != dataLen) {
         when (align) {
-          Align.RIGHT -> ret.substring(0, dataLen)
-          Align.LEFT -> ret.substring(ret.length - dataLen)
+          Align.R -> ret.substring(0, dataLen)
+          Align.L -> ret.substring(ret.length - dataLen)
         }
       } else {
         ret

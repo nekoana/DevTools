@@ -14,26 +14,12 @@
  * limitations under the License.
  */
 
-package com.kouqurong.iso8583.util
+package com.kouqurong.iso8583.data
 
-import com.kouqurong.iso8583.data.Align
-import org.junit.Assert.*
-import org.junit.Test
-
-class StringUtilKtTest {
-
-  @Test
-  fun toBcd() {
-    val bcdStr = "1234567890".toBcd()
-
-    assertArrayEquals(byteArrayOf(0x12, 0x34, 0x56, 0x78, 0x90.toByte()), bcdStr)
-
-    val bcdStr3 = "123456789".toBcd(Align.R)
-
-    assertArrayEquals(byteArrayOf(0x01, 0x23, 0x45, 0x67, 0x89.toByte()), bcdStr3)
-
-    val bcdStr4 = "123456789".toBcd(Align.L)
-
-    assertArrayEquals(byteArrayOf(0x12, 0x34, 0x56, 0x78, 0x90.toByte()), bcdStr4)
-  }
+enum class FieldMenuItem {
+  Add,
+  Export,
+  Import,
+  Clear,
+  Temeplate
 }

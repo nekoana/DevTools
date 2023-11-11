@@ -27,8 +27,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.kouqurong.iso8583.componet.ISO8583Content
+import com.kouqurong.iso8583.data.FieldMenuItem
+import com.kouqurong.iso8583.viewmodel.IFieldMenuIntent
 import com.kouqurong.iso8583.viewmodel.PluginISO8583ViewModel
 import com.kouqurong.plugin.view.BackDispatcher
+import jFileChooser
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -54,7 +57,30 @@ fun App(backDispatcher: BackDispatcher) {
         modifier = Modifier.fillMaxSize(),
         iso8583Hex = viewModel.iso8583Hex,
         fieldItems = viewModel.fieldItems,
-        fieldMenuItems = viewModel.fieldMenuItems,
+        fieldMenuItems = FieldMenuItem.entries,
+        onMenuClick = {
+          when (it) {
+            FieldMenuItem.Add -> viewModel.fieldMenuIntent(IFieldMenuIntent.Add)
+            FieldMenuItem.Export -> {
+              if (viewModel.fieldItems.isEmpty()) {
+                viewModel.addDialogMessage("没有可导出的配置")
+              } else {
+                val file = jFileChooser(FileChooserType.SAVE, true, "conf", ".conf")
+                if (file != null) {
+                  viewModel.fieldMenuIntent(IFieldMenuIntent.Export(file))
+                }
+              }
+            }
+            FieldMenuItem.Import -> {
+              val file = jFileChooser(FileChooserType.OPEN, true, "conf", ".conf")
+              if (file != null) {
+                viewModel.fieldMenuIntent(IFieldMenuIntent.Import(file))
+              }
+            }
+            FieldMenuItem.Clear -> viewModel.fieldMenuIntent(IFieldMenuIntent.Clear)
+            FieldMenuItem.Temeplate -> viewModel.fieldMenuIntent(IFieldMenuIntent.Template)
+          }
+        },
         displayFieldItems = viewModel.displayFieldItems,
         scrollFieldDetailState = viewModel.scrollFieldDetailState,
         swipeEnabled = viewModel.displayFieldItems.isEmpty(),
