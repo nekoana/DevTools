@@ -50,7 +50,7 @@ sealed interface IISO8583HexIntent {
 
   data object Parsing : IISO8583HexIntent
 
-  object Generate : IISO8583HexIntent
+  data object Generate : IISO8583HexIntent
 }
 
 sealed interface IFieldMenuIntent {

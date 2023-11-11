@@ -74,16 +74,14 @@ fun MessageDialog(
     message: () -> String?,
     onConfirm: () -> Unit,
 ) {
-  val text = message()
+  val text by remember { derivedStateOf { message() } }
 
-  var isShowDialog by remember(text) { mutableStateOf(text != null) }
-
-  if (isShowDialog) {
+  text?.let {
     AlertDialog(
         modifier = modifier,
-        onDismissRequest = { isShowDialog = false },
+        onDismissRequest = {},
         confirmButton = { Button(onClick = onConfirm) { Text(text = "OK") } },
         title = { Text(text = "Message") },
-        text = { Text(text = text ?: "") })
+        text = { Text(text = it) })
   }
 }
