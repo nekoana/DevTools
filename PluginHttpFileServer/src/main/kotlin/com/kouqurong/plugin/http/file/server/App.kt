@@ -55,16 +55,6 @@ fun App() {
 
   Surface(modifier = Modifier.fillMaxSize().padding(16.dp)) {
     Box {
-      SnackbarHost(
-          modifier = Modifier.align(Alignment.BottomCenter),
-          hostState = viewModel.snackbarHostState,
-          snackbar = { snackbarData ->
-            Snackbar(
-                modifier = Modifier.padding(8.dp),
-                snackbarData = snackbarData,
-            )
-          })
-
       Row(
           modifier = Modifier.fillMaxWidth().height(80.dp).align(Alignment.TopCenter),
           verticalAlignment = Alignment.CenterVertically,
@@ -124,6 +114,16 @@ fun App() {
               }
         }
       }
+
+      SnackbarHost(
+          modifier = Modifier.align(Alignment.BottomCenter),
+          hostState = viewModel.snackbarHostState,
+          snackbar = { snackbarData ->
+            Snackbar(
+                modifier = Modifier.padding(8.dp),
+                snackbarData = snackbarData,
+            )
+          })
     }
   }
 }
