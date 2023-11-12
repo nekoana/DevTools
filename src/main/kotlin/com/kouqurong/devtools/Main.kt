@@ -46,7 +46,9 @@ import androidx.compose.ui.window.*
 import com.kouqurong.devtools.viewmodel.HostViewModel
 import com.kouqurong.devtools.viewmodel.PluginViewWindowState
 import com.kouqurong.plugin.view.IPluginView
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import java.awt.MouseInfo
 import java.awt.Point
@@ -86,7 +88,7 @@ fun Home(views: () -> List<IPluginView>, onDisplay: (IPluginView) -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
 @Preview
 fun App(
@@ -144,6 +146,7 @@ fun App(
                             LaunchedEffect(Unit) {
                                 snapshotFlow { searchKeyword }
                                     .distinctUntilChanged()
+                                    .debounce(500)
                                     .collectLatest {
                                         onSearch(searchKeyword)
                                     }
