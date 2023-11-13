@@ -29,6 +29,7 @@ dependencies {
     implementation(project(":PluginView"))
     implementation(project(":ShardBitSet"))
     implementation(project(":ShardUtils"))
+    implementation(libs.material.icons.extended.desktop)
     implementation(libs.kotlinx.serialization.hocon)
     implementation(libs.material3.desktop)
     implementation(libs.auto.service.annotations)

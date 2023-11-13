@@ -19,4 +19,8 @@ package com.kouqurong.iso8583.data
 data class DisplayFieldItem(
     val field: String,
     val value: String,
-)
+) {
+  override fun toString(): String {
+    return "$field:$value"
+  }
+}

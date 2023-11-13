@@ -26,6 +26,7 @@ import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.SwipeableState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -34,11 +35,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import com.kouqurong.iso8583.data.DisplayFieldItem
 import com.kouqurong.iso8583.data.FieldItem
 import com.kouqurong.iso8583.data.FieldMenuItem
-import com.kouqurong.iso8583.viewmodel.*
+import com.kouqurong.iso8583.viewmodel.IFieldItemIntent
+import com.kouqurong.iso8583.viewmodel.IISO8583HexIntent
 import com.kouqurong.plugin.view.defaultDashedBorder
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
@@ -56,6 +60,8 @@ fun ISO8583Content(
     onFieldItemIntent: (IFieldItemIntent) -> Unit,
     onISO8583HexIntent: (IISO8583HexIntent) -> Unit,
 ) {
+
+  val clipboard = LocalClipboardManager.current
 
   Box(modifier = modifier, contentAlignment = Alignment.Center) {
     SwipeCrossFadeLayout(
@@ -75,6 +81,14 @@ fun ISO8583Content(
                           onDisplayValueChange = {})
                     }
                   }
+                  FloatingActionButton(
+                      modifier = Modifier.padding(8.dp).align(Alignment.BottomEnd),
+                      onClick = {
+                        clipboard.setText(
+                            buildAnnotatedString { append(displayFieldItems.joinToString("\n")) })
+                      }) {
+                        Icon(Icons.Default.Save, contentDescription = "Save")
+                      }
                 } else {
 
                   ISO8583HexInput(
