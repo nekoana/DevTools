@@ -29,6 +29,7 @@ import com.kouqurong.iso8583.util.parseISO8583HexString
 import com.kouqurong.plugin.view.ViewModel
 import com.typesafe.config.ConfigFactory
 import com.typesafe.config.ConfigRenderOptions
+import java.io.File
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,7 +38,6 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.hocon.Hocon
 import kotlinx.serialization.hocon.decodeFromConfig
 import kotlinx.serialization.hocon.encodeToConfig
-import java.io.File
 
 sealed interface IFieldItemIntent {
   data class Delete(val index: Int) : IFieldItemIntent
@@ -192,64 +192,68 @@ class PluginISO8583ViewModel : ViewModel() {
                   .root()
                   .render(ConfigRenderOptions.defaults().setOriginComments(false))
 
-            val comment = "$COMMENT\r\n$content"
+          val comment = "$COMMENT\r\n$content"
 
           intent.file.writeText(comment)
         }
       }
       is IFieldMenuIntent.Import -> {
-          viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
-              _dialogMessage.add(throwable.message)
-          }) {
-          val config = ConfigFactory.parseFile(intent.file)
-          val items = Hocon.decodeFromConfig<Map<String, SerializeFieldItem>>(config)
+        viewModelScope.launch(
+            Dispatchers.IO +
+                CoroutineExceptionHandler { _, throwable ->
+                  _dialogMessage.add(throwable.message)
+                }) {
+              val config = ConfigFactory.parseFile(intent.file)
+              val items = Hocon.decodeFromConfig<Map<String, SerializeFieldItem>>(config)
 
-          val fieldItems =
-              items
-                  .map {
-                    FieldItem(
-                        field = it.key,
-                        attr = it.value.attr,
-                        format = it.value.format,
-                        length = it.value.length,
-                        align = it.value.align,
-                        padding = it.value.padding,
-                    )
-                  }
-                  .sortedBy { it.field.toInt() }
+              val fieldItems =
+                  items
+                      .map {
+                        FieldItem(
+                            field = it.key,
+                            attr = it.value.attr,
+                            format = it.value.format,
+                            length = it.value.length,
+                            align = it.value.align,
+                            padding = it.value.padding,
+                        )
+                      }
+                      .sortedBy { it.field.toInt() }
 
-          withContext(Dispatchers.Main) {
-            _fieldItems.clear()
-            _fieldItems.addAll(fieldItems)
-          }
-        }
+              withContext(Dispatchers.Main) {
+                _fieldItems.clear()
+                _fieldItems.addAll(fieldItems)
+              }
+            }
       }
       IFieldMenuIntent.Template -> {
-          viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
-              _dialogMessage.add(throwable.message)
-          }) {
+        viewModelScope.launch(
+            Dispatchers.IO +
+                CoroutineExceptionHandler { _, throwable ->
+                  _dialogMessage.add(throwable.message)
+                }) {
               val config = ConfigFactory.parseString(TEMPLATE)
               val items = Hocon.decodeFromConfig<Map<String, SerializeFieldItem>>(config)
 
               val fieldItems =
                   items
                       .map {
-                          FieldItem(
-                              field = it.key,
-                              attr = it.value.attr,
-                              format = it.value.format,
-                              length = it.value.length,
-                              align = it.value.align,
-                              padding = it.value.padding,
-                          )
+                        FieldItem(
+                            field = it.key,
+                            attr = it.value.attr,
+                            format = it.value.format,
+                            length = it.value.length,
+                            align = it.value.align,
+                            padding = it.value.padding,
+                        )
                       }
                       .sortedBy { it.field.toInt() }
 
               withContext(Dispatchers.Main) {
-                  _fieldItems.clear()
-                  _fieldItems.addAll(fieldItems)
+                _fieldItems.clear()
+                _fieldItems.addAll(fieldItems)
               }
-          }
+            }
       }
     }
   }
@@ -267,8 +271,8 @@ class PluginISO8583ViewModel : ViewModel() {
   }
 }
 
-
-private const val COMMENT = """
+private const val COMMENT =
+    """
 # Generated by ISO8583 Plugin
 # attr = ASCII | BCD | BINARY
 # format = FIX | VAR , if length <= 99, length is one byte, else length is two bytes
@@ -277,8 +281,8 @@ private const val COMMENT = """
 # padding  if content length < length, padding content to length
 """
 
-
-private const val TEMPLATE = """
+private const val TEMPLATE =
+    """
 {
     "2" : {
         "align" : "L",
