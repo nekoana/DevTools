@@ -16,17 +16,18 @@
 
 package com.kouqurong.iso8583.util
 
-fun Byte.bcdToStr(): String {
-  // 如果不检查的话那么与转hexStr的方法就没有区别了
-  val high = (this.toInt() and 0xf0).ushr(4)
-  val low = this.toInt() and 0x0f
-  if (high > 9 || low > 9) {
-    throw IllegalArgumentException("Invalid bcd digit $this")
-  }
-  return buildString {
-    append(high)
-    append(low)
-  }
-}
+/** 扩展bcd， 允许0-9a-f */
+fun Byte.bcdToStr(): String = toHexStr()
+// 如果不检查的话那么与转hexStr的方法就没有区别了
+//  val high = (this.toInt() and 0xf0).ushr(4)
+//  val low = this.toInt() and 0x0f
+//  if (high > 9 || low > 9) {
+//    throw IllegalArgumentException("Invalid bcd digit $this")
+//  }
+//  return buildString {
+//    append(high)
+//    append(low)
+//  }
+// }
 
 fun Byte.toHexStr(): String = String.format("%02X", this)
