@@ -35,7 +35,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.kouqurong.plugin.tcpserver.model.Message
 import com.kouqurong.plugin.tcpserver.model.Whoami
-import com.kouqurong.plugin.view.recomposeHighlighter
 
 @Composable
 fun ChatMessage(
@@ -68,14 +67,13 @@ fun AuthorAndTimestamp(message: Message, modifier: Modifier = Modifier) {
         style = MaterialTheme.typography.titleMedium,
         modifier =
             Modifier.alignBy(LastBaseline)
-                .recomposeHighlighter()
                 .paddingFrom(LastBaseline, after = 8.dp) // Space to 1st bubble
         )
     Spacer(modifier = Modifier.width(8.dp))
     Text(
         text = message.timestamp,
         style = MaterialTheme.typography.bodySmall,
-        modifier = Modifier.alignBy(LastBaseline).recomposeHighlighter(),
+        modifier = Modifier.alignBy(LastBaseline),
         color = MaterialTheme.colorScheme.onSurfaceVariant)
   }
 }
@@ -106,11 +104,11 @@ fun TextBubble(message: Message, modifier: Modifier = Modifier) {
 
   CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColors) {
     Surface(color = backgroundBubbleColor, modifier = Modifier.clip(ChatBubbleShape)) {
-      SelectionContainer(modifier = Modifier.recomposeHighlighter().focusable(enabled = false)) {
+      SelectionContainer(modifier = Modifier.focusable(enabled = false)) {
         Text(
             text = message.content,
             style = MaterialTheme.typography.bodyLarge.copy(color = LocalContentColor.current),
-            modifier = Modifier.padding(16.dp).recomposeHighlighter(),
+            modifier = Modifier.padding(16.dp),
         )
       }
     }
