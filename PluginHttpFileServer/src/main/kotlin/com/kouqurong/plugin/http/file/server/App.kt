@@ -107,8 +107,8 @@ fun App() {
               onClick = {
                 val desktop = Desktop.getDesktop()
 
-                desktop.browse(
-                    URI.create("http://${HttpFileServerViewModel.HOST}:${viewModel.port}"))
+                // fixme windows 0.0.0.0 无法打开
+                desktop.browse(URI.create("http://127.0.0.1:${viewModel.port}"))
               }) {
                 Icon(Icons.Default.TravelExplore, contentDescription = "Explore")
               }

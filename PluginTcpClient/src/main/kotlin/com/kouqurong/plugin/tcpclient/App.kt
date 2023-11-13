@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import com.kouqurong.plugin.tcpclient.components.ChatRoom
 import com.kouqurong.plugin.tcpclient.viewmodel.IConnectionState
 import com.kouqurong.plugin.tcpclient.viewmodel.TcpClientViewModel
-import com.kouqurong.plugin.view.recomposeHighlighter
 
 @Composable
 fun App() {
@@ -82,7 +81,7 @@ fun AddressEdit(
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalAlignment = Alignment.CenterVertically) {
         TextField(
-            modifier = Modifier.width(260.dp).recomposeHighlighter(),
+            modifier = Modifier.width(260.dp),
             value = address,
             enabled = isEnabledEdit,
             label = {
