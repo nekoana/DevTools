@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.plugins
+package com.kouqurong.plugin.http.file.server.plugins
 
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
@@ -96,6 +96,7 @@ fun Application.configFiles(path: String, file: File) {
 
       call.respondText(rsp, io.ktor.http.ContentType.Text.Html)
     }
+    static {}
     staticFiles(path, file)
   }
 }

@@ -45,7 +45,6 @@ import com.kouqurong.plugin.tcpserver.components.ChatRoom
 import com.kouqurong.plugin.tcpserver.viewmodel.Client
 import com.kouqurong.plugin.tcpserver.viewmodel.IListenState
 import com.kouqurong.plugin.tcpserver.viewmodel.TcpServerViewModel
-import com.kouqurong.plugin.view.recomposeHighlighter
 import java.net.InetSocketAddress
 
 @Composable
@@ -108,7 +107,7 @@ fun PortEdit(
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalAlignment = Alignment.CenterVertically) {
         TextField(
-            modifier = Modifier.width(260.dp).recomposeHighlighter(),
+            modifier = Modifier.width(260.dp),
             value = port,
             enabled = isEnabledEdit && listenState == IListenState.Closed,
             label = {

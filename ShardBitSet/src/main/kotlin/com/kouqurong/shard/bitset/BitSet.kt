@@ -67,7 +67,7 @@ sealed class BitSet private constructor(protected var buffer: ByteBuffer) {
     fun bytesOf(bytes: ByteArray, offset: Int = 0, length: Int = bytes.size): BitSet {
       val newBytes = bytes.copyOfRange(offset, offset + length)
 
-      val buffer = ByteBuffer.allocate(newBytes.size).asReadOnlyBuffer()
+      val buffer = ByteBuffer.wrap(newBytes).asReadOnlyBuffer()
 
       return HexBitSet(buffer)
     }
