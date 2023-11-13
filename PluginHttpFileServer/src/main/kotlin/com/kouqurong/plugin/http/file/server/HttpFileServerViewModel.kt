@@ -18,8 +18,8 @@ package com.kouqurong.plugin.http.file.server
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.mutableStateOf
-import com.example.plugins.configFiles
-import com.example.plugins.configureRouting
+import com.kouqurong.plugin.http.file.server.plugins.configFiles
+import com.kouqurong.plugin.http.file.server.plugins.configureRouting
 import com.kouqurong.plugin.view.ViewModel
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
