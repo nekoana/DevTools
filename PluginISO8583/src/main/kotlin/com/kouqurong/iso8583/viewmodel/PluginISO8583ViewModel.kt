@@ -158,7 +158,7 @@ class PluginISO8583ViewModel : ViewModel() {
         if (fieldItems.isEmpty()) {
           addDialogMessage("Error,empty field")
         } else {
-          addDialogMessage("Error,not impl yes")
+          addDialogMessage("Error,not impl yet")
         }
       }
     }
