@@ -21,15 +21,22 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import com.google.zxing.BarcodeFormat
+import com.google.zxing.BinaryBitmap
 import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
+import com.google.zxing.client.j2se.BufferedImageLuminanceSource
 import com.google.zxing.common.BitMatrix
+import com.google.zxing.common.HybridBinarizer
+import com.google.zxing.qrcode.QRCodeReader
 import com.kouqurong.plugin.view.ViewModel
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
+import java.io.File
 import javax.imageio.ImageIO
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import org.jetbrains.skia.Image
 
 class QRCodeViewModel : ViewModel() {
@@ -43,14 +50,14 @@ class QRCodeViewModel : ViewModel() {
       snapshotFlow { qrCode }
           .debounce(1000)
           .distinctUntilChanged()
-          .map { generateQRCode(it) }
+          .map { encodeQRCode(it) }
           .shareIn(viewModelScope, SharingStarted.Lazily, 1)
 
   fun onQRCodeChanged(qrCode: String) {
     _qrCode.value = qrCode
   }
 
-  private fun generateQRCode(qrCode: String): ImageBitmap? {
+  private fun encodeQRCode(qrCode: String): ImageBitmap? {
     if (qrCode.isEmpty()) return null
 
     val hintMap = mapOf<EncodeHintType, Any>(EncodeHintType.ERROR_CORRECTION to 'L')
@@ -77,4 +84,20 @@ class QRCodeViewModel : ViewModel() {
 
   private fun ByteArray.toImageBitmap(): ImageBitmap =
       Image.makeFromEncoded(this).toComposeImageBitmap()
+
+  fun decodeQRCode(path: String) {
+    viewModelScope.launch(Dispatchers.IO) {
+      runCatching {
+            val file = File(path)
+
+            val bufferedImage: BufferedImage = ImageIO.read(file)
+            val source = BufferedImageLuminanceSource(bufferedImage)
+            val bitmap = BinaryBitmap(HybridBinarizer(source))
+
+            QRCodeReader().decode(bitmap)
+          }
+          .onFailure { onQRCodeChanged(it.message ?: "Unable to decode") }
+          .onSuccess { onQRCodeChanged(it.text) }
+    }
+  }
 }

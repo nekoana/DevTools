@@ -16,6 +16,7 @@
 
 package com.kouqurong.plugin.qrcode
 
+import FileChooserType
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -33,6 +34,7 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import com.kouqurong.plugin.view.defaultDashedBorder
+import jFileChooser
 
 @Composable
 fun App() {
@@ -50,6 +52,14 @@ fun App() {
 
       PreviewQRCode(
           modifier = Modifier.fillMaxHeight().fillMaxWidth(),
+          onClick = {
+            jFileChooser(
+                    type = FileChooserType.OPEN,
+                    isFileOnly = true,
+                    extension = "png,jpg,jpeg,bmp",
+                    description = "*.png,*.jpg,*.jpeg,*.bmp")
+                ?.let { viewModel.decodeQRCode(it.absolutePath) }
+          },
           qrCode = {
             val bitmap = bitmapState.value
             if (bitmap == null) null else BitmapPainter(bitmap)
@@ -75,13 +85,14 @@ fun EnterQRCode(modifier: Modifier = Modifier, qrCode: String, onQRCodeChanged: 
 @Composable
 fun PreviewQRCode(
     modifier: Modifier = Modifier,
+    onClick: () -> Unit,
     qrCode: () -> Painter?,
 ) {
 
   val painter = qrCode()
 
   Card(
-      modifier = modifier.clickable {},
+      modifier = modifier.clickable { onClick() },
   ) {
     if (painter == null) {
       Box(modifier = Modifier.fillMaxSize()) {
