@@ -23,6 +23,7 @@ import androidx.compose.material.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
@@ -31,10 +32,10 @@ import androidx.compose.ui.unit.dp
 import com.kouqurong.plugin.tcpclient.components.ChatRoom
 import com.kouqurong.plugin.tcpclient.viewmodel.IConnectionState
 import com.kouqurong.plugin.tcpclient.viewmodel.TcpClientViewModel
-import com.kouqurong.plugin.view.recomposeHighlighter
 
 @Composable
-fun App(viewModel: TcpClientViewModel) {
+fun App() {
+  val viewModel = remember { TcpClientViewModel() }
 
   val isAvailableAddress = viewModel.uiState.isAvailableAddress.collectAsState()
 
@@ -80,7 +81,7 @@ fun AddressEdit(
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalAlignment = Alignment.CenterVertically) {
         TextField(
-            modifier = Modifier.width(260.dp).recomposeHighlighter(),
+            modifier = Modifier.width(260.dp),
             value = address,
             enabled = isEnabledEdit,
             label = {

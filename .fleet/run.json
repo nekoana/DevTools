@@ -1,0 +1,37 @@
+{
+    "configurations": [
+        {
+            "type": "gradle",
+            "name": "soptlessApply",
+            "tasks": [
+                "--init-script",
+                "gradle/init.gradle.kts",
+                "spotlessApply"
+            ],
+        },
+        {
+            "type": "gradle",
+            "name": "devtoolRun",
+            "tasks": [
+                "run"
+            ],
+        },
+        {
+            "type": "gradle",
+            "name": "devtoolRunAndSpotlessApply",
+            "tasks": [],
+            "dependsOn": [
+                "soptlessApply",
+                "devtoolRun"
+            ],
+        },
+        {
+            "type": "gradle",
+            "name": "devtoolBuild",
+            "tasks": [
+                "build"
+            ],
+        },
+
+    ]
+}

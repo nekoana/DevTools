@@ -34,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,11 +45,12 @@ import com.kouqurong.plugin.tcpserver.components.ChatRoom
 import com.kouqurong.plugin.tcpserver.viewmodel.Client
 import com.kouqurong.plugin.tcpserver.viewmodel.IListenState
 import com.kouqurong.plugin.tcpserver.viewmodel.TcpServerViewModel
-import com.kouqurong.plugin.view.recomposeHighlighter
 import java.net.InetSocketAddress
 
 @Composable
-fun App(viewModel: TcpServerViewModel) {
+fun App() {
+  val viewModel = remember { TcpServerViewModel() }
+
   val connectState = viewModel.listenState.collectAsState()
   val isAvailableAddress = viewModel.uiState.isAvailableAddress.collectAsState()
 
@@ -105,7 +107,7 @@ fun PortEdit(
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalAlignment = Alignment.CenterVertically) {
         TextField(
-            modifier = Modifier.width(260.dp).recomposeHighlighter(),
+            modifier = Modifier.width(260.dp),
             value = port,
             enabled = isEnabledEdit && listenState == IListenState.Closed,
             label = {
