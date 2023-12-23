@@ -25,9 +25,22 @@ import androidx.compose.ui.unit.dp
 import com.kouqurong.plugin.adbtool.component.CommandDialog
 import com.kouqurong.plugin.adbtool.component.CommandItem
 import com.kouqurong.plugin.adbtool.model.Command
+import com.kouqurong.plugin.view.SearchDispatcher
+
+fun onSearch(search: String) {
+    println("onSearch: $search")
+}
 
 @Composable
-fun App() {
+fun App(searchDispatcher: SearchDispatcher) {
+    DisposableEffect(Unit) {
+        searchDispatcher.register(::onSearch)
+        onDispose {
+            searchDispatcher.unregister(::onSearch)
+        }
+    }
+
+
   Box(modifier = Modifier.fillMaxSize()) {
     var clickedCommand by remember { mutableStateOf<Command?>(null) }
 

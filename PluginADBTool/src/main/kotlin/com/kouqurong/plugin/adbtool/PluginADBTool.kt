@@ -22,11 +22,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.loadSvgPainter
 import com.google.auto.service.AutoService
 import com.kouqurong.plugin.view.IPluginView
+import com.kouqurong.plugin.view.PluginView
 
 @AutoService(IPluginView::class)
-class PluginADBTool : IPluginView {
+class PluginADBTool : PluginView() {
+  override val requestSearch: Boolean
+    get() = true
   override val view: @Composable () -> Unit
-    get() = { App() }
+    get() = { App(searchDispatcher) }
 
   override val icon: @Composable () -> Painter
     get() = { loadSvgPainter(SVG.byteInputStream(), LocalDensity.current) }
