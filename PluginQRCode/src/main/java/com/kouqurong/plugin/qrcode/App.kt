@@ -20,10 +20,7 @@ import FileChooserType
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
@@ -71,7 +68,7 @@ fun App() {
 
 @Composable
 fun EnterQRCode(modifier: Modifier = Modifier, qrCode: String, onQRCodeChanged: (String) -> Unit) {
-  Card(
+  ElevatedCard(
       modifier = modifier,
   ) {
     OutlinedTextField(
@@ -91,7 +88,7 @@ fun PreviewQRCode(
 
   val painter = qrCode()
 
-  Card(
+  ElevatedCard(
       modifier = modifier.clickable { onClick() },
   ) {
     if (painter == null) {
