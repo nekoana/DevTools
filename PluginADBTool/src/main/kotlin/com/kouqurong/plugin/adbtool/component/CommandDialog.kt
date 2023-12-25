@@ -16,22 +16,25 @@
 
 package com.kouqurong.plugin.adbtool.component
 
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import com.kouqurong.plugin.adbtool.model.Command
 import com.kouqurong.plugin.view.recomposeHighlighter
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CommandDialog(
     command: Command,
@@ -39,6 +42,8 @@ fun CommandDialog(
     onCommandChange: (Command) -> Unit,
 ) {
   var editCommand by remember { mutableStateOf(command.copy()) }
+
+  var isRunningBackground by remember { mutableStateOf(false) }
 
   val isCommandChanged by derivedStateOf { command != editCommand }
 
@@ -85,15 +90,39 @@ fun CommandDialog(
         }
       },
       confirmButton = {
-        IconButton(
-            onClick = { isShowRunningWindow = true },
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-          Icon(Icons.Default.PlayArrow, "Run")
+          Checkbox(
+              checked = isRunningBackground,
+              onCheckedChange = { isRunningBackground = !isRunningBackground },
+          )
+          Text(text = "Run in background")
+
+          IconButton(
+              onClick = { isShowRunningWindow = true },
+          ) {
+            Icon(Icons.Default.PlayArrow, "Run")
+          }
         }
       },
       dismissButton = {
         if (isCommandChanged) {
-          IconButton(onClick = {}) { Icon(Icons.Default.Done, "Done") }
+          TooltipArea(
+              tooltip = {
+                Box(
+                    modifier =
+                        Modifier.shadow(4.dp, MaterialTheme.shapes.medium, true)
+                            .clip(MaterialTheme.shapes.medium)
+                            .background(MaterialTheme.colorScheme.surface),
+                    contentAlignment = Alignment.Center) {
+                      Text(modifier = Modifier.padding(8.dp), text = "Save")
+                    }
+              }) {
+                IconButton(onClick = { onCommandChange(editCommand) }) {
+                  Icon(Icons.Default.Done, "Save")
+                }
+              }
         }
       })
 

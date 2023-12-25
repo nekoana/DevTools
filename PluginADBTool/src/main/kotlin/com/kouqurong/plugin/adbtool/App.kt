@@ -28,18 +28,15 @@ import com.kouqurong.plugin.adbtool.model.Command
 import com.kouqurong.plugin.view.SearchDispatcher
 
 fun onSearch(search: String) {
-    println("onSearch: $search")
+  println("onSearch: $search")
 }
 
 @Composable
 fun App(searchDispatcher: SearchDispatcher) {
-    DisposableEffect(Unit) {
-        searchDispatcher.register(::onSearch)
-        onDispose {
-            searchDispatcher.unregister(::onSearch)
-        }
-    }
-
+  DisposableEffect(Unit) {
+    searchDispatcher.register(::onSearch)
+    onDispose { searchDispatcher.unregister(::onSearch) }
+  }
 
   Box(modifier = Modifier.fillMaxSize()) {
     var clickedCommand by remember { mutableStateOf<Command?>(null) }

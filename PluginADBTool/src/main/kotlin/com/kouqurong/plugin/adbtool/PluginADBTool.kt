@@ -28,6 +28,7 @@ import com.kouqurong.plugin.view.PluginView
 class PluginADBTool : PluginView() {
   override val requestSearch: Boolean
     get() = true
+
   override val view: @Composable () -> Unit
     get() = { App(searchDispatcher) }
 

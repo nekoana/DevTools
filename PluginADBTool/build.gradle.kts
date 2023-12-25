@@ -31,4 +31,5 @@ dependencies {
     kapt(libs.auto.service.processor)
     // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-swing
     implementation(libs.kotlinx.coroutines.swing)
+    testImplementation(libs.junit)
 }

@@ -36,7 +36,7 @@ abstract class PluginView : IPluginView {
 
   val searchDispatcher by lazy { SearchDispatcher() }
 
-   override fun onBack(): Boolean {
+  override fun onBack(): Boolean {
     return backDispatcher.dispatch()
   }
 
