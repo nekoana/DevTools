@@ -44,7 +44,7 @@ abstract class PluginView : IPluginView {
     return if (requestSearch) {
       searchDispatcher::dispatch
     } else {
-      null
+      super.onSearch()
     }
   }
 
