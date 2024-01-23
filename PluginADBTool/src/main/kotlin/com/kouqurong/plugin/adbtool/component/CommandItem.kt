@@ -20,12 +20,15 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.*
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.kouqurong.plugin.adbtool.model.Command
+import com.kouqurong.plugin.database.Command
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,10 +66,12 @@ fun PreviewCommandItem() {
       modifier = Modifier.size(120.dp, 80.dp),
       command =
           Command(
+              id = 1,
               name = "Top Activity",
               description = "description  description description description description",
-              command = "command",
+              arguments = "command",
               keywords = "keywords",
+              background = 0L,
           ),
       onClick = {})
 }

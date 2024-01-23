@@ -1,0 +1,57 @@
+
+CREATE TABLE IF NOT EXISTS command(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    arguments TEXT NOT NULL,
+    keywords TEXT NOT NULL,
+    background INTEGER DEFAULT 0
+);
+
+
+INSERT OR IGNORE INTO command(id, name, description, arguments, keywords)
+    VALUES(1,'version', 'version', 'version', 'default,version');
+
+INSERT OR IGNORE INTO command(id, name, description, arguments, keywords)
+    VALUES(2,'logcat', 'logcat', 'logcat', 'default,logcat');
+
+INSERT OR IGNORE INTO command(id, name, description, arguments, keywords,background)
+    VALUES(3,'back', 'navigation back', 'shell input keyevent 4', 'default,back,keyevent',1);
+
+INSERT OR IGNORE INTO command(id, name, description, arguments, keywords,background)
+    VALUES(4,'home', 'navigation home', 'shell input keyevent 3', 'default,home,keyevent',1);
+
+INSERT OR IGNORE INTO command(id, name, description, arguments, keywords,background)
+    VALUES(5,'menu', 'navigation menu', 'shell input keyevent 82', 'default,menu,keyevent',1);
+
+INSERT OR IGNORE INTO command(id, name, description, arguments, keywords,background)
+    VALUES(6,'power', 'power', 'shell input keyevent 26', 'default,power,keyevent',1);
+
+INSERT OR IGNORE INTO command(id, name, description, arguments, keywords,background)
+    VALUES(7,'screenshot', 'screenshot', 'shell screencap -p /sdcard/screenshot.png', 'default,screenshot,screencap',1);
+
+INSERT OR IGNORE INTO command(id, name, description, arguments, keywords,background)
+    VALUES(8,'dumpsys activity', 'dumpsys activity', 'dumpsys activity activities', 'default,dumpsys,activity',0);
+
+ queryAll:
+    SELECT * FROM command ORDER BY id ASC;
+
+ queryByKeywords:
+    SELECT * FROM command
+    WHERE  name LIKE ('%' || :name || '%')
+    OR description LIKE ('%' || :description || '%')
+    OR arguments LIKE ('%' || :arguments || '%')
+    OR keywords LIKE ('%' || :keywords || '%');
+
+ insert:
+    INSERT INTO command(name, description, arguments, keywords)
+    VALUES(?, ?, ?, ?);
+
+ update:
+    UPDATE command
+    SET name = ?, description = ?, arguments = ?, keywords = ?
+    WHERE id = ?;
+
+ delete:
+    DELETE FROM command
+    WHERE id = ?;

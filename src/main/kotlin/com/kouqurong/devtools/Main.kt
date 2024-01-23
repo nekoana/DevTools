@@ -141,6 +141,11 @@ fun App(
                             mutableStateOf("")
                         }
 
+                        LaunchedEffect(onSearch) {
+                            searchKeyword = ""
+                            isInSearch = false
+                        }
+
                         LaunchedEffect(Unit) {
                             snapshotFlow { searchKeyword }
                                 .distinctUntilChanged()

@@ -1,11 +1,12 @@
 package com.kouqurong.plugin.adbtool.util
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.junit.Test
 
-class ProgressKtTest {
-
-    @OptIn(DelicateCoroutinesApi::class)
-    @org.junit.Test
+class ProgressTest {
+    @Test
     fun `test running adb progress`() {
         runBlocking {
           val job =  launch{

@@ -19,23 +19,39 @@ package com.kouqurong.plugin.adbtool
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.kouqurong.plugin.adbtool.component.CommandDialog
+import com.kouqurong.plugin.adbtool.component.CommandAddDialog
+import com.kouqurong.plugin.adbtool.component.CommandDetailDialog
 import com.kouqurong.plugin.adbtool.component.CommandItem
-import com.kouqurong.plugin.adbtool.model.Command
+import com.kouqurong.plugin.adbtool.component.CommandRunningWindow
+import com.kouqurong.plugin.adbtool.util.isBackground
+import com.kouqurong.plugin.adbtool.util.runningProcess
+import com.kouqurong.plugin.adbtool.viewmodel.ADBToolViewModel
+import com.kouqurong.plugin.database.Command
 import com.kouqurong.plugin.view.SearchDispatcher
-
-fun onSearch(search: String) {
-  println("onSearch: $search")
-}
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @Composable
 fun App(searchDispatcher: SearchDispatcher) {
+  val viewModel = remember { ADBToolViewModel() }
+
+  val commands by viewModel.commands.collectAsState()
+
+  var runningCommand by remember { mutableStateOf<Command?>(null) }
+
+  var isAddNewCommand by remember { mutableStateOf(false) }
+
   DisposableEffect(Unit) {
-    searchDispatcher.register(::onSearch)
-    onDispose { searchDispatcher.unregister(::onSearch) }
+    searchDispatcher.register(viewModel::search)
+    onDispose { searchDispatcher.unregister(viewModel::search) }
   }
 
   Box(modifier = Modifier.fillMaxSize()) {
@@ -46,91 +62,59 @@ fun App(searchDispatcher: SearchDispatcher) {
         contentPadding = PaddingValues(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)) {
-          item {
-            CommandItem(
-                command =
-                    Command(
-                        name = "Top Activity",
-                        description = "This is description for this command,",
-                        command = "shell dumpy acitity activities",
-                        keywords = "activity,")) {
-                  clickedCommand = it
-                }
-          }
+          items(commands.size, key = { commands[it].id }) { index ->
+            val command = commands[index]
 
-          item {
-            CommandItem(
-                command =
-                    Command(
-                        name = "Top Activity",
-                        description = "This is description for this command,",
-                        command = "shell dumpy acitity activities",
-                        keywords = "activity,")) {}
-          }
-
-          item {
-            CommandItem(
-                command =
-                    Command(
-                        name = "Top Activity",
-                        description = "This is description for this command,",
-                        command = "shell dumpy acitity activities",
-                        keywords = "activity,")) {}
-          }
-
-          item {
-            CommandItem(
-                command =
-                    Command(
-                        name = "Top Activity",
-                        description = "This is description for this command,",
-                        command = "shell dumpy acitity activities",
-                        keywords = "activity,")) {}
-          }
-
-          item {
-            CommandItem(
-                command =
-                    Command(
-                        name = "Top Activity",
-                        description = "This is description for this command,",
-                        command = "shell dumpy acitity activities",
-                        keywords = "activity,")) {}
-          }
-
-          item {
-            CommandItem(
-                command =
-                    Command(
-                        name = "Top Activity",
-                        description = "This is description for this command,",
-                        command = "shell dumpy acitity activities",
-                        keywords = "activity,")) {}
-          }
-
-          item {
-            CommandItem(
-                command =
-                    Command(
-                        name = "Top Activity",
-                        description = "This is description for this command,",
-                        command = "shell dumpy acitity activities",
-                        keywords = "activity,")) {}
-          }
-
-          item {
-            CommandItem(
-                command =
-                    Command(
-                        name = "Top Activity",
-                        description = "This is description for this command,",
-                        command = "shell dumpy acitity activities",
-                        keywords = "activity,")) {}
+            CommandItem(command = command, onClick = { clickedCommand = command })
           }
         }
 
     if (clickedCommand != null) {
-      CommandDialog(command = clickedCommand!!, onDismissRequest = { clickedCommand = null }) {}
+      val scope = rememberCoroutineScope()
+
+      CommandDetailDialog(
+          command = clickedCommand!!,
+          onDismissRequest = { clickedCommand = null },
+          onSaveRequest = {
+            viewModel.updateCommand(it)
+            clickedCommand = null
+          },
+          onDeleteRequest = {
+            viewModel.deleteCommand(it)
+            clickedCommand = null
+          },
+          onRunningRequest = { command, isRunningBackground ->
+            if (isRunningBackground) {
+              scope.launch {
+                runningProcess(arguments = command.arguments, inBackground = command.isBackground())
+                    .collect()
+              }
+            } else {
+              runningCommand = command
+            }
+          })
+    }
+
+    if (runningCommand != null) {
+      CommandRunningWindow(command = runningCommand!!, onDismiss = { runningCommand = null })
+    }
+
+    FloatingActionButton(
+        modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp),
+        onClick = { isAddNewCommand = true }) {
+          Icon(
+              imageVector = Icons.Default.Add,
+              contentDescription = "Add",
+          )
+        }
+
+    if (isAddNewCommand) {
+      CommandAddDialog(
+          onDismissRequest = { isAddNewCommand = false },
+          onSaveRequest = {
+            viewModel.insertCommand(it)
+            isAddNewCommand = false
+          })
     }
   }
 }

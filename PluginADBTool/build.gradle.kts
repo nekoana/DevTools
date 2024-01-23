@@ -17,6 +17,15 @@ plugins {
     kotlin("jvm")
     kotlin("kapt")
     id("org.jetbrains.compose")
+    id("app.cash.sqldelight") version "2.0.1"
+}
+
+sqldelight {
+    databases {
+        create("ADBToolsDatabase") {
+            packageName.set("com.kouqurong.plugin.database")
+        }
+    }
 }
 
 dependencies {
@@ -28,6 +37,8 @@ dependencies {
     implementation(project(":PluginView"))
     implementation(libs.material3.desktop)
     implementation(libs.auto.service.annotations)
+    implementation("app.cash.sqldelight:sqlite-driver:2.0.1")
+    implementation("app.cash.sqldelight:coroutines-extensions:2.0.1")
     kapt(libs.auto.service.processor)
     // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-swing
     implementation(libs.kotlinx.coroutines.swing)

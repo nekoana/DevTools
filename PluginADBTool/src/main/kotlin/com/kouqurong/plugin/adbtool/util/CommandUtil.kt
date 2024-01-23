@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 The Open Source Project
+ * Copyright 2024 The Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-package com.kouqurong.plugin.adbtool.model
+package com.kouqurong.plugin.adbtool.util
 
-data class Command(
-    val name: String,
-    val description: String,
-    val command: String,
-    val keywords: String,
-)
+import com.kouqurong.plugin.database.Command
+
+fun Command.isBackground() = background != 0L

@@ -17,31 +17,40 @@
 package com.kouqurong.plugin.adbtool.util
 
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 
 @Throws(IOException::class)
 suspend fun runningProcess(
-    program: String,
-    command: String,
+    program: String = "adb",
+    arguments: String,
+    inBackground: Boolean = false,
 ) =
     channelFlow {
+          val args = arguments.split(" ").toTypedArray()
           val exe =
-              ProcessBuilder(program, command).start().apply {
-                val input = inputStream.bufferedReader()
+              ProcessBuilder(program, *args).start().apply {
+                if (!inBackground) {
+                  val reader = inputStream.bufferedReader()
 
-                launch(Dispatchers.IO) {
                   while (isActive) {
-                    val line = input.readLine() ?: break
+                    val line = reader.readLine() ?: break
                     send(line)
                   }
                 }
-              }
 
+                try {
+                  waitFor(1, TimeUnit.SECONDS)
+                } catch (e: InterruptedException) {
+                  e.printStackTrace()
+                } finally {
+                  close()
+                }
+              }
           awaitClose { exe.destroy() }
         }
         .flowOn(Dispatchers.IO)
