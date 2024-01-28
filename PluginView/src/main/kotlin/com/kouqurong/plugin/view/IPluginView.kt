@@ -34,12 +34,40 @@ interface IPluginView {
 abstract class PluginView : IPluginView {
   val backDispatcher by lazy { BackDispatcher() }
 
+  val searchDispatcher by lazy { SearchDispatcher() }
+
   override fun onBack(): Boolean {
     return backDispatcher.dispatch()
   }
+
+  override fun onSearch(): ((String) -> Unit)? {
+    return if (requestSearch) {
+      searchDispatcher::dispatch
+    } else {
+      super.onSearch()
+    }
+  }
+
+  open val requestSearch: Boolean = false
 }
 
-class BackDispatcher {
+class SearchDispatcher internal constructor() {
+  private var searchListener: ((String) -> Unit)? = null
+
+  fun register(listener: (String) -> Unit) {
+    searchListener = listener
+  }
+
+  fun unregister(listener: (String) -> Unit) {
+    searchListener = null
+  }
+
+  fun dispatch(query: String) {
+    searchListener?.invoke(query)
+  }
+}
+
+class BackDispatcher internal constructor() {
   private val backListeners = mutableListOf<() -> Boolean>()
 
   fun register(listener: () -> Boolean) {
