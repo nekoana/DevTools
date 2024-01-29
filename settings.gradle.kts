@@ -45,3 +45,4 @@ include("ShardUtils")
 
 include("PluginHttpFileServer")
 include("PluginQRCode")
+include("PluginADBTool")

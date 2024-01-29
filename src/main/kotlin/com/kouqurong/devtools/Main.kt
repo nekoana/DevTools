@@ -127,31 +127,35 @@ fun App(
                         }
                     },
                     actions = {
-                        //                IconButton(
-                        //                    onClick = {},
-                        //                ) {
-                        //                  Icon(imageVector = Icons.Default.Settings, contentDescription =
-                        // "Setting")
-                        //                }
+                        val isShowSearchAction by derivedStateOf {
+                            onSearch != null
+                        }
 
-                        onSearch?.let {
-                            var isInSearch by remember {
-                                mutableStateOf(false)
-                            }
+                        val onSearchState by rememberUpdatedState(onSearch)
 
-                            var searchKeyword by remember {
-                                mutableStateOf("")
-                            }
+                        var isInSearch by remember {
+                            mutableStateOf(false)
+                        }
 
-                            LaunchedEffect(Unit) {
-                                snapshotFlow { searchKeyword }
-                                    .distinctUntilChanged()
-                                    .debounce(500)
-                                    .collectLatest {
-                                        onSearch(searchKeyword)
-                                    }
-                            }
+                        var searchKeyword by remember {
+                            mutableStateOf("")
+                        }
 
+                        LaunchedEffect(onSearch) {
+                            searchKeyword = ""
+                            isInSearch = false
+                        }
+
+                        LaunchedEffect(Unit) {
+                            snapshotFlow { searchKeyword }
+                                .distinctUntilChanged()
+                                .debounce(500)
+                                .collectLatest {
+                                    onSearchState?.invoke(searchKeyword)
+                                }
+                        }
+
+                        if (isShowSearchAction) {
                             AnimatedContent(targetState = isInSearch) {
                                 if (it) {
                                     Row(
@@ -225,10 +229,10 @@ fun ApplicationScope.HostWindow(
 
         val pluginViews = viewModel.pluginViews.collectAsState()
 
-        val onSearch by remember {
+        val callSearch by remember {
             derivedStateOf {
-                if (displayPluginView != null) {
-                    displayPluginView!!.onSearch()
+                if(displayPluginView != null) {
+                     displayPluginView!!.onSearch()
                 } else {
                     onSearch
                 }
@@ -237,7 +241,7 @@ fun ApplicationScope.HostWindow(
 
         App(
             window,
-            onSearch = onSearch,
+            onSearch = callSearch,
             onClose = { onCloseRequest() },
             onMinimize = { windowState.isMinimized = true },
             onBack = {
