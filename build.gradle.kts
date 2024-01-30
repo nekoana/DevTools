@@ -46,6 +46,8 @@ compose.desktop {
     mainClass = "com.kouqurong.devtools.MainKt"
 
     nativeDistributions {
+      modules("java.sql")
+
       targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb)
       packageName = "DevTools"
       packageVersion = "1.0.0"
