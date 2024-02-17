@@ -31,8 +31,6 @@ dependencies {
     implementation(libs.auto.service.annotations)
     implementation(libs.material.icons.extended.desktop)
     kapt(libs.auto.service.processor)
-    // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-swing
-    implementation(libs.kotlinx.coroutines.swing)
 
     implementation("io.ktor:ktor-server-core-jvm:2.2.4")
     implementation("io.ktor:ktor-server-host-common-jvm:2.2.4")

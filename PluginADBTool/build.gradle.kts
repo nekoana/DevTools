@@ -40,7 +40,5 @@ dependencies {
     implementation("app.cash.sqldelight:sqlite-driver:2.0.1")
     implementation("app.cash.sqldelight:coroutines-extensions:2.0.1")
     kapt(libs.auto.service.processor)
-    // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-swing
-    implementation(libs.kotlinx.coroutines.swing)
     testImplementation(libs.junit)
 }
