@@ -17,42 +17,45 @@
 package com.kouqurong.plugin.http.file.server
 
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import com.kouqurong.plugin.http.file.server.plugins.configFiles
-import com.kouqurong.plugin.http.file.server.plugins.configureRouting
 import com.kouqurong.plugin.view.ViewModel
-import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 enum class ServerStatus {
-  STARTED,
+  RUNNING,
   STOPPED
 }
 
 class HttpFileServerViewModel : ViewModel() {
 
-  private lateinit var server: ApplicationEngine
+  init {
+    val path = System.getProperty("compose.application.resources.dir")
+  }
 
   private val _port = mutableStateOf(DEFAULT_PORT.toString())
 
   private val _shardPath = mutableStateOf("")
 
-  val snackbarHostState = SnackbarHostState()
+  val snackBarHostState = SnackbarHostState()
 
   private val _serverStatus = mutableStateOf(ServerStatus.STOPPED)
+
+  val port: String
+    get() = _port.value
+
+  val enabled by derivedStateOf { port.toIntOrNull() != null && shardPath.isNotBlank() }
 
   val serverStatus: ServerStatus
     get() = _serverStatus.value
 
+  val isServerRunning by derivedStateOf { serverStatus == ServerStatus.RUNNING }
+
   val shardPath: String
     get() = _shardPath.value
-
-  val port: String
-    get() = _port.value
 
   fun setPort(port: String) {
     _port.value = port
@@ -66,46 +69,31 @@ class HttpFileServerViewModel : ViewModel() {
       viewModelScope.launch(Dispatchers.IO) {
         val listen = port.toIntOrNull()
         if (listen == null) {
-          snackbarHostState.showSnackbar("Port is invalid")
+          snackBarHostState.showSnackbar("Port is invalid")
           return@launch
         }
 
         if (shardPath.isBlank()) {
-          snackbarHostState.showSnackbar("Path is invalid")
+          snackBarHostState.showSnackbar("Path is invalid")
           return@launch
         }
 
         val file = File(shardPath)
         if (!file.isDirectory) {
-          snackbarHostState.showSnackbar("Path is invalid")
+          snackBarHostState.showSnackbar("Path is invalid")
           return@launch
         }
 
-        runCatching {
-              server =
-                  embeddedServer(Netty, port = listen, host = HOST) { configFiles("/", file) }
-                      .start(wait = false)
-            }
-            .onFailure { snackbarHostState.showSnackbar("Start server failed: ${it.message}") }
-            .onSuccess { _serverStatus.value = ServerStatus.STARTED }
+        runCatching {}
+            .onFailure { snackBarHostState.showSnackbar("Start server failed: ${it.message}") }
+            .onSuccess { _serverStatus.value = ServerStatus.RUNNING }
       }
 
-  fun stopServer() =
-      viewModelScope.launch(Dispatchers.IO) {
-        if (::server.isInitialized) {
-          runCatching { server.stop(1000, 1000) }
-              .onFailure { snackbarHostState.showSnackbar("Stop server failed: ${it.message}") }
-              .onSuccess { _serverStatus.value = ServerStatus.STOPPED }
-        }
-      }
+  fun stopServer() = viewModelScope.launch(Dispatchers.IO) {}
 
   companion object {
     const val HOST = "0.0.0.0"
 
     const val DEFAULT_PORT = 8080
   }
-}
-
-fun Application.module() {
-  configureRouting()
 }

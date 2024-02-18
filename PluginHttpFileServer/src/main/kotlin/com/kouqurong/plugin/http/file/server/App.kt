@@ -23,7 +23,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,20 +41,14 @@ import java.net.URI
 fun App() {
   val viewModel = remember { HttpFileServerViewModel() }
 
-  val enabled by remember {
-    derivedStateOf { viewModel.port.toIntOrNull() != null && viewModel.shardPath.isNotBlank() }
-  }
-
-  val isServerRunning by remember {
-    derivedStateOf { viewModel.serverStatus == ServerStatus.STARTED }
-  }
-
   DisposableEffect(Unit) { onDispose { viewModel.stopServer() } }
 
   val offset by
       animateIntOffsetAsState(
           IntOffset(
-              0, if (isServerRunning) 0 else with(LocalDensity.current) { 80.dp.toPx().toInt() }))
+              0,
+              if (viewModel.isServerRunning) 0
+              else with(LocalDensity.current) { 80.dp.toPx().toInt() }))
 
   Surface(modifier = Modifier.fillMaxSize().padding(16.dp)) {
     Box {
@@ -92,14 +89,14 @@ fun App() {
           Button(
               modifier = Modifier.align(Alignment.Center).size(220.dp),
               elevation = ButtonDefaults.buttonElevation(8.dp),
-              enabled = enabled,
+              enabled = viewModel.enabled,
               onClick = {
                 when (viewModel.serverStatus) {
-                  ServerStatus.STARTED -> viewModel.stopServer()
+                  ServerStatus.RUNNING -> viewModel.stopServer()
                   ServerStatus.STOPPED -> viewModel.startServer()
                 }
               }) {
-                Text(if (isServerRunning) "Stop" else "Start")
+                Text(if (viewModel.isServerRunning) "Stop" else "Start")
               }
 
           FloatingActionButton(
@@ -117,7 +114,7 @@ fun App() {
 
       SnackbarHost(
           modifier = Modifier.align(Alignment.BottomCenter),
-          hostState = viewModel.snackbarHostState,
+          hostState = viewModel.snackBarHostState,
           snackbar = { snackbarData ->
             Snackbar(
                 modifier = Modifier.padding(8.dp),

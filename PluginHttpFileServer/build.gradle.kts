@@ -17,8 +17,10 @@ plugins {
     kotlin("jvm")
     kotlin("kapt")
     id("org.jetbrains.compose")
-//    id("io.ktor.plugin") version "2.3.6"
 }
+
+apply(from = "shared.gradle.kts")
+
 
 dependencies {
     // Note, if you develop a library, you should use compose.desktop.common.
@@ -31,12 +33,4 @@ dependencies {
     implementation(libs.auto.service.annotations)
     implementation(libs.material.icons.extended.desktop)
     kapt(libs.auto.service.processor)
-
-    implementation("io.ktor:ktor-server-core-jvm:2.2.4")
-    implementation("io.ktor:ktor-server-host-common-jvm:2.2.4")
-    implementation("io.ktor:ktor-server-netty-jvm:2.2.4")
-    implementation("ch.qos.logback:logback-classic:1.4.11")
-//    implementation("io.ktor:ktor:2.3.6")
-    // https://mvnrepository.com/artifact/io.ktor/ktor-server-core
-    implementation("io.ktor:ktor-server-core:2.3.6")
 }
