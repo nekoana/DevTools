@@ -1,1 +1,1 @@
-![img.png](.asserts/screenshot.png)
+![img.png](.assets/screenshot.png)
